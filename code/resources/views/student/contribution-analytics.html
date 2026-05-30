@@ -1,0 +1,271 @@
+// Contribution Analytics Page
+import { renderStudentLayout, initStudentLayout } from '../../layouts/StudentLayout.js';
+
+export function renderContributionAnalytics() {
+    const content = `
+        <div class="space-y-6 animate-fade-in">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800">Contribution Analytics</h2>
+                <select id="timeframe-select" class="px-3 py-2 border border-gray-300 rounded-md">
+                    <option value="week">Last 7 Days</option>
+                    <option value="month">Last 30 Days</option>
+                    <option value="semester">This Semester</option>
+                </select>
+            </div>
+            
+            <!-- Metrics Cards -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-600">Total Commits</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="total-commits">0</p>
+                    <p class="text-xs text-green-600 mt-1" id="commit-trend">↑ 0%</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-600">Lines Added</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="lines-added">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-600">Lines Deleted</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="lines-deleted">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-600">Consistency Score</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="consistency-score">0</p>
+                </div>
+            </div>
+            
+            <!-- Charts Grid -->
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Commit Activity</h3>
+                    <canvas id="commitChart" height="250"></canvas>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Code Changes</h3>
+                    <canvas id="codeChangesChart" height="250"></canvas>
+                </div>
+            </div>
+            
+            <!-- Activity Consistency -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Activity Consistency</h3>
+                <canvas id="consistencyChart" height="200"></canvas>
+            </div>
+            
+            <!-- Contribution Heatmap -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Contribution Heatmap</h3>
+                <div id="heatmap-container" class="overflow-x-auto">
+                    <div class="text-center py-8 text-gray-500">Loading heatmap...</div>
+                </div>
+            </div>
+            
+            <!-- Top Repositories -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Top Repositories</h3>
+                </div>
+                <div id="top-repos-list" class="divide-y divide-gray-200">
+                    <div class="p-6 text-center text-gray-500">Loading repositories...</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const layout = renderStudentLayout(content, 'analytics');
+    document.getElementById('app').innerHTML = layout;
+    initStudentLayout();
+    
+    loadAnalytics();
+    setupTimeframeListener();
+}
+
+let currentChart = {};
+
+async function loadAnalytics(timeframe = 'week') {
+    try {
+        const user = JSON.parse(localStorage.getItem('groupsync_user_data') || '{}');
+        
+        if (window.analyticsService) {
+            const analytics = await window.analyticsService.getStudentAnalytics(user.id, null, timeframe);
+            updateMetrics(analytics);
+            renderCommitChart(analytics);
+            renderCodeChangesChart(analytics);
+            renderConsistencyChart(analytics);
+            renderHeatmap(analytics);
+            renderTopRepositories(analytics);
+        }
+    } catch (error) {
+        console.error('Error loading analytics:', error);
+        window.toast?.error('Failed to load analytics data');
+    }
+}
+
+function updateMetrics(analytics) {
+    document.getElementById('total-commits').textContent = analytics.total_commits || 0;
+    document.getElementById('lines-added').textContent = (analytics.total_lines_added || 0).toLocaleString();
+    document.getElementById('lines-deleted').textContent = (analytics.total_lines_deleted || 0).toLocaleString();
+    document.getElementById('consistency-score').textContent = analytics.consistency_score || 0;
+    
+    const trend = analytics.commit_trend || 0;
+    const trendElement = document.getElementById('commit-trend');
+    if (trend >= 0) {
+        trendElement.innerHTML = `↑ ${trend}%`;
+        trendElement.className = 'text-xs text-green-600 mt-1';
+    } else {
+        trendElement.innerHTML = `↓ ${Math.abs(trend)}%`;
+        trendElement.className = 'text-xs text-red-600 mt-1';
+    }
+}
+
+function renderCommitChart(analytics) {
+    const ctx = document.getElementById('commitChart')?.getContext('2d');
+    if (!ctx) return;
+    
+    if (currentChart.commit) currentChart.commit.destroy();
+    
+    currentChart.commit = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: analytics.commit_labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Commits',
+                data: analytics.commit_data || [0, 0, 0, 0],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
+}
+
+function renderCodeChangesChart(analytics) {
+    const ctx = document.getElementById('codeChangesChart')?.getContext('2d');
+    if (!ctx) return;
+    
+    if (currentChart.codeChanges) currentChart.codeChanges.destroy();
+    
+    currentChart.codeChanges = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: analytics.commit_labels || ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [
+                {
+                    label: 'Lines Added',
+                    data: analytics.lines_added_data || [0, 0, 0, 0],
+                    backgroundColor: '#10b981'
+                },
+                {
+                    label: 'Lines Deleted',
+                    data: analytics.lines_deleted_data || [0, 0, 0, 0],
+                    backgroundColor: '#ef4444'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { position: 'top' }
+            }
+        }
+    });
+}
+
+function renderConsistencyChart(analytics) {
+    const ctx = document.getElementById('consistencyChart')?.getContext('2d');
+    if (!ctx) return;
+    
+    if (currentChart.consistency) currentChart.consistency.destroy();
+    
+    currentChart.consistency = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Commits', 'PRs', 'Code Reviews', 'Documentation', 'Testing', 'Issues'],
+            datasets: [{
+                label: 'Your Activity',
+                data: analytics.radar_data || [85, 70, 60, 75, 65, 80],
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.2)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100
+                }
+            }
+        }
+    });
+}
+
+function renderHeatmap(analytics) {
+    const container = document.getElementById('heatmap-container');
+    if (!container) return;
+    
+    if (analytics.heatmap_data && analytics.heatmap_data.length > 0) {
+        container.innerHTML = `
+            <div class="grid grid-cols-7 gap-1">
+                ${analytics.heatmap_data.map(day => `
+                    <div class="text-center">
+                        <div class="text-xs text-gray-600 mb-1">${day.day}</div>
+                        <div class="w-10 h-10 rounded ${getHeatmapColor(day.count)} flex items-center justify-center text-xs text-white mx-auto">
+                            ${day.count}
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    } else {
+        container.innerHTML = '<div class="text-center py-8 text-gray-500">No heatmap data available</div>';
+    }
+}
+
+function getHeatmapColor(count) {
+    if (count === 0) return 'bg-gray-200 text-gray-600';
+    if (count < 5) return 'bg-green-200 text-green-800';
+    if (count < 10) return 'bg-green-400 text-white';
+    if (count < 20) return 'bg-green-600 text-white';
+    return 'bg-green-800 text-white';
+}
+
+function renderTopRepositories(analytics) {
+    const container = document.getElementById('top-repos-list');
+    
+    if (analytics.top_repos && analytics.top_repos.length > 0) {
+        container.innerHTML = analytics.top_repos.map(repo => `
+            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                <div>
+                    <p class="font-medium text-gray-900">${repo.name}</p>
+                    <p class="text-sm text-gray-500">${repo.commits} commits • ${repo.lines_added} lines added</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-semibold text-gray-900">${repo.contribution_percentage}%</p>
+                    <p class="text-xs text-gray-500">of total</p>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        container.innerHTML = '<div class="p-6 text-center text-gray-500">No repository data available</div>';
+    }
+}
+
+function setupTimeframeListener() {
+    const select = document.getElementById('timeframe-select');
+    select?.addEventListener('change', (e) => {
+        loadAnalytics(e.target.value);
+    });
+}
+
+export default renderContributionAnalytics;
