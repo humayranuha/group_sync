@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GroupSync - Academic Collaboration Analytics Platform</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                <p class="text-gray-600">Loading GroupSync...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // STORAGE KEYS
+        // ============================================
+        const STORAGE_KEYS = {
+            AUTH_TOKEN: 'groupsync_auth_token',
+            USER_DATA: 'groupsync_user_data'
+        };
+
+        // ============================================
+        // TOAST NOTIFICATIONS
+        // ============================================
+        class ToastManager {
+            constructor() {
+                this.container = null;
+                this.init();
+            }
+            init() {
+                this.container = document.createElement('div');
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                document.body.appendChild(this.container);
+            }
+            show(message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                const colors = { success: 'bg-green-50 border-green-400', error: 'bg-red-50 border-red-400', warning: 'bg-yellow-50 border-yellow-400', info: 'bg-blue-50 border-blue-400' };
+                const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg ${colors[type]} p-4 mb-2`;
+                toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm">${message}</p><button class="ml-auto text-gray-400 hover:text-gray-600">&times;</button></div>`;
+                this.container.appendChild(toast);
+                setTimeout(() => toast.classList.add('translate-x-0', 'opacity-100'), 10);
+                setTimeout(() => { if(toast.parentNode) toast.remove(); }, duration);
+                toast.querySelector('button').onclick = () => toast.remove();
+                return toast;
+            }
+            success(m) { this.show(m, 'success'); }
+            error(m) { this.show(m, 'error'); }
+            warning(m) { this.show(m, 'warning'); }
+            info(m) { this.show(m, 'info'); }
+        }
+
+        // ============================================
+        // LOADING MANAGER
+        // ============================================
+        class LoadingManager {
+            show() { 
+                if(this.loader) return;
+                this.loader = document.createElement('div'); 
+                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'; 
+                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>'; 
+                document.body.appendChild(this.loader); 
+            }
+            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
+        }
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        class AuthService {
+            login(email, password) {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        const token = 'fake-token-' + Date.now();
+                        const user = { 
+                            id: 1, 
+                            email, 
+                            first_name: email.split('@')[0].charAt(0).toUpperCase() + email.split('@')[0].slice(1), 
+                            last_name: 'User', 
+                            role: email.toLowerCase().includes('prof') || email.toLowerCase().includes('teacher') ? 'professor' : 'student' 
+                        };
+                        localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, token);
+                        localStorage.setItem(STORAGE_KEYS.USER_DATA, JSON.stringify(user));
+                        resolve({ token, user });
+                    }, 500);
+                });
+            }
+            register(data) { return new Promise((resolve) => setTimeout(() => resolve({ success: true }), 500)); }
+            logout() { localStorage.removeItem(STORAGE_KEYS.AUTH_TOKEN); localStorage.removeItem(STORAGE_KEYS.USER_DATA); window.location.href = '/'; }
+            isAuthenticated() { return !!localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN); }
+            getCurrentUser() { const u = localStorage.getItem(STORAGE_KEYS.USER_DATA); return u ? JSON.parse(u) : null; }
+        }
+
+        // ============================================
+        // GLOBAL INSTANCES
+        // ============================================
+        window.toast = new ToastManager();
+        window.loading = new LoadingManager();
+        window.authService = new AuthService();
+
+        // ============================================
+        // LANDING PAGE
+        // ============================================
+        function renderLandingPage() {
+            document.getElementById('app').innerHTML = `
+                <div class="min-h-screen bg-white">
+                    <nav class="bg-white shadow-sm"><div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center"><h1 class="text-2xl font-bold text-blue-600">GroupSync</h1><div><a href="/login.html" class="mr-4 text-gray-700 hover:text-gray-900">Login</a><a href="/register.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Register</a></div></div></nav>
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 py-20 text-center"><h1 class="text-5xl font-bold">AI-Powered Academic<br><span class="text-blue-600">Collaboration Analytics</span></h1><p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">Monitor student contributions, detect free riders, and enhance group collaboration with real-time GitHub analytics and AI evaluation.</p><div class="mt-8 space-x-4"><a href="/register.html" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Get Started</a><a href="#features" class="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">Learn More</a></div></div>
+                    <div id="features" class="py-16 max-w-7xl mx-auto px-4"><div class="text-center mb-12"><h2 class="text-3xl font-bold">Features</h2></div><div class="grid md:grid-cols-3 gap-8"><div class="bg-white p-6 rounded-lg shadow card-hover"><div class="text-4xl mb-3">📊</div><h3 class="text-xl font-semibold">GitHub Analytics</h3><p class="text-gray-600 mt-2">Track commits, pull requests, forks, and code contributions in real-time</p></div><div class="bg-white p-6 rounded-lg shadow card-hover"><div class="text-4xl mb-3">🤖</div><h3 class="text-xl font-semibold">AI Evaluation</h3><p class="text-gray-600 mt-2">AI-powered free rider detection and contribution quality analysis</p></div><div class="bg-white p-6 rounded-lg shadow card-hover"><div class="text-4xl mb-3">📈</div><h3 class="text-xl font-semibold">Performance Metrics</h3><p class="text-gray-600 mt-2">Visual dashboards with contribution heatmaps and activity trends</p></div></div></div>
+                    <footer class="bg-gray-800 text-white py-8 text-center"><p>&copy; 2024 GroupSync. All rights reserved.</p></footer>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // LOGIN PAGE
+        // ============================================
+        function renderLoginPage() {
+            document.getElementById('app').innerHTML = `
+                <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-8"><div class="text-center mb-8"><h2 class="text-3xl font-bold text-gray-900">Welcome Back</h2><p class="text-gray-600 mt-2">Sign in to your account</p></div>
+                    <form id="login-form"><div class="mb-4"><label class="block text-sm font-medium text-gray-700 mb-1">Email</label><input type="email" id="email" placeholder="student@university.edu" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
+                    <div class="mb-6"><label class="block text-sm font-medium text-gray-700 mb-1">Password</label><input type="password" id="password" placeholder="••••••••" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"></div>
+                    <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Sign In</button></form>
+                    <p class="mt-6 text-center text-sm text-gray-600">Don't have an account? <a href="/register.html" class="text-blue-600 hover:text-blue-500">Sign up</a></p>
+                    <div class="mt-4 text-center text-xs text-gray-500">Demo: student@demo.com (Student) | prof@demo.com (Professor)</div></div>
+                </div>
+            `;
+            document.getElementById('login-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                if(!email || !password) { window.toast.error('Please enter email and password'); return; }
+                window.loading.show();
+                try {
+                    await window.authService.login(email, password);
+                    const user = window.authService.getCurrentUser();
+                    window.toast.success(`Welcome back, ${user.first_name}!`);
+                    setTimeout(() => {
+                        window.location.href = user?.role === 'professor' ? '/professor/dashboard.html' : '/student/dashboard.html';
+                    }, 500);
+                } catch(e) { window.toast.error('Login failed'); }
+                finally { window.loading.hide(); }
+            });
+        }
+
+        // ============================================
+        // REGISTER PAGE
+        // ============================================
+        function renderRegisterPage() {
+            document.getElementById('app').innerHTML = `
+                <div class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-8"><div class="text-center mb-8"><h2 class="text-3xl font-bold text-gray-900">Create Account</h2><p class="text-gray-600 mt-2">Join GroupSync today</p></div>
+                    <form id="register-form"><div class="grid grid-cols-2 gap-4 mb-4"><div><input type="text" id="first_name" placeholder="First Name" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-blue-500"></div><div><input type="text" id="last_name" placeholder="Last Name" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-blue-500"></div></div>
+                    <div class="mb-4"><input type="email" id="email" placeholder="Email" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-blue-500"></div>
+                    <div class="mb-4"><select id="role" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-blue-500"><option value="student">Student</option><option value="professor">Professor</option></select></div>
+                    <div class="mb-4"><input type="password" id="password" placeholder="Password" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-blue-500"></div>
+                    <div class="mb-6"><input type="password" id="confirm_password" placeholder="Confirm Password" class="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-blue-500"></div>
+                    <button type="submit" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Create Account</button></form>
+                    <p class="mt-6 text-center text-sm text-gray-600">Already have an account? <a href="/login.html" class="text-blue-600 hover:text-blue-500">Sign in</a></p></div>
+                </div>
+            `;
+            document.getElementById('register-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const pwd = document.getElementById('password').value;
+                const confirm = document.getElementById('confirm_password').value;
+                if(pwd !== confirm) { window.toast.error('Passwords do not match'); return; }
+                if(pwd.length < 6) { window.toast.error('Password must be at least 6 characters'); return; }
+                window.loading.show();
+                try {
+                    await window.authService.register({});
+                    window.toast.success('Registration successful! Please login.');
+                    setTimeout(() => window.location.href = '/login.html', 500);
+                } catch(e) { window.toast.error('Registration failed'); }
+                finally { window.loading.hide(); }
+            });
+        }
+
+        // ============================================
+        // STUDENT DASHBOARD
+        // ============================================
+        let studentCurrentPage = 'dashboard';
+        let studentCharts = {};
+
+        function renderStudentDashboard() {
+            const user = window.authService.getCurrentUser() || { first_name: 'John', last_name: 'Doe' };
+            document.getElementById('app').innerHTML = `
+                <div class="min-h-screen bg-gray-50">
+                    <aside id="studentSidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+                        <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center"><h1 class="text-xl font-bold text-white">GroupSync</h1><span class="ml-2 text-xs text-blue-200">Student</span></div>
+                        <nav class="p-4 space-y-1">
+                            <a href="#" data-page="dashboard" class="student-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">📊</span><span>Dashboard</span></a>
+                            <a href="#" data-page="group" class="student-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">👥</span><span>My Group</span></a>
+                            <a href="#" data-page="repository" class="student-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">🔗</span><span>GitHub Connection</span></a>
+                            <a href="#" data-page="analytics" class="student-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">📈</span><span>Analytics</span></a>
+                            <a href="#" data-page="ai-feedback" class="student-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">🤖</span><span>AI Feedback</span></a>
+                        </nav>
+                        <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50"><div class="flex items-center"><div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">${(user.first_name?.[0] || 'S')}${(user.last_name?.[0] || 'T')}</div><div class="ml-3 flex-1"><p class="text-sm font-medium text-gray-800">${user.first_name || 'Student'} ${user.last_name || ''}</p><p class="text-xs text-gray-500">Student</p></div><button id="studentLogoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button></div></div>
+                    </aside>
+                    <button id="studentMenuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">☰</button>
+                    <main class="md:ml-64 p-6"><div id="studentPageContent"></div></main>
+                </div>
+            `;
+            
+            // Mobile menu toggle
+            document.getElementById('studentMenuBtn')?.addEventListener('click', () => {
+                document.getElementById('studentSidebar').classList.toggle('-translate-x-full');
+            });
+            
+            // Logout
+            document.getElementById('studentLogoutBtn')?.addEventListener('click', () => window.authService.logout());
+            
+            // Navigation
+            document.querySelectorAll('.student-nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.student-nav-link').forEach(l => {
+                        l.classList.remove('bg-blue-50', 'text-blue-700');
+                    });
+                    link.classList.add('bg-blue-50', 'text-blue-700');
+                    studentCurrentPage = link.dataset.page;
+                    loadStudentPage(studentCurrentPage);
+                });
+            });
+            
+            // Set active class on default
+            document.querySelector('.student-nav-link[data-page="dashboard"]')?.classList.add('bg-blue-50', 'text-blue-700');
+            loadStudentPage('dashboard');
+        }
+
+        function loadStudentPage(page) {
+            const container = document.getElementById('studentPageContent');
+            const pages = {
+                dashboard: () => `
+                    <div class="space-y-6 animate-fade-in"><h2 class="text-2xl font-bold text-gray-800">Student Dashboard</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Total Commits</p><p class="text-2xl font-bold text-gray-900 mt-1">127</p><p class="text-xs text-green-600 mt-1">↑ 12%</p></div><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Pull Requests</p><p class="text-2xl font-bold text-gray-900 mt-1">23</p><p class="text-xs text-green-600 mt-1">↑ 5%</p></div><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Activity Score</p><p class="text-2xl font-bold text-gray-900 mt-1">85%</p><p class="text-xs text-green-600 mt-1">↑ 8%</p></div><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Team Rank</p><p class="text-2xl font-bold text-gray-900 mt-1">#2/5</p><p class="text-xs text-yellow-600 mt-1">Good standing</p></div></div>
+                    <div class="grid lg:grid-cols-2 gap-6"><div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold text-gray-800 mb-3">Commit Trends</h3><canvas id="studentCommitChart" height="250"></canvas></div><div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold text-gray-800 mb-3">Weekly Activity</h3><canvas id="studentActivityChart" height="250"></canvas></div></div>
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 p-5 rounded-lg shadow"><div class="flex justify-between items-center"><h3 class="font-semibold text-gray-800">AI Performance Classification</h3><span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">Active Contributor</span></div><div class="w-full bg-gray-200 rounded-full h-2 mt-3"><div class="bg-green-600 h-2 rounded-full" style="width:85%"></div></div><p class="text-gray-600 mt-3">Excellent contribution quality and consistency! You're demonstrating strong collaboration skills.</p></div>
+                    <div class="bg-white rounded-lg shadow"><div class="px-5 py-3 border-b"><h3 class="font-semibold text-gray-800">Recent Activity</h3></div><div class="divide-y"><div class="flex items-center p-3 hover:bg-gray-50"><div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">📝</div><div class="ml-3"><p class="text-sm font-medium">Pushed 3 commits to main</p><p class="text-xs text-gray-500">2 hours ago</p></div></div><div class="flex items-center p-3 hover:bg-gray-50"><div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">🔄</div><div class="ml-3"><p class="text-sm font-medium">Created pull request #42</p><p class="text-xs text-gray-500">Yesterday</p></div></div></div></div></div>
+                    <script>
+                        setTimeout(() => {
+                            const ctx1 = document.getElementById('studentCommitChart')?.getContext('2d');
+                            if(ctx1 && !window.studentCommitChart) { window.studentCommitChart = new Chart(ctx1, { type: 'line', data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], datasets: [{ label: 'Commits', data: [12, 19, 15, 27], borderColor: '#3b82f6', tension: 0.4, fill: true, backgroundColor: 'rgba(59,130,246,0.1)' }] }, options: { responsive: true, maintainAspectRatio: true } }); }
+                            const ctx2 = document.getElementById('studentActivityChart')?.getContext('2d');
+                            if(ctx2 && !window.studentActivityChart) { window.studentActivityChart = new Chart(ctx2, { type: 'bar', data: { labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], datasets: [{ label: 'Contributions', data: [5, 8, 12, 7, 9, 3, 2], backgroundColor: '#60a5fa', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: true } }); }
+                        }, 100);
+                    </script>
+                `,
+                group: () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">My Group</h2>
+                    <div class="bg-white rounded-lg shadow overflow-hidden"><div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4"><h3 class="text-xl font-semibold text-white">Team Alpha</h3><p class="text-blue-100 text-sm">Software Engineering Project</p></div>
+                    <div class="p-6"><h4 class="font-semibold text-gray-800 mb-3">Team Members (4)</h4><div class="space-y-2"><div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm">JD</div><div class="ml-3"><p class="font-medium">John Doe</p><p class="text-xs text-gray-500">You</p></div></div><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div><div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm">JS</div><div class="ml-3"><p class="font-medium">Jane Smith</p></div></div><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div><div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm">MB</div><div class="ml-3"><p class="font-medium">Mike Brown</p></div></div><span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs">Moderate</span></div><div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg"><div class="flex items-center"><div class="w-8 h-8 bg-gray-400 rounded-full flex items-center justify-center text-white text-sm">LW</div><div class="ml-3"><p class="font-medium">Lisa Wong</p></div></div><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div></div></div></div>
+                    <div class="bg-white rounded-lg shadow p-6"><h3 class="font-semibold text-gray-800 mb-3">Contribution Distribution</h3><canvas id="groupContributionChart" height="250"></canvas></div></div>
+                    <script>setTimeout(()=>{const c=document.getElementById('groupContributionChart')?.getContext('2d');if(c){new Chart(c,{type:'doughnut',data:{labels:['John Doe (You)','Jane Smith','Mike Brown','Lisa Wong'],datasets:[{data:[35,28,22,15],backgroundColor:['#3b82f6','#60a5fa','#93c5fd','#bfdbfe']}]},options:{responsive:true,plugins:{legend:{position:'bottom'}}}})}},100)</script>
+                `,
+                repository: () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">GitHub Repository Connection</h2>
+                    <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg shadow p-6 text-white"><div class="flex items-center justify-between flex-wrap gap-4"><div class="flex items-center"><div class="text-4xl mr-4">🐙</div><div><h3 class="text-xl font-semibold">Connect GitHub Repository</h3><p class="text-gray-300 text-sm">Connect your repository to start tracking contributions</p></div></div><button id="githubConnectBtn" class="px-6 py-3 bg-white text-gray-900 rounded-lg hover:bg-gray-100 font-medium">Connect GitHub Account</button></div></div>
+                    <div class="bg-white rounded-lg shadow p-6"><h3 class="font-semibold text-gray-800 mb-4">Connect Repository Manually</h3><div class="space-y-4"><div><input type="url" id="repoUrl" placeholder="https://github.com/username/repository" class="w-full px-3 py-2 border rounded-md"></div><div><select id="repoType" class="w-full px-3 py-2 border rounded-md"><option value="original">Original Repository</option><option value="collaborator">Collaborator Repository</option><option value="forked">Forked Repository</option></select></div><button id="manualConnectBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Connect Repository</button></div></div>
+                    <div class="bg-white rounded-lg shadow"><div class="px-5 py-3 border-b"><h3 class="font-semibold text-gray-800">Connected Repositories</h3></div><div id="reposList" class="p-6 text-center text-gray-500">No repositories connected yet. Click above to connect your first repository.</div></div></div>
+                    <script>
+                        document.getElementById('githubConnectBtn')?.addEventListener('click', () => window.toast.info('GitHub OAuth would redirect to GitHub'));
+                        document.getElementById('manualConnectBtn')?.addEventListener('click', () => { const url = document.getElementById('repoUrl').value; if(url) { window.toast.success('Repository connected: ' + url); document.getElementById('repoUrl').value = ''; document.getElementById('reposList').innerHTML = '<div class="flex items-center justify-between p-3 hover:bg-gray-50"><div><p class="font-medium">' + url.split('/').pop() + '</p><p class="text-xs text-gray-500">Connected successfully</p></div><button class="text-red-500 text-sm">Remove</button></div>'; } else { window.toast.warning('Please enter a repository URL'); } });
+                    </script>
+                `,
+                analytics: () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">Contribution Analytics</h2>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4"><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-xs text-gray-600">Total Commits</p><p class="text-xl font-bold">127</p></div><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-xs text-gray-600">Lines Added</p><p class="text-xl font-bold">2,450</p></div><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-xs text-gray-600">Lines Deleted</p><p class="text-xl font-bold">890</p></div><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-xs text-gray-600">Consistency</p><p class="text-xl font-bold">92%</p></div></div>
+                    <div class="grid lg:grid-cols-2 gap-6"><div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold mb-3">Commit Activity</h3><canvas id="analyticsCommitChart" height="250"></canvas></div><div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold mb-3">Code Changes</h3><canvas id="analyticsCodeChart" height="250"></canvas></div></div>
+                    <div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold mb-3">Activity Consistency Radar</h3><canvas id="analyticsRadarChart" height="250"></canvas></div></div>
+                    <script>
+                        setTimeout(() => {
+                            const ctx1 = document.getElementById('analyticsCommitChart')?.getContext('2d');
+                            if(ctx1) new Chart(ctx1, { type: 'line', data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], datasets: [{ label: 'Commits', data: [12, 19, 15, 27], borderColor: '#3b82f6', fill: true }] } });
+                            const ctx2 = document.getElementById('analyticsCodeChart')?.getContext('2d');
+                            if(ctx2) new Chart(ctx2, { type: 'bar', data: { labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'], datasets: [{ label: 'Lines Added', data: [320, 450, 380, 520], backgroundColor: '#10b981' }, { label: 'Lines Deleted', data: [120, 180, 140, 210], backgroundColor: '#ef4444' }] } });
+                            const ctx3 = document.getElementById('analyticsRadarChart')?.getContext('2d');
+                            if(ctx3) new Chart(ctx3, { type: 'radar', data: { labels: ['Commits', 'PRs', 'Code Quality', 'Reviews', 'Documentation'], datasets: [{ label: 'Your Score', data: [85, 70, 78, 65, 80], backgroundColor: 'rgba(59,130,246,0.2)', borderColor: '#3b82f6' }] } });
+                        }, 100);
+                    </script>
+                `,
+                'ai-feedback': () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">AI Evaluation Feedback</h2>
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow p-6"><div class="flex justify-between items-start flex-wrap gap-4"><div><h3 class="text-xl font-semibold text-gray-800">Your Performance Classification</h3><p class="text-gray-600 mt-1">Week 8 Evaluation</p></div><span class="px-4 py-2 bg-green-100 text-green-800 rounded-full text-lg font-semibold">Active Contributor</span></div></div>
+                    <div class="grid md:grid-cols-3 gap-4"><div class="bg-white p-5 rounded-lg shadow text-center"><div class="text-3xl mb-2">📊</div><p class="text-sm text-gray-600">Participation Score</p><p class="text-3xl font-bold text-blue-600">85</p></div><div class="bg-white p-5 rounded-lg shadow text-center"><div class="text-3xl mb-2">⭐</div><p class="text-sm text-gray-600">Quality Score</p><p class="text-3xl font-bold text-blue-600">78</p></div><div class="bg-white p-5 rounded-lg shadow text-center"><div class="text-3xl mb-2">📈</div><p class="text-sm text-gray-600">Consistency Score</p><p class="text-3xl font-bold text-blue-600">92</p></div></div>
+                    <div class="bg-white rounded-lg shadow p-6"><h3 class="font-semibold text-gray-800 mb-2">AI Feedback</h3><p class="text-gray-700">Excellent contribution quality and consistency! You're demonstrating strong collaboration skills and delivering high-quality code. Your activity pattern shows regular engagement with the repository.</p></div>
+                    <div class="bg-white rounded-lg shadow p-6"><h3 class="font-semibold text-gray-800 mb-2">Improvement Suggestions</h3><ul class="space-y-2"><li class="flex items-start"><span class="text-blue-500 mr-2">•</span><span>Increase code review participation by reviewing teammates' PRs</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">•</span><span>Help mentor passive group members to improve team performance</span></li><li class="flex items-start"><span class="text-blue-500 mr-2">•</span><span>Document your code more thoroughly for better knowledge transfer</span></li></ul></div>
+                    <div class="bg-white rounded-lg shadow p-6"><h3 class="font-semibold text-gray-800 mb-3">Weekly Performance Trend</h3><canvas id="aiTrendChart" height="200"></canvas></div></div>
+                    <script>setTimeout(()=>{const c=document.getElementById('aiTrendChart')?.getContext('2d');if(c){new Chart(c,{type:'line',data:{labels:['Week1','Week2','Week3','Week4','Week5','Week6','Week7','Week8'],datasets:[{label:'Your Score',data:[70,72,75,78,80,82,85,87],borderColor:'#3b82f6',fill:true},{label:'Team Average',data:[68,69,71,72,73,75,76,77],borderColor:'#10b981',fill:true}]}})}},100)</script>
+                `
+            };
+            container.innerHTML = (pages[page] || pages.dashboard)();
+        }
+
+        // ============================================
+        // PROFESSOR DASHBOARD
+        // ============================================
+        let professorCurrentPage = 'dashboard';
+        let professorCharts = {};
+
+        function renderProfessorDashboard() {
+            const user = window.authService.getCurrentUser() || { first_name: 'Jane', last_name: 'Smith' };
+            document.getElementById('app').innerHTML = `
+                <div class="min-h-screen bg-gray-50">
+                    <aside id="professorSidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+                        <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center"><h1 class="text-xl font-bold text-white">GroupSync</h1><span class="ml-2 text-xs text-blue-200">Professor</span></div>
+                        <nav class="p-4 space-y-1">
+                            <a href="#" data-page="dashboard" class="professor-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">📊</span><span>Dashboard</span></a>
+                            <a href="#" data-page="courses" class="professor-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">📚</span><span>Course Management</span></a>
+                            <a href="#" data-page="analytics" class="professor-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">📈</span><span>Group Analytics</span></a>
+                            <a href="#" data-page="evaluation" class="professor-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">🎓</span><span>Student Evaluation</span></a>
+                            <a href="#" data-page="reports" class="professor-nav-link flex items-center px-3 py-2 rounded-lg transition-colors"><span class="text-xl mr-3">📄</span><span>PDF Reports</span></a>
+                        </nav>
+                        <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50"><div class="flex items-center"><div class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">${(user.first_name?.[0] || 'P')}${(user.last_name?.[0] || 'R')}</div><div class="ml-3 flex-1"><p class="text-sm font-medium text-gray-800">Prof. ${user.first_name || 'Professor'} ${user.last_name || ''}</p><p class="text-xs text-gray-500">Professor</p></div><button id="professorLogoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button></div></div>
+                    </aside>
+                    <button id="professorMenuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">☰</button>
+                    <main class="md:ml-64 p-6"><div id="professorPageContent"></div></main>
+                </div>
+            `;
+            
+            document.getElementById('professorMenuBtn')?.addEventListener('click', () => {
+                document.getElementById('professorSidebar').classList.toggle('-translate-x-full');
+            });
+            document.getElementById('professorLogoutBtn')?.addEventListener('click', () => window.authService.logout());
+            
+            document.querySelectorAll('.professor-nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('.professor-nav-link').forEach(l => {
+                        l.classList.remove('bg-blue-50', 'text-blue-700');
+                    });
+                    link.classList.add('bg-blue-50', 'text-blue-700');
+                    professorCurrentPage = link.dataset.page;
+                    loadProfessorPage(professorCurrentPage);
+                });
+            });
+            
+            document.querySelector('.professor-nav-link[data-page="dashboard"]')?.classList.add('bg-blue-50', 'text-blue-700');
+            loadProfessorPage('dashboard');
+        }
+
+        function loadProfessorPage(page) {
+            const container = document.getElementById('professorPageContent');
+            const pages = {
+                dashboard: () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">Professor Dashboard</h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Active Courses</p><p class="text-2xl font-bold text-gray-900">3</p><p class="text-xs text-green-600 mt-1">+1 this semester</p></div><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Total Students</p><p class="text-2xl font-bold text-gray-900">85</p></div><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Student Groups</p><p class="text-2xl font-bold text-gray-900">12</p></div><div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Free Riders Detected</p><p class="text-2xl font-bold text-red-600">5</p><p class="text-xs text-red-600 mt-1">Requires attention</p></div></div>
+                    <div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold text-gray-800 mb-3">AI Risk Indicators by Course</h3><canvas id="riskChart" height="280"></canvas></div>
+                    <div class="bg-white rounded-lg shadow"><div class="px-5 py-3 border-b flex justify-between"><h3 class="font-semibold text-gray-800">Active Courses</h3><button id="viewAllCoursesBtn" class="text-blue-600 text-sm hover:text-blue-800">View All →</button></div><div class="divide-y"><div class="flex items-center justify-between p-4 hover:bg-gray-50"><div><p class="font-medium">CS401 - Software Engineering</p><p class="text-sm text-gray-500">Fall 2024 • 32 students • 5 groups</p></div><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div><div class="flex items-center justify-between p-4 hover:bg-gray-50"><div><p class="font-medium">CS402 - Database Systems</p><p class="text-sm text-gray-500">Fall 2024 • 28 students • 4 groups</p></div><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div><div class="flex items-center justify-between p-4 hover:bg-gray-50"><div><p class="font-medium">CS403 - Web Development</p><p class="text-sm text-gray-500">Fall 2024 • 25 students • 3 groups</p></div><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div></div></div></div>
+                    <script>setTimeout(()=>{const c=document.getElementById('riskChart')?.getContext('2d');if(c){new Chart(c,{type:'bar',data:{labels:['CS401','CS402','CS403'],datasets:[{label:'High Risk',data:[2,1,2],backgroundColor:'#ef4444'},{label:'Medium Risk',data:[3,2,1],backgroundColor:'#f59e0b'},{label:'Low Risk',data:[27,25,22],backgroundColor:'#10b981'}]},options:{responsive:true,maintainAspectRatio:true,scales:{x:{stacked:true},y:{stacked:true,title:{display:true,text:'Students'}}}}})}},100)</script>
+                    <script>document.getElementById('viewAllCoursesBtn')?.addEventListener('click',()=>{document.querySelector('.professor-nav-link[data-page="courses"]')?.click()})</script>
+                `,
+                courses: () => `
+                    <div class="space-y-6"><div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800">Course Management</h2><button id="createCourseBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">+ New Course</button></div>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"><div class="bg-white rounded-lg shadow overflow-hidden card-hover"><div class="bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-3"><h3 class="text-lg font-semibold text-white">CS401</h3><p class="text-blue-100 text-sm">Software Engineering</p></div><div class="p-5"><div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-gray-600">Semester:</span><span class="font-medium">Fall 2024</span></div><div class="flex justify-between"><span class="text-gray-600">Students:</span><span class="font-medium">32</span></div><div class="flex justify-between"><span class="text-gray-600">Groups:</span><span class="font-medium">5</span></div><div class="flex justify-between"><span class="text-gray-600">Status:</span><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div></div><div class="mt-4 flex space-x-2"><button class="viewCourseBtn flex-1 px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700" data-course="CS401">View Details</button><button class="editCourseBtn px-3 py-1.5 bg-gray-200 rounded text-sm hover:bg-gray-300" data-course="CS401">Edit</button></div></div></div>
+                    <div class="bg-white rounded-lg shadow overflow-hidden card-hover"><div class="bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-3"><h3 class="text-lg font-semibold text-white">CS402</h3><p class="text-blue-100 text-sm">Database Systems</p></div><div class="p-5"><div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-gray-600">Semester:</span><span class="font-medium">Fall 2024</span></div><div class="flex justify-between"><span class="text-gray-600">Students:</span><span class="font-medium">28</span></div><div class="flex justify-between"><span class="text-gray-600">Groups:</span><span class="font-medium">4</span></div><div class="flex justify-between"><span class="text-gray-600">Status:</span><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div></div><div class="mt-4 flex space-x-2"><button class="viewCourseBtn flex-1 px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700" data-course="CS402">View Details</button><button class="editCourseBtn px-3 py-1.5 bg-gray-200 rounded text-sm hover:bg-gray-300" data-course="CS402">Edit</button></div></div></div>
+                    <div class="bg-white rounded-lg shadow overflow-hidden card-hover"><div class="bg-gradient-to-r from-blue-500 to-blue-600 px-5 py-3"><h3 class="text-lg font-semibold text-white">CS403</h3><p class="text-blue-100 text-sm">Web Development</p></div><div class="p-5"><div class="space-y-2 text-sm"><div class="flex justify-between"><span class="text-gray-600">Semester:</span><span class="font-medium">Fall 2024</span></div><div class="flex justify-between"><span class="text-gray-600">Students:</span><span class="font-medium">25</span></div><div class="flex justify-between"><span class="text-gray-600">Groups:</span><span class="font-medium">3</span></div><div class="flex justify-between"><span class="text-gray-600">Status:</span><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Active</span></div></div><div class="mt-4 flex space-x-2"><button class="viewCourseBtn flex-1 px-3 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700" data-course="CS403">View Details</button><button class="editCourseBtn px-3 py-1.5 bg-gray-200 rounded text-sm hover:bg-gray-300" data-course="CS403">Edit</button></div></div></div></div></div>
+                    <script>
+                        document.getElementById('createCourseBtn')?.addEventListener('click', () => window.toast.info('Create course modal would open here'));
+                        document.querySelectorAll('.viewCourseBtn').forEach(btn => btn.addEventListener('click', () => window.toast.info('Viewing course: ' + btn.dataset.course)));
+                        document.querySelectorAll('.editCourseBtn').forEach(btn => btn.addEventListener('click', () => window.toast.info('Edit course: ' + btn.dataset.course)));
+                    </script>
+                `,
+                analytics: () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">Group Analytics</h2>
+                    <div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold mb-3">Group Performance Comparison</h3><canvas id="groupBarChart" height="280"></canvas></div>
+                    <div class="grid lg:grid-cols-2 gap-6"><div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold mb-3">Activity Trends</h3><canvas id="groupTrendChart" height="250"></canvas></div><div class="bg-white p-5 rounded-lg shadow"><h3 class="font-semibold mb-3">AI Risk Summary</h3><canvas id="riskPieChart" height="250"></canvas></div></div>
+                    <div class="bg-white rounded-lg shadow overflow-hidden"><div class="px-5 py-3 border-b"><h3 class="font-semibold">Team Summary</h3></div><table class="w-full"><thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left text-xs">Group</th><th class="px-4 py-2 text-left text-xs">Members</th><th class="px-4 py-2 text-left text-xs">Avg Commits</th><th class="px-4 py-2 text-left text-xs">Activity Score</th><th class="px-4 py-2 text-left text-xs">Risk Level</th></tr></thead><tbody><tr class="border-t"><td class="px-4 py-2">Team Alpha</td><td class="px-4 py-2">4</td><td class="px-4 py-2">32</td><td class="px-4 py-2">85%</td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Low</span></td></tr><tr class="border-t"><td class="px-4 py-2">Team Beta</td><td class="px-4 py-2">4</td><td class="px-4 py-2">28</td><td class="px-4 py-2">72%</td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs">Medium</span></td></tr><tr class="border-t"><td class="px-4 py-2">Team Gamma</td><td class="px-4 py-2">3</td><td class="px-4 py-2">35</td><td class="px-4 py-2">88%</td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Low</span></td></tr></tbody></table></div></div>
+                    <script>setTimeout(()=>{const c1=document.getElementById('groupBarChart')?.getContext('2d');if(c1){new Chart(c1,{type:'bar',data:{labels:['Team Alpha','Team Beta','Team Gamma'],datasets:[{label:'Avg Contribution %',data:[78,65,82],backgroundColor:'#3b82f6'}]}})}const c2=document.getElementById('groupTrendChart')?.getContext('2d');if(c2){new Chart(c2,{type:'line',data:{labels:['Week1','Week2','Week3','Week4','Week5'],datasets:[{label:'Team Alpha',data:[75,78,80,82,85],borderColor:'#3b82f6'},{label:'Team Beta',data:[65,68,70,72,75],borderColor:'#f59e0b'}]}})}const c3=document.getElementById('riskPieChart')?.getContext('2d');if(c3){new Chart(c3,{type:'pie',data:{labels:['Low Risk','Medium Risk','High Risk'],datasets:[{data:[68,22,10],backgroundColor:['#10b981','#f59e0b','#ef4444']}]}})}},100)</script>
+                `,
+                evaluation: () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">Student Evaluation</h2>
+                    <div class="grid grid-cols-4 gap-4"><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-blue-600">85</p><p class="text-xs text-gray-600">Total Students</p></div><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-green-600">48</p><p class="text-xs text-gray-600">Active</p></div><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-yellow-600">25</p><p class="text-xs text-gray-600">Moderate</p></div><div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-red-600">12</p><p class="text-xs text-gray-600">At Risk</p></div></div>
+                    <div class="bg-white rounded-lg shadow overflow-hidden"><table class="w-full"><thead class="bg-gray-50"><tr><th class="px-4 py-2 text-left">Student</th><th class="px-4 py-2 text-left">Course</th><th class="px-4 py-2 text-left">Group</th><th class="px-4 py-2 text-left">Classification</th><th class="px-4 py-2 text-left">Risk</th><th class="px-4 py-2 text-left">Action</th></tr></thead><tbody><tr class="border-t"><td class="px-4 py-2">John Doe</td><td class="px-4 py-2">CS401</td><td class="px-4 py-2">Alpha</td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Active</span></td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Low</span></td><td class="px-4 py-2"><button class="viewStudentBtn text-blue-600 text-sm" data-student="John Doe">View</button></td></tr><tr class="border-t"><td class="px-4 py-2">Jane Smith</td><td class="px-4 py-2">CS401</td><td class="px-4 py-2">Alpha</td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Active</span></td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs">Low</span></td><td class="px-4 py-2"><button class="viewStudentBtn text-blue-600 text-sm" data-student="Jane Smith">View</button></td></tr><tr class="border-t"><td class="px-4 py-2">Mike Brown</td><td class="px-4 py-2">CS401</td><td class="px-4 py-2">Alpha</td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs">Passive</span></td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-yellow-100 text-yellow-800 rounded-full text-xs">Medium</span></td><td class="px-4 py-2"><button class="viewStudentBtn text-blue-600 text-sm" data-student="Mike Brown">View</button></td></tr></tbody></table></div></div>
+                    <script>document.querySelectorAll('.viewStudentBtn').forEach(btn=>btn.addEventListener('click',()=>window.toast.info('Viewing details for: '+btn.dataset.student)))</script>
+                `,
+                reports: () => `
+                    <div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800">Generate PDF Reports</h2>
+                    <div class="grid md:grid-cols-3 gap-6"><div class="bg-white rounded-lg shadow p-5"><div class="text-center"><div class="text-4xl mb-2">👨‍🎓</div><h3 class="text-lg font-semibold">Student Report</h3><p class="text-sm text-gray-500 mt-1">Generate individual student performance report</p></div><div class="mt-4"><select class="w-full p-2 border rounded mb-3"><option>Select Student</option><option>John Doe</option><option>Jane Smith</option><option>Mike Brown</option></select><button id="genStudentReport" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Generate PDF</button></div></div>
+                    <div class="bg-white rounded-lg shadow p-5"><div class="text-center"><div class="text-4xl mb-2">👥</div><h3 class="text-lg font-semibold">Group Report</h3><p class="text-sm text-gray-500 mt-1">Generate comprehensive group report</p></div><div class="mt-4"><select class="w-full p-2 border rounded mb-3"><option>Select Group</option><option>Team Alpha</option><option>Team Beta</option><option>Team Gamma</option></select><button id="genGroupReport" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Generate PDF</button></div></div>
+                    <div class="bg-white rounded-lg shadow p-5"><div class="text-center"><div class="text-4xl mb-2">📚</div><h3 class="text-lg font-semibold">Course Report</h3><p class="text-sm text-gray-500 mt-1">Generate overview course report</p></div><div class="mt-4"><select class="w-full p-2 border rounded mb-3"><option>Select Course</option><option>CS401 - Software Engineering</option><option>CS402 - Database Systems</option></select><button id="genCourseReport" class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Generate PDF</button></div></div></div></div>
+                    <script>
+                        const { jsPDF } = window.jspdf;
+                        document.getElementById('genStudentReport')?.addEventListener('click', () => { const doc = new jsPDF(); doc.text('Student Performance Report', 20, 20); doc.save('student-report.pdf'); window.toast.success('PDF generated successfully'); });
+                        document.getElementById('genGroupReport')?.addEventListener('click', () => { const doc = new jsPDF(); doc.text('Group Performance Report', 20, 20); doc.save('group-report.pdf'); window.toast.success('PDF generated successfully'); });
+                        document.getElementById('genCourseReport')?.addEventListener('click', () => { const doc = new jsPDF(); doc.text('Course Performance Report', 20, 20); doc.save('course-report.pdf'); window.toast.success('PDF generated successfully'); });
+                    </script>
+                `
+            };
+            container.innerHTML = (pages[page] || pages.dashboard)();
+        }
+
+        // ============================================
+        // ROUTER
+        // ============================================
+        function router() {
+            const path = window.location.pathname;
+            const user = window.authService.getCurrentUser();
+            
+            if (path.includes('/login.html')) {
+                renderLoginPage();
+            } else if (path.includes('/register.html')) {
+                renderRegisterPage();
+            } else if (path.includes('/student/dashboard.html') || (user?.role === 'student' && !path.includes('/professor'))) {
+                renderStudentDashboard();
+            } else if (path.includes('/professor/dashboard.html') || user?.role === 'professor') {
+                renderProfessorDashboard();
+            } else {
+                renderLandingPage();
+            }
+        }
+        
+        // Start the app
+        router();
+    </script>
+</body>
+</html>
