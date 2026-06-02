@@ -43,30 +43,29 @@ class ApiController extends Controller
     
     // Register API
     public function register(Request $request)
-    {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required|in:student,professor'
-        ]);
-        
-        $user = User::create([
-            'first_name' => $validated['first_name'],
-            'last_name' => $validated['last_name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => $validated['role']
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Registration successful',
-            'user' => $user
-        ]);
-    }
+{
+    $validated = $request->validate([
+        'first_name' => 'required|string|max:255',
+        'last_name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users',
+        'password' => 'required|min:6',
+        'role' => 'required|in:student,professor'
+    ]);
     
+    $user = User::create([
+        'first_name' => $validated['first_name'],
+        'last_name' => $validated['last_name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'role' => $validated['role']
+    ]);
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'Registration successful',
+        'user' => $user
+    ], 201);
+}
     // Logout API
     public function logout(Request $request)
     {

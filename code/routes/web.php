@@ -72,3 +72,7 @@ Route::prefix('api')->group(base_path('routes/api.php'));
 Route::get('/{any}', function () {
     return view('app');
 })->where('any', '.*');
+
+Route::get('/auth/github/redirect', function () {
+    return redirect('https://github.com/login/oauth/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=' . urlencode(url('/auth/github/callback')));
+})->name('github.redirect');
