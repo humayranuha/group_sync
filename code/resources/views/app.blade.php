@@ -38,4 +38,46 @@
         </div>
     </div>
 
-    
+    <script>
+        // Simple router - no complex imports
+        (function() {
+            // Get current path
+            const path = window.location.pathname;
+            console.log('Current path:', path);
+            
+            // Function to load HTML file
+            async function loadPage(url) {
+                try {
+                    const response = await fetch(url);
+                    const html = await response.text();
+                    document.getElementById('app').innerHTML = html;
+                } catch (error) {
+                    console.error('Error loading page:', error);
+                    document.getElementById('app').innerHTML = '<div class="text-center text-red-600 p-8">Error loading page. Please try again.</div>';
+                }
+            }
+            
+            // Route to appropriate page
+            if (path === '/' || path === '/index.html') {
+                loadPage('/frontend/pages/public/landing.html');
+            } 
+            else if (path === '/login.html') {
+                loadPage('/frontend/pages/public/login.html');
+            }
+            else if (path === '/register.html') {
+                loadPage('/frontend/pages/public/register.html');
+            }
+            else if (path.includes('/student/')) {
+                loadPage('/frontend/pages/student/dashboard.html');
+            }
+            else if (path.includes('/professor/')) {
+                loadPage('/frontend/pages/professor/dashboard.html');
+            }
+            else {
+                // Try to load the requested file
+                loadPage('/frontend' + path);
+            }
+        })();
+    </script>
+</body>
+</html>
