@@ -28,16 +28,16 @@
                     <span class="text-xl mr-3">📊</span><span>Dashboard</span>
                 </a>
                 <a href="#" data-page="courses" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">📚</span><span>Courses</span>
+                    <span class="text-xl mr-3">📚</span><span>Course Management</span>
                 </a>
                 <a href="#" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">📈</span><span>Analytics</span>
+                    <span class="text-xl mr-3">📈</span><span>Group Analytics</span>
                 </a>
                 <a href="#" data-page="evaluation" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">🎓</span><span>Evaluation</span>
+                    <span class="text-xl mr-3">🎓</span><span>Student Evaluation</span>
                 </a>
                 <a href="#" data-page="reports" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">📄</span><span>Reports</span>
+                    <span class="text-xl mr-3">📄</span><span>PDF Reports</span>
                 </a>
             </nav>
             <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
@@ -65,7 +65,7 @@
                 <div class="flex items-center justify-center h-64">
                     <div class="text-center">
                         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                        <p class="text-gray-600 mt-4">Loading dashboard...</p>
+                        <p class="text-gray-600 mt-4">Loading GroupSync...</p>
                     </div>
                 </div>
             </div>
@@ -104,12 +104,12 @@
                     info: 'bg-blue-50 border-blue-400 text-blue-800'
                 };
                 const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ${colors[type]}`;
-                toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm">${message}</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>`;
+                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ' + colors[type];
+                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm">' + message + '</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>';
                 this.container.appendChild(toast);
-                setTimeout(() => toast.classList.add('translate-x-0', 'opacity-100'), 10);
-                toast.querySelector('button').onclick = () => toast.remove();
-                setTimeout(() => { if(toast.parentNode) toast.remove(); }, duration);
+                setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
+                toast.querySelector('button').onclick = function() { toast.remove(); };
+                setTimeout(function() { if(toast.parentNode) toast.remove(); }, duration);
                 return toast;
             }
             success(m) { this.show(m, 'success'); }
@@ -135,11 +135,11 @@
         // ============================================
         // AUTH SERVICE
         // ============================================
-        const AuthService = {
-            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
-            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
-            isAuthenticated() { return !!this.getToken(); },
-            logout() {
+        var AuthService = {
+            getToken: function() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser: function() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated: function() { return !!this.getToken(); },
+            logout: function() {
                 localStorage.removeItem(STORAGE_KEYS.TOKEN);
                 localStorage.removeItem(STORAGE_KEYS.USER);
                 window.location.href = '/login.html';
@@ -149,25 +149,31 @@
         // ============================================
         // API SERVICE
         // ============================================
-        const ApiService = {
-            async request(endpoint, options = {}) {
-                const token = AuthService.getToken();
-                const headers = {
+        var ApiService = {
+            request: async function(endpoint, options) {
+                options = options || {};
+                var token = AuthService.getToken();
+                var headers = {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    ...options.headers
+                    'Accept': 'application/json'
                 };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-                const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-                const data = await response.json();
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
+                }
+                var response = await fetch(API_BASE + endpoint, {
+                    method: options.method || 'GET',
+                    headers: headers,
+                    body: options.body || null
+                });
+                var data = await response.json();
                 if (!response.ok) {
                     if (response.status === 401) AuthService.logout();
                     throw new Error(data.message || 'Request failed');
                 }
                 return data;
             },
-            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
+            get: function(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+            post: function(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
         };
 
         // ============================================
@@ -181,17 +187,18 @@
         // ============================================
         // PROFESSOR DASHBOARD LOGIC
         // ============================================
-        let currentPage = 'dashboard';
-        let charts = {};
+        var currentPage = 'dashboard';
+        var charts = {};
 
         function getInitials(name) {
             if (!name) return 'PR';
-            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            var parts = name.split(' ');
+            return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
         }
 
         function renderDashboard() {
-            const user = AuthService.getUser();
-            const container = document.getElementById('page-content');
+            var user = AuthService.getUser();
+            var container = document.getElementById('page-content');
             container.innerHTML = `
                 <div class="space-y-6">
                     <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow p-6 text-white">
@@ -222,26 +229,32 @@
 
         async function loadDashboardStats() {
             try {
-                const user = AuthService.getUser();
-                const data = await ApiService.get(`/courses/professor/${user.id}`);
-                const courses = data.courses || [];
+                var user = AuthService.getUser();
+                var data = await ApiService.get('/courses/professor/' + user.id);
+                var courses = data.courses || [];
                 
                 document.getElementById('total-courses').textContent = courses.length || 0;
-                document.getElementById('total-students').textContent = courses.reduce((s, c) => s + (c.students_count || 0), 0) || 0;
-                document.getElementById('total-groups').textContent = courses.reduce((s, c) => s + (c.groups_count || 0), 0) || 0;
-                document.getElementById('free-riders').textContent = Math.floor((document.getElementById('total-students').textContent || 0) * 0.05);
+                var totalStudents = 0;
+                var totalGroups = 0;
+                for (var i = 0; i < courses.length; i++) {
+                    totalStudents += courses[i].students_count || 0;
+                    totalGroups += courses[i].groups_count || 0;
+                }
+                document.getElementById('total-students').textContent = totalStudents;
+                document.getElementById('total-groups').textContent = totalGroups;
+                document.getElementById('free-riders').textContent = Math.floor(totalStudents * 0.05);
 
-                const ctx = document.getElementById('riskChart')?.getContext('2d');
+                var ctx = document.getElementById('riskChart')?.getContext('2d');
                 if (ctx && courses.length > 0) {
                     if (charts.risk) charts.risk.destroy();
                     charts.risk = new Chart(ctx, {
                         type: 'bar',
                         data: {
-                            labels: courses.map(c => c.code),
+                            labels: courses.map(function(c) { return c.code; }),
                             datasets: [
-                                { label: 'High Risk', data: courses.map(() => Math.floor(Math.random() * 3)), backgroundColor: '#ef4444' },
-                                { label: 'Medium Risk', data: courses.map(() => Math.floor(Math.random() * 4)), backgroundColor: '#f59e0b' },
-                                { label: 'Low Risk', data: courses.map(() => Math.floor(Math.random() * 20) + 10), backgroundColor: '#10b981' }
+                                { label: 'High Risk', data: courses.map(function() { return Math.floor(Math.random() * 3); }), backgroundColor: '#ef4444' },
+                                { label: 'Medium Risk', data: courses.map(function() { return Math.floor(Math.random() * 4); }), backgroundColor: '#f59e0b' },
+                                { label: 'Low Risk', data: courses.map(function() { return Math.floor(Math.random() * 20) + 10; }), backgroundColor: '#10b981' }
                             ]
                         },
                         options: { responsive: true, maintainAspectRatio: true, scales: { x: { stacked: true }, y: { stacked: true } } }
@@ -253,7 +266,7 @@
         }
 
         function renderCourses() {
-            const container = document.getElementById('page-content');
+            var container = document.getElementById('page-content');
             container.innerHTML = `
                 <div class="space-y-6">
                     <div class="flex justify-between items-center">
@@ -270,30 +283,35 @@
 
         async function loadCourses() {
             try {
-                const user = AuthService.getUser();
-                const data = await ApiService.get(`/courses/professor/${user.id}`);
-                const container = document.getElementById('courses-grid');
-                const courses = data.courses || [];
+                var user = AuthService.getUser();
+                var data = await ApiService.get('/courses/professor/' + user.id);
+                var container = document.getElementById('courses-grid');
+                var courses = data.courses || [];
                 
                 if (courses.length > 0) {
-                    container.innerHTML = courses.map(c => `
-                        <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
-                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
-                                <h3 class="text-lg font-semibold text-white">${c.code}</h3>
-                                <p class="text-blue-100 text-sm">${c.title}</p>
-                            </div>
-                            <div class="p-6">
-                                <div class="space-y-2">
-                                    <div class="flex justify-between"><span class="text-sm text-gray-600">Semester</span><span class="font-medium">${c.semester}</span></div>
-                                    <div class="flex justify-between"><span class="text-sm text-gray-600">Students</span><span class="font-medium">${c.students_count || 0}</span></div>
-                                    <div class="flex justify-between"><span class="text-sm text-gray-600">Groups</span><span class="font-medium">${c.groups_count || 0}</span></div>
+                    var html = '';
+                    for (var i = 0; i < courses.length; i++) {
+                        var c = courses[i];
+                        html += `
+                            <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+                                <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                                    <h3 class="text-lg font-semibold text-white">${c.code}</h3>
+                                    <p class="text-blue-100 text-sm">${c.title}</p>
                                 </div>
-                                <button class="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">View Details</button>
+                                <div class="p-6">
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between"><span class="text-sm text-gray-600">Semester</span><span class="font-medium">${c.semester}</span></div>
+                                        <div class="flex justify-between"><span class="text-sm text-gray-600">Students</span><span class="font-medium">${c.students_count || 0}</span></div>
+                                        <div class="flex justify-between"><span class="text-sm text-gray-600">Groups</span><span class="font-medium">${c.groups_count || 0}</span></div>
+                                    </div>
+                                    <button class="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">View Details</button>
+                                </div>
                             </div>
-                        </div>
-                    `).join('');
+                        `;
+                    }
+                    container.innerHTML = html;
                 } else {
-                    container.innerHTML = `<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">📚</div><h3 class="text-lg font-medium">No Courses Yet</h3><p class="text-gray-500">Create your first course to get started.</p></div>`;
+                    container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">📚</div><h3 class="text-lg font-medium">No Courses Yet</h3><p class="text-gray-500">Create your first course to get started.</p></div>';
                 }
             } catch (error) {
                 console.error('Error loading courses:', error);
@@ -356,8 +374,12 @@
         // ============================================
         function navigate(page) {
             currentPage = page;
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
+            var links = document.querySelectorAll('.nav-link');
+            for (var i = 0; i < links.length; i++) {
+                links[i].classList.remove('active');
+            }
+            var activeLink = document.querySelector('.nav-link[data-page="' + page + '"]');
+            if (activeLink) activeLink.classList.add('active');
             
             switch(page) {
                 case 'dashboard': renderDashboard(); break;
@@ -378,30 +400,33 @@
                 return;
             }
 
-            const user = AuthService.getUser();
+            var user = AuthService.getUser();
             if (user) {
-                document.getElementById('user-name').textContent = `Prof. ${user.first_name || 'Professor'} ${user.last_name || ''}`;
-                document.getElementById('user-avatar').textContent = getInitials(`${user.first_name || 'P'} ${user.last_name || 'R'}`);
+                document.getElementById('user-name').textContent = 'Prof. ' + (user.first_name || 'Professor') + ' ' + (user.last_name || '');
+                document.getElementById('user-avatar').textContent = getInitials((user.first_name || 'P') + ' ' + (user.last_name || 'R'));
             }
 
-            document.getElementById('menuBtn')?.addEventListener('click', () => {
+            document.getElementById('menuBtn')?.addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
 
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
+            var links = document.querySelectorAll('.nav-link');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function(e) {
                     e.preventDefault();
-                    const page = link.dataset.page;
+                    var page = this.dataset.page;
                     if (window.innerWidth < 768) {
                         document.getElementById('sidebar').classList.add('-translate-x-full');
                     }
                     navigate(page);
                 });
-            });
+            }
 
-            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+            document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                AuthService.logout();
+            });
             
-            document.getElementById('createCourseBtn')?.addEventListener('click', () => {
+            document.getElementById('createCourseBtn')?.addEventListener('click', function() {
                 window.toast.info('Create course form coming soon!');
             });
 

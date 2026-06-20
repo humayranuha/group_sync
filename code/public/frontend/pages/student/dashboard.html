@@ -139,16 +139,9 @@
         // AUTH SERVICE
         // ============================================
         const AuthService = {
-            getToken() {
-                return localStorage.getItem(STORAGE_KEYS.TOKEN);
-            },
-            getUser() {
-                const data = localStorage.getItem(STORAGE_KEYS.USER);
-                return data ? JSON.parse(data) : null;
-            },
-            isAuthenticated() {
-                return !!this.getToken();
-            },
+            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated() { return !!this.getToken(); },
             logout() {
                 localStorage.removeItem(STORAGE_KEYS.TOKEN);
                 localStorage.removeItem(STORAGE_KEYS.USER);
@@ -167,26 +160,17 @@
                     'Accept': 'application/json',
                     ...options.headers
                 };
-                if (token) {
-                    headers['Authorization'] = `Bearer ${token}`;
-                }
-                const response = await fetch(`${API_BASE}${endpoint}`, {
-                    ...options,
-                    headers
-                });
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
                 const data = await response.json();
                 if (!response.ok) {
-                    if (response.status === 401) {
-                        AuthService.logout();
-                    }
+                    if (response.status === 401) AuthService.logout();
                     throw new Error(data.message || 'Request failed');
                 }
                 return data;
             },
             get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
-            put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); },
-            delete(endpoint) { return this.request(endpoint, { method: 'DELETE' }); }
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
         };
 
         // ============================================
@@ -218,14 +202,25 @@
             return classes[classification] || 'bg-gray-100 text-gray-600';
         }
 
+        function getRelativeTime(date) {
+            if (!date) return 'Recently';
+            const now = new Date();
+            const diff = now - new Date(date);
+            const minutes = Math.floor(diff / 60000);
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes} min ago`;
+            if (minutes < 1440) return `${Math.floor(minutes / 60)} hours ago`;
+            return `${Math.floor(minutes / 1440)} days ago`;
+        }
+
         // ============================================
-        // RENDER FUNCTIONS
+        // PAGE RENDERERS
         // ============================================
         function renderDashboard() {
             const user = AuthService.getUser();
             const container = document.getElementById('page-content');
             container.innerHTML = `
-                <div class="space-y-6">
+                <div class="space-y-6 animate-fade-in">
                     <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
                         <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Student'}! 👋</h2>
                         <p class="text-blue-100 mt-1">Here's your academic performance overview</p>
@@ -318,7 +313,6 @@
                     </div>
                 </div>
             `;
-
             loadDashboardData();
         }
 
@@ -418,6 +412,9 @@
             }
         }
 
+        // ============================================
+        // GROUP PAGE
+        // ============================================
         function renderGroup() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -433,6 +430,9 @@
             `;
         }
 
+        // ============================================
+        // REPOSITORY PAGE
+        // ============================================
         function renderRepository() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -461,6 +461,9 @@
             });
         }
 
+        // ============================================
+        // ANALYTICS PAGE
+        // ============================================
         function renderAnalytics() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -512,6 +515,9 @@
             }
         }
 
+        // ============================================
+        // PEER REVIEW PAGE
+        // ============================================
         function renderPeerReview() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -526,6 +532,9 @@
             `;
         }
 
+        // ============================================
+        // AI FEEDBACK PAGE
+        // ============================================
         function renderAIFeedback() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -601,7 +610,6 @@
         // INITIALIZATION
         // ============================================
         function init() {
-            // Check authentication
             if (!AuthService.isAuthenticated()) {
                 window.location.href = '/login.html';
                 return;
@@ -613,12 +621,10 @@
                 document.getElementById('user-avatar').textContent = getInitials(`${user.first_name || 'S'} ${user.last_name || 'T'}`);
             }
 
-            // Sidebar toggle
             document.getElementById('menuBtn')?.addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
 
-            // Navigation
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -630,16 +636,10 @@
                 });
             });
 
-            // Logout
-            document.getElementById('logoutBtn')?.addEventListener('click', () => {
-                AuthService.logout();
-            });
-
-            // Load initial page
+            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
             navigate('dashboard');
         }
 
-        // Start the app when DOM is ready
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
