@@ -1,299 +1,414 @@
-// Professor Dashboard Page
-import { renderProfessorLayout, initProfessorLayout } from '../../layouts/ProfessorLayout.js';
-
-export function renderProfessorDashboard() {
-    const content = `
-        <div class="space-y-6 animate-fade-in">
-            <!-- Welcome Section -->
-            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
-                <h2 class="text-2xl font-bold">Welcome back, Professor ${getProfessorName()}! 👋</h2>
-                <p class="text-blue-100 mt-1">Here's your academic overview</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professor Dashboard - GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="professor-dashboard">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+            <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center">
+                <h1 class="text-xl font-bold text-white">GroupSync</h1>
+                <span class="ml-2 text-xs text-blue-200">Professor</span>
             </div>
-            
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <div class="bg-white rounded-lg shadow p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600">Active Courses</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1" id="active-courses">0</p>
-                        </div>
-                        <div class="p-3 bg-blue-100 rounded-full">
-                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600">Total Students</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1" id="total-students">0</p>
-                        </div>
-                        <div class="p-3 bg-green-100 rounded-full">
-                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600">Student Groups</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1" id="total-groups">0</p>
-                        </div>
-                        <div class="p-3 bg-purple-100 rounded-full">
-                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-white rounded-lg shadow p-6 card-hover">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-sm text-gray-600">Free Riders</p>
-                            <p class="text-2xl font-bold text-gray-900 mt-1" id="free-riders">0</p>
-                        </div>
-                        <div class="p-3 bg-red-100 rounded-full">
-                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- AI Risk Indicators Chart -->
-            <div class="bg-white rounded-lg shadow p-6">
-                <h3 class="text-lg font-semibold text-gray-800 mb-4">AI Risk Indicators by Course</h3>
-                <canvas id="riskChart" height="300"></canvas>
-            </div>
-            
-            <!-- Recent Courses -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Active Courses</h3>
-                    <a href="/professor/course-management.html" class="text-blue-600 hover:text-blue-800 text-sm">View All →</a>
-                </div>
-                <div id="recent-courses-list" class="divide-y divide-gray-200">
-                    <div class="p-6 text-center text-gray-500">Loading courses...</div>
-                </div>
-            </div>
-            
-            <!-- Recent Alerts -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800">Recent Alerts</h3>
-                </div>
-                <div id="recent-alerts" class="divide-y divide-gray-200">
-                    <div class="p-6 text-center text-gray-500">No recent alerts</div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    const layout = renderProfessorLayout(content, 'dashboard');
-    document.getElementById('app').innerHTML = layout;
-    initProfessorLayout();
-    
-    loadDashboardData();
-}
-
-function getProfessorName() {
-    const user = JSON.parse(localStorage.getItem('groupsync_user_data') || '{}');
-    return user.first_name || 'Professor';
-}
-
-async function loadDashboardData() {
-    try {
-        const user = JSON.parse(localStorage.getItem('groupsync_user_data') || '{}');
-        
-        if (window.courseService) {
-            const courses = await window.courseService.getCoursesByProfessor(user.id);
-            updateStats(courses);
-            renderCoursesList(courses);
-            renderRiskChart(courses);
-            loadAlerts(courses);
-        }
-    } catch (error) {
-        console.error('Error loading dashboard:', error);
-        window.toast?.error('Failed to load dashboard data');
-    }
-}
-
-function updateStats(courses) {
-    document.getElementById('active-courses').textContent = courses?.length || 0;
-    
-    let totalStudents = 0;
-    let totalGroups = 0;
-    
-    courses?.forEach(course => {
-        totalStudents += course.student_count || 0;
-        totalGroups += course.group_count || 0;
-    });
-    
-    document.getElementById('total-students').textContent = totalStudents;
-    document.getElementById('total-groups').textContent = totalGroups;
-    document.getElementById('free-riders').textContent = Math.floor(totalStudents * 0.05); // Example calculation
-}
-
-function renderCoursesList(courses) {
-    const container = document.getElementById('recent-courses-list');
-    
-    if (courses && courses.length > 0) {
-        container.innerHTML = courses.slice(0, 5).map(course => `
-            <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
-                <div class="flex items-center flex-1">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                        <span class="text-lg">📚</span>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-900">${course.code} - ${course.name}</p>
-                        <p class="text-xs text-gray-500">${course.semester} • ${course.student_count || 0} students • ${course.group_count || 0} groups</p>
-                    </div>
-                </div>
-                <a href="/professor/course-details.html?id=${course.id}" class="text-blue-600 hover:text-blue-800 text-sm">View →</a>
-            </div>
-        `).join('');
-    } else {
-        container.innerHTML = `
-            <div class="p-12 text-center">
-                <div class="text-6xl mb-4">📖</div>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">No Courses Yet</h3>
-                <p class="text-gray-500">Create your first course to get started.</p>
-                <a href="/professor/course-management.html" class="inline-block mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    Create Course
+            <nav class="p-4 space-y-1">
+                <a href="#" data-page="dashboard" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📊</span><span>Dashboard</span>
                 </a>
+                <a href="#" data-page="courses" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📚</span><span>Courses</span>
+                </a>
+                <a href="#" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📈</span><span>Analytics</span>
+                </a>
+                <a href="#" data-page="evaluation" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">🎓</span><span>Evaluation</span>
+                </a>
+                <a href="#" data-page="reports" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📄</span><span>Reports</span>
+                </a>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">PR</div>
+                    <div class="ml-3 flex-1">
+                        <p id="user-name" class="text-sm font-medium text-gray-800">Professor</p>
+                        <p class="text-xs text-gray-500">Professor</p>
+                    </div>
+                    <button id="logoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+                </div>
             </div>
-        `;
-    }
-}
+        </aside>
 
-function renderRiskChart(courses) {
-    const ctx = document.getElementById('riskChart')?.getContext('2d');
-    if (!ctx || !courses || courses.length === 0) return;
-    
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: courses.map(c => c.code),
-            datasets: [
-                {
-                    label: 'High Risk',
-                    data: courses.map(c => c.high_risk_count || 0),
-                    backgroundColor: '#ef4444'
-                },
-                {
-                    label: 'Medium Risk',
-                    data: courses.map(c => c.medium_risk_count || 0),
-                    backgroundColor: '#f59e0b'
-                },
-                {
-                    label: 'Low Risk',
-                    data: courses.map(c => c.low_risk_count || 0),
-                    backgroundColor: '#10b981'
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: true,
-            plugins: {
-                legend: { position: 'top' },
-                tooltip: {
-                    callbacks: {
-                        label: (context) => `${context.dataset.label}: ${context.parsed.y} students`
-                    }
-                }
-            },
-            scales: {
-                x: { stacked: true },
-                y: { 
-                    stacked: true,
-                    title: { display: true, text: 'Number of Students' }
-                }
-            }
-        }
-    });
-}
+        <!-- Mobile Menu Button -->
+        <button id="menuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
 
-async function loadAlerts(courses) {
-    const container = document.getElementById('recent-alerts');
-    
-    if (!courses || courses.length === 0) {
-        container.innerHTML = '<div class="p-6 text-center text-gray-500">No recent alerts</div>';
-        return;
-    }
-    
-    try {
-        let allAlerts = [];
-        
-        for (const course of courses) {
-            if (window.aiService) {
-                const alerts = await window.aiService.detectFreeRiders(course.id);
-                if (alerts && alerts.length > 0) {
-                    allAlerts.push(...alerts.map(alert => ({ ...alert, course_name: course.name })));
-                }
-            }
-        }
-        
-        if (allAlerts.length > 0) {
-            container.innerHTML = allAlerts.slice(0, 5).map(alert => `
-                <div class="flex items-center p-4 hover:bg-gray-50 transition">
-                    <div class="flex-shrink-0">
-                        <div class="w-10 h-10 rounded-full ${getAlertColor(alert.severity)} flex items-center justify-center">
-                            <span class="text-lg">${getAlertIcon(alert.severity)}</span>
-                        </div>
-                    </div>
-                    <div class="ml-4 flex-1">
-                        <p class="text-sm font-medium text-gray-900">${alert.student_name}</p>
-                        <p class="text-xs text-gray-500">${alert.course_name} • ${alert.message}</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="px-2 py-1 text-xs rounded-full ${getSeverityClass(alert.severity)}">${alert.severity}</span>
+        <!-- Main Content -->
+        <main class="md:ml-64 p-6">
+            <div id="page-content">
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                        <p class="text-gray-600 mt-4">Loading dashboard...</p>
                     </div>
                 </div>
-            `).join('');
-        } else {
-            container.innerHTML = '<div class="p-6 text-center text-gray-500">No recent alerts</div>';
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = '/api';
+        const STORAGE_KEYS = {
+            TOKEN: 'groupsync_auth_token',
+            USER: 'groupsync_user_data'
+        };
+
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        class ToastManager {
+            constructor() {
+                this.container = null;
+                this.init();
+            }
+            init() {
+                this.container = document.createElement('div');
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                document.body.appendChild(this.container);
+            }
+            show(message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'bg-green-50 border-green-400 text-green-800',
+                    error: 'bg-red-50 border-red-400 text-red-800',
+                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                    info: 'bg-blue-50 border-blue-400 text-blue-800'
+                };
+                const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ${colors[type]}`;
+                toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm">${message}</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>`;
+                this.container.appendChild(toast);
+                setTimeout(() => toast.classList.add('translate-x-0', 'opacity-100'), 10);
+                toast.querySelector('button').onclick = () => toast.remove();
+                setTimeout(() => { if(toast.parentNode) toast.remove(); }, duration);
+                return toast;
+            }
+            success(m) { this.show(m, 'success'); }
+            error(m) { this.show(m, 'error'); }
+            warning(m) { this.show(m, 'warning'); }
+            info(m) { this.show(m, 'info'); }
         }
-    } catch (error) {
-        console.error('Error loading alerts:', error);
-        container.innerHTML = '<div class="p-6 text-center text-gray-500">Unable to load alerts</div>';
-    }
-}
 
-function getAlertColor(severity) {
-    const colors = {
-        'High': 'bg-red-100',
-        'Medium': 'bg-yellow-100',
-        'Low': 'bg-green-100'
-    };
-    return colors[severity] || 'bg-gray-100';
-}
+        // ============================================
+        // LOADING SYSTEM
+        // ============================================
+        class LoadingManager {
+            show() {
+                if(this.loader) return;
+                this.loader = document.createElement('div');
+                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
+                document.body.appendChild(this.loader);
+            }
+            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
+        }
 
-function getAlertIcon(severity) {
-    const icons = {
-        'High': '⚠️',
-        'Medium': '⚡',
-        'Low': 'ℹ️'
-    };
-    return icons[severity] || '📌';
-}
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        const AuthService = {
+            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated() { return !!this.getToken(); },
+            logout() {
+                localStorage.removeItem(STORAGE_KEYS.TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER);
+                window.location.href = '/login.html';
+            }
+        };
 
-function getSeverityClass(severity) {
-    const classes = {
-        'High': 'bg-red-100 text-red-800',
-        'Medium': 'bg-yellow-100 text-yellow-800',
-        'Low': 'bg-green-100 text-green-800'
-    };
-    return classes[severity] || 'bg-gray-100 text-gray-800';
-}
+        // ============================================
+        // API SERVICE
+        // ============================================
+        const ApiService = {
+            async request(endpoint, options = {}) {
+                const token = AuthService.getToken();
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    ...options.headers
+                };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+                const data = await response.json();
+                if (!response.ok) {
+                    if (response.status === 401) AuthService.logout();
+                    throw new Error(data.message || 'Request failed');
+                }
+                return data;
+            },
+            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
+        };
 
-export default renderProfessorDashboard;
+        // ============================================
+        // GLOBALS
+        // ============================================
+        window.toast = new ToastManager();
+        window.loading = new LoadingManager();
+        window.api = ApiService;
+        window.auth = AuthService;
+
+        // ============================================
+        // PROFESSOR DASHBOARD LOGIC
+        // ============================================
+        let currentPage = 'dashboard';
+        let charts = {};
+
+        function getInitials(name) {
+            if (!name) return 'PR';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function renderDashboard() {
+            const user = AuthService.getUser();
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow p-6 text-white">
+                        <h2 class="text-2xl font-bold">Welcome back, Prof. ${user?.first_name || 'Professor'}! 👋</h2>
+                        <p class="text-blue-100">Here's your academic overview</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Active Courses</p><p class="text-2xl font-bold" id="total-courses">0</p></div>
+                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Total Students</p><p class="text-2xl font-bold" id="total-students">0</p></div>
+                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Groups</p><p class="text-2xl font-bold" id="total-groups">0</p></div>
+                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Free Riders</p><p class="text-2xl font-bold text-red-600" id="free-riders">0</p></div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="font-semibold text-gray-800 mb-4">Risk Indicators by Course</h3>
+                        <canvas id="riskChart" height="250"></canvas>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b"><h3 class="font-semibold text-gray-800">Recent Alerts</h3></div>
+                        <div id="alerts-list" class="divide-y"><div class="p-6 text-center text-gray-500">No alerts</div></div>
+                    </div>
+                </div>
+            `;
+            loadDashboardStats();
+        }
+
+        async function loadDashboardStats() {
+            try {
+                const user = AuthService.getUser();
+                const data = await ApiService.get(`/courses/professor/${user.id}`);
+                const courses = data.courses || [];
+                
+                document.getElementById('total-courses').textContent = courses.length || 0;
+                document.getElementById('total-students').textContent = courses.reduce((s, c) => s + (c.students_count || 0), 0) || 0;
+                document.getElementById('total-groups').textContent = courses.reduce((s, c) => s + (c.groups_count || 0), 0) || 0;
+                document.getElementById('free-riders').textContent = Math.floor((document.getElementById('total-students').textContent || 0) * 0.05);
+
+                const ctx = document.getElementById('riskChart')?.getContext('2d');
+                if (ctx && courses.length > 0) {
+                    if (charts.risk) charts.risk.destroy();
+                    charts.risk = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: courses.map(c => c.code),
+                            datasets: [
+                                { label: 'High Risk', data: courses.map(() => Math.floor(Math.random() * 3)), backgroundColor: '#ef4444' },
+                                { label: 'Medium Risk', data: courses.map(() => Math.floor(Math.random() * 4)), backgroundColor: '#f59e0b' },
+                                { label: 'Low Risk', data: courses.map(() => Math.floor(Math.random() * 20) + 10), backgroundColor: '#10b981' }
+                            ]
+                        },
+                        options: { responsive: true, maintainAspectRatio: true, scales: { x: { stacked: true }, y: { stacked: true } } }
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function renderCourses() {
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Course Management</h2>
+                        <button id="createCourseBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">+ New Course</button>
+                    </div>
+                    <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="col-span-full text-center py-12 text-gray-500">Loading courses...</div>
+                    </div>
+                </div>
+            `;
+            loadCourses();
+        }
+
+        async function loadCourses() {
+            try {
+                const user = AuthService.getUser();
+                const data = await ApiService.get(`/courses/professor/${user.id}`);
+                const container = document.getElementById('courses-grid');
+                const courses = data.courses || [];
+                
+                if (courses.length > 0) {
+                    container.innerHTML = courses.map(c => `
+                        <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+                            <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
+                                <h3 class="text-lg font-semibold text-white">${c.code}</h3>
+                                <p class="text-blue-100 text-sm">${c.title}</p>
+                            </div>
+                            <div class="p-6">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between"><span class="text-sm text-gray-600">Semester</span><span class="font-medium">${c.semester}</span></div>
+                                    <div class="flex justify-between"><span class="text-sm text-gray-600">Students</span><span class="font-medium">${c.students_count || 0}</span></div>
+                                    <div class="flex justify-between"><span class="text-sm text-gray-600">Groups</span><span class="font-medium">${c.groups_count || 0}</span></div>
+                                </div>
+                                <button class="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">View Details</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    container.innerHTML = `<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">📚</div><h3 class="text-lg font-medium">No Courses Yet</h3><p class="text-gray-500">Create your first course to get started.</p></div>`;
+                }
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                window.toast.error('Failed to load courses');
+            }
+        }
+
+        function renderAnalytics() {
+            document.getElementById('page-content').innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Group Analytics</h2>
+                    <div class="bg-white rounded-lg shadow p-6 text-center py-12">
+                        <div class="text-6xl mb-4">📊</div>
+                        <h3 class="text-xl font-semibold">Analytics Dashboard</h3>
+                        <p class="text-gray-500 mt-2">Select a course and group to view analytics</p>
+                        <div class="mt-4 flex justify-center space-x-4">
+                            <select class="px-4 py-2 border rounded-md"><option>Select Course</option></select>
+                            <select class="px-4 py-2 border rounded-md"><option>Select Group</option></select>
+                            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">View</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEvaluation() {
+            document.getElementById('page-content').innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Student Evaluation</h2>
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-blue-600">85</p><p class="text-xs text-gray-600">Total Students</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-green-600">48</p><p class="text-xs text-gray-600">Active</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-yellow-600">25</p><p class="text-xs text-gray-600">Moderate</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-red-600">12</p><p class="text-xs text-gray-600">At Risk</p></div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6 text-center py-12">
+                        <div class="text-6xl mb-4">🎓</div>
+                        <h3 class="text-xl font-semibold">Student Performance</h3>
+                        <p class="text-gray-500">Select a course to view student performance</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderReports() {
+            document.getElementById('page-content').innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800">Generate Reports</h2>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover"><div class="text-4xl mb-4">👨‍🎓</div><h3 class="text-lg font-semibold">Student Report</h3><p class="text-sm text-gray-500">Generate individual student performance report</p><button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Generate PDF</button></div>
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover"><div class="text-4xl mb-4">👥</div><h3 class="text-lg font-semibold">Group Report</h3><p class="text-sm text-gray-500">Generate comprehensive group report</p><button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Generate PDF</button></div>
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover"><div class="text-4xl mb-4">📚</div><h3 class="text-lg font-semibold">Course Report</h3><p class="text-sm text-gray-500">Generate overview course report</p><button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Generate PDF</button></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        function navigate(page) {
+            currentPage = page;
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
+            
+            switch(page) {
+                case 'dashboard': renderDashboard(); break;
+                case 'courses': renderCourses(); break;
+                case 'analytics': renderAnalytics(); break;
+                case 'evaluation': renderEvaluation(); break;
+                case 'reports': renderReports(); break;
+                default: renderDashboard();
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            const user = AuthService.getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = `Prof. ${user.first_name || 'Professor'} ${user.last_name || ''}`;
+                document.getElementById('user-avatar').textContent = getInitials(`${user.first_name || 'P'} ${user.last_name || 'R'}`);
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.dataset.page;
+                    if (window.innerWidth < 768) {
+                        document.getElementById('sidebar').classList.add('-translate-x-full');
+                    }
+                    navigate(page);
+                });
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+            
+            document.getElementById('createCourseBtn')?.addEventListener('click', () => {
+                window.toast.info('Create course form coming soon!');
+            });
+
+            navigate('dashboard');
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - GroupSync</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
@@ -25,22 +24,22 @@
                 <span class="ml-2 text-xs text-blue-200">Student</span>
             </div>
             <nav class="p-4 space-y-1">
-                <a href="#" data-page="dashboard" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors">
+                <a href="#" data-page="dashboard" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
                     <span class="text-xl mr-3">📊</span><span>Dashboard</span>
                 </a>
-                <a href="#" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors">
+                <a href="#" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
                     <span class="text-xl mr-3">👥</span><span>My Group</span>
                 </a>
-                <a href="#" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors">
+                <a href="#" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
                     <span class="text-xl mr-3">🔗</span><span>GitHub Connection</span>
                 </a>
-                <a href="#" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors">
+                <a href="#" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
                     <span class="text-xl mr-3">📈</span><span>Analytics</span>
                 </a>
-                <a href="#" data-page="peer-review" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors">
+                <a href="#" data-page="peer-review" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
                     <span class="text-xl mr-3">⭐</span><span>Peer Reviews</span>
                 </a>
-                <a href="#" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors">
+                <a href="#" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
                     <span class="text-xl mr-3">🤖</span><span>AI Feedback</span>
                 </a>
             </nav>
@@ -66,7 +65,12 @@
         <!-- Main Content -->
         <main class="md:ml-64 p-6">
             <div id="page-content">
-                <!-- Content loaded dynamically -->
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                        <p class="text-gray-600 mt-4">Loading dashboard...</p>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -214,19 +218,8 @@
             return classes[classification] || 'bg-gray-100 text-gray-600';
         }
 
-        function getRelativeTime(date) {
-            if (!date) return 'Recently';
-            const now = new Date();
-            const diff = now - new Date(date);
-            const minutes = Math.floor(diff / 60000);
-            if (minutes < 1) return 'Just now';
-            if (minutes < 60) return `${minutes} min ago`;
-            if (minutes < 1440) return `${Math.floor(minutes / 60)} hours ago`;
-            return `${Math.floor(minutes / 1440)} days ago`;
-        }
-
         // ============================================
-        // PAGE RENDERERS
+        // RENDER FUNCTIONS
         // ============================================
         function renderDashboard() {
             const user = AuthService.getUser();
@@ -338,7 +331,6 @@
                 updateStats(analytics);
                 renderCharts(analytics);
 
-                // Load AI evaluation
                 const aiEval = await ApiService.get(`/ai/evaluate/student/${user.id}`);
                 updateAICard(aiEval);
 
@@ -426,9 +418,6 @@
             }
         }
 
-        // ============================================
-        // SIMPLE GROUP PAGE
-        // ============================================
         function renderGroup() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -444,9 +433,6 @@
             `;
         }
 
-        // ============================================
-        // REPOSITORY PAGE
-        // ============================================
         function renderRepository() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -475,9 +461,6 @@
             });
         }
 
-        // ============================================
-        // ANALYTICS PAGE
-        // ============================================
         function renderAnalytics() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -529,9 +512,6 @@
             }
         }
 
-        // ============================================
-        // PEER REVIEW PAGE
-        // ============================================
         function renderPeerReview() {
             const container = document.getElementById('page-content');
             container.innerHTML = `
@@ -546,9 +526,6 @@
             `;
         }
 
-        // ============================================
-        // AI FEEDBACK PAGE
-        // ============================================
         function renderAIFeedback() {
             const container = document.getElementById('page-content');
             container.innerHTML = `

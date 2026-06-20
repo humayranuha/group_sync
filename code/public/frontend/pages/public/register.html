@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - GroupSync</title>
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        .card-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
-        }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100">
-    <div class="flex min-h-screen">
-        <!-- Left side - Branding -->
-        <div class="hidden lg:flex lg:w-1/2 bg-blue-600 items-center justify-center">
-            <div class="text-center text-white p-12">
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="flex w-full max-w-6xl">
+        <!-- Left Side -->
+        <div class="hidden lg:flex lg:w-1/2 bg-blue-600 rounded-l-2xl items-center justify-center p-12">
+            <div class="text-center text-white">
                 <div class="text-6xl mb-6">🚀</div>
                 <h1 class="text-4xl font-bold mb-4">Join GroupSync</h1>
                 <p class="text-xl mb-6">Start your academic collaboration journey</p>
@@ -28,241 +22,149 @@
             </div>
         </div>
         
-        <!-- Right side - Form -->
-        <div class="w-full lg:w-1/2 flex items-center justify-center p-8">
-            <div class="w-full max-w-md">
-                <div class="bg-white rounded-lg shadow-xl p-8">
-                    <div class="text-center mb-8">
-                        <h2 class="text-3xl font-bold text-gray-900">Create Account</h2>
-                        <p class="text-gray-600 mt-2">Join GroupSync today</p>
-                    </div>
-                    
-                    <form id="registerForm" class="space-y-4">
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">First Name</label>
-                                <input type="text" id="firstName" required 
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700">Last Name</label>
-                                <input type="text" id="lastName" required 
-                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                            <input type="email" id="email" required 
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">I am a...</label>
-                            <select id="role" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="student">Student</option>
-                                <option value="professor">Professor</option>
-                            </select>
-                        </div>
-                        
-                        <div id="studentIdField">
-                            <label class="block text-sm font-medium text-gray-700">Student ID</label>
-                            <input type="text" id="studentId" 
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <p class="mt-1 text-xs text-gray-500">Optional for students</p>
-                        </div>
-                        
-                        <div id="departmentField" style="display: none;">
-                            <label class="block text-sm font-medium text-gray-700">Department</label>
-                            <input type="text" id="department" 
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Password</label>
-                            <input type="password" id="password" required 
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                            <p class="mt-1 text-xs text-gray-500">Must be at least 6 characters</p>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                            <input type="password" id="confirmPassword" required 
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
-                        </div>
-                        
-                        <div class="flex items-center">
-                            <input type="checkbox" id="terms" required class="h-4 w-4 text-blue-600 rounded border-gray-300">
-                            <label for="terms" class="ml-2 text-sm text-gray-700">
-                                I agree to the <a href="#" class="text-blue-600">Terms of Service</a> and <a href="#" class="text-blue-600">Privacy Policy</a>
-                            </label>
-                        </div>
-                        
-                        <button type="submit" id="submitBtn" 
-                                class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-                            Create Account
-                        </button>
-                    </form>
-                    
-                    <div class="mt-6">
-                        <div class="relative">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t border-gray-300"></div>
-                            </div>
-                            <div class="relative flex justify-center text-sm">
-                                <span class="px-2 bg-white text-gray-500">Or</span>
-                            </div>
-                        </div>
-                        
-                        <button id="githubSignup" 
-                                class="mt-6 w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.682-.103-.253-.447-1.27.098-2.646 0 0 .84-.269 2.75 1.025.8-.223 1.65-.334 2.5-.334.85 0 1.7.111 2.5.334 1.91-1.294 2.75-1.025 2.75-1.025.545 1.376.201 2.393.099 2.646.64.698 1.03 1.591 1.03 2.682 0 3.841-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.14 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z"/>
-                            </svg>
-                            Sign up with GitHub
-                        </button>
-                    </div>
-                    
-                    <p class="mt-6 text-center text-sm text-gray-600">
-                        Already have an account?
-                        <a href="/login.html" class="font-medium text-blue-600 hover:text-blue-500">Sign in</a>
-                    </p>
-                </div>
+        <!-- Right Side -->
+        <div class="w-full lg:w-1/2 bg-white rounded-r-2xl shadow-2xl p-8 lg:p-12">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900">Create Account</h2>
+                <p class="text-gray-600 mt-2">Join GroupSync today</p>
             </div>
+            
+            <form id="registerForm" class="space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">First Name</label>
+                        <input type="text" id="firstName" placeholder="John" required
+                               class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" id="lastName" placeholder="Doe" required
+                               class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                    <input type="email" id="email" placeholder="student@university.edu" required
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">I am a...</label>
+                    <select id="role" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="student">Student</option>
+                        <option value="professor">Professor</option>
+                    </select>
+                </div>
+                
+                <div id="departmentField" style="display: none;">
+                    <label class="block text-sm font-medium text-gray-700">Department</label>
+                    <input type="text" id="department" placeholder="e.g., Computer Science"
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="mt-1 text-xs text-gray-500">Must be at least 6 characters</p>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                    <input type="password" id="confirmPassword" placeholder="••••••••" required
+                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                
+                <button type="submit" id="registerBtn"
+                        class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-lg">
+                    Create Account
+                </button>
+            </form>
+            
+            <p class="mt-6 text-center text-sm text-gray-600">
+                Already have an account? <a href="/login.html" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>
+            </p>
         </div>
     </div>
-    
+
     <script>
-        // Get CSRF token
-        function getCsrfToken() {
-            const token = document.querySelector('meta[name="csrf-token"]');
-            return token ? token.content : '';
-        }
-        
-        // Show message
-        function showMessage(message, isError = false) {
-            const existingMsg = document.getElementById('formMessage');
-            if (existingMsg) existingMsg.remove();
-            
-            const msgDiv = document.createElement('div');
-            msgDiv.id = 'formMessage';
-            msgDiv.className = `p-3 rounded-lg mb-4 ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
-            msgDiv.textContent = message;
-            
-            const form = document.getElementById('registerForm');
-            form.insertBefore(msgDiv, form.firstChild);
-            
-            setTimeout(() => msgDiv.remove(), 5000);
-        }
-        
-        // Toggle fields based on role
-        const roleSelect = document.getElementById('role');
-        const studentField = document.getElementById('studentIdField');
-        const departmentField = document.getElementById('departmentField');
-        
-        function toggleFields() {
-            if (roleSelect.value === 'student') {
-                studentField.style.display = 'block';
-                departmentField.style.display = 'none';
-            } else {
-                studentField.style.display = 'none';
-                departmentField.style.display = 'block';
-            }
-        }
-        
-        roleSelect.addEventListener('change', toggleFields);
-        toggleFields();
-        
-        // Form submission
         const form = document.getElementById('registerForm');
-        const submitBtn = document.getElementById('submitBtn');
-        
+        const btn = document.getElementById('registerBtn');
+        const roleSelect = document.getElementById('role');
+        const departmentField = document.getElementById('departmentField');
+
+        // Show/hide department field based on role
+        roleSelect.addEventListener('change', function() {
+            if (this.value === 'professor') {
+                departmentField.style.display = 'block';
+            } else {
+                departmentField.style.display = 'none';
+            }
+        });
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            // Get values
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
             const role = roleSelect.value;
-            const terms = document.getElementById('terms').checked;
-            
-            // Validation
+            const department = document.getElementById('department').value.trim();
+
             if (!firstName || !lastName || !email || !password) {
-                showMessage('Please fill all required fields', true);
+                alert('Please fill all required fields');
                 return;
             }
-            
+
             if (password !== confirmPassword) {
-                showMessage('Passwords do not match', true);
+                alert('Passwords do not match');
                 return;
             }
-            
+
             if (password.length < 6) {
-                showMessage('Password must be at least 6 characters', true);
+                alert('Password must be at least 6 characters');
                 return;
             }
-            
-            if (!terms) {
-                showMessage('Please agree to the Terms of Service', true);
-                return;
-            }
-            
-            // Prepare data
+
             const userData = {
                 first_name: firstName,
                 last_name: lastName,
                 email: email,
                 password: password,
-                role: role
+                role: role,
+                department: role === 'professor' ? department : null
             };
-            
-            if (role === 'student') {
-                userData.student_id = document.getElementById('studentId').value;
-            } else {
-                userData.department = document.getElementById('department').value;
-            }
-            
-            // Show loading
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Creating account...';
-            submitBtn.disabled = true;
-            
+
+            btn.textContent = 'Creating account...';
+            btn.disabled = true;
+
             try {
                 const response = await fetch('/api/auth/register', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': getCsrfToken()
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData)
                 });
                 
                 const data = await response.json();
                 
-                if (response.ok && data.success) {
-                    showMessage('Registration successful! Redirecting to login...');
+                if (data.success) {
+                    alert('Registration successful! Please login.');
                     setTimeout(() => {
                         window.location.href = '/login.html';
-                    }, 2000);
+                    }, 1000);
                 } else {
-                    showMessage(data.message || 'Registration failed. Please try again.', true);
+                    const errors = data.errors ? Object.values(data.errors).flat().join(', ') : data.message || 'Registration failed';
+                    alert(errors);
                 }
             } catch (error) {
-                console.error('Registration error:', error);
-                showMessage('Network error. Please check your connection.', true);
+                alert('Network error. Please try again.');
             } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+                btn.textContent = 'Create Account';
+                btn.disabled = false;
             }
-        });
-        
-        // GitHub signup
-        document.getElementById('githubSignup')?.addEventListener('click', () => {
-            window.location.href = '/auth/github/redirect';
         });
     </script>
 </body>
