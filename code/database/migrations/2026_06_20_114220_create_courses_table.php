@@ -6,20 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('courses', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
+            $table->string('title');
+            $table->string('semester');
+            $table->text('description')->nullable();
+            $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
+            $table->string('enrollment_code')->unique()->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('courses');
