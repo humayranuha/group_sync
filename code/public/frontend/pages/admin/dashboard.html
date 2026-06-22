@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
+        .nav-link { cursor: pointer; transition: all 0.2s ease; }
+        .nav-link:hover { background-color: #f3f4f6; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .page-section { display: none; }
+        .page-section.active { display: block; }
+        .tab-btn.active { background-color: #eff6ff; color: #1d4ed8; border-bottom: 2px solid #1d4ed8; }
+        .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+        .status-active { background-color: #dcfce7; color: #166534; }
+        .status-inactive { background-color: #fee2e2; color: #991b1b; }
+        .status-pending { background-color: #fef9c3; color: #854d0e; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+            <div class="h-16 bg-gradient-to-r from-purple-600 to-purple-700 flex items-center justify-center">
+                <h1 class="text-xl font-bold text-white">GroupSync</h1>
+                <span class="ml-2 text-xs text-purple-200">Admin</span>
+            </div>
+            <nav class="p-4 space-y-1">
+                <a href="#" onclick="showPage('dashboard')" class="nav-link active flex items-center px-3 py-2 rounded-lg" data-page="dashboard">
+                    <span class="text-xl mr-3">📊</span><span>Dashboard</span>
+                </a>
+                <a href="#" onclick="showPage('users')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="users">
+                    <span class="text-xl mr-3">👥</span><span>User Management</span>
+                </a>
+                <a href="#" onclick="showPage('courses')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="courses">
+                    <span class="text-xl mr-3">📚</span><span>Course Management</span>
+                </a>
+                <a href="#" onclick="showPage('logs')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="logs">
+                    <span class="text-xl mr-3">📋</span><span>Audit Logs</span>
+                </a>
+                <a href="#" onclick="showPage('settings')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="settings">
+                    <span class="text-xl mr-3">⚙️</span><span>System Settings</span>
+                </a>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-r from-purple-400 to-purple-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">AD</div>
+                    <div class="ml-3 flex-1">
+                        <p id="user-name" class="text-sm font-medium text-gray-800">Administrator</p>
+                        <p class="text-xs text-gray-500">Admin</p>
+                    </div>
+                    <button onclick="logoutUser()" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Menu Button -->
+        <button id="menuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-purple-600 text-white p-2 rounded-lg shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Main Content -->
+        <main class="md:ml-64 p-6">
+            <div id="page-content">
+                <!-- Pages will be loaded here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        var STORAGE_KEYS = {
+            TOKEN: 'groupsync_auth_token',
+            USER: 'groupsync_user_data'
+        };
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        function getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); }
+        function getUser() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; }
+        function isAuthenticated() { return !!getToken(); }
+
+        function logoutUser() {
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            window.location.href = '/login.html';
+        }
+
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        function showToast(message, type) {
+            type = type || 'info';
+            var colors = {
+                success: 'bg-green-50 border-green-400 text-green-800',
+                error: 'bg-red-50 border-red-400 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                info: 'bg-blue-50 border-blue-400 text-blue-800'
+            };
+            var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+            
+            var container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                document.body.appendChild(container);
+            }
+            
+            var toast = document.createElement('div');
+            toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 max-w-md ' + colors[type];
+            toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm flex-1">' + message + '</p><button class="ml-2 text-gray-400 hover:text-gray-600" onclick="this.parentElement.parentElement.remove()">&times;</button></div>';
+            container.appendChild(toast);
+            setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
+            setTimeout(function() { if(toast.parentNode) toast.remove(); }, 5000);
+        }
+
+        // ============================================
+        // DEMO DATA
+        // ============================================
+        var adminUsers = [
+            { id: 1, name: 'John Doe', email: 'john@example.com', role: 'student', status: 'active', joined: '2024-01-15' },
+            { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'student', status: 'active', joined: '2024-01-20' },
+            { id: 3, name: 'Prof. Bob Bobbi', email: 'bob@example.com', role: 'professor', status: 'active', joined: '2023-12-01' },
+            { id: 4, name: 'Mike Brown', email: 'mike@example.com', role: 'student', status: 'inactive', joined: '2024-02-10' },
+            { id: 5, name: 'Prof. Alice Wonder', email: 'alice@example.com', role: 'professor', status: 'pending', joined: '2024-03-01' }
+        ];
+
+        var adminCourses = [
+            { id: 1, code: 'CS401', title: 'Software Engineering', teacher: 'Prof. Bob Bobbi', students: 32, status: 'active' },
+            { id: 2, code: 'CS402', title: 'Database Systems', teacher: 'Prof. Alice Wonder', students: 28, status: 'active' },
+            { id: 3, code: 'CS403', title: 'Web Development', teacher: 'Prof. Bob Bobbi', students: 25, status: 'active' },
+            { id: 4, code: 'CS404', title: 'Data Structures', teacher: 'Prof. Alice Wonder', students: 30, status: 'inactive' }
+        ];
+
+        var adminLogs = [
+            { user: 'John Doe', action: 'Login', details: 'User logged in successfully', time: '2024-06-22 10:30:00' },
+            { user: 'Jane Smith', action: 'Submit Peer Review', details: 'Submitted review for Mike Brown', time: '2024-06-22 09:15:00' },
+            { user: 'Prof. Bob Bobbi', action: 'Create Course', details: 'Created course CS403', time: '2024-06-21 16:45:00' },
+            { user: 'Admin', action: 'User Management', details: 'Added new student account', time: '2024-06-21 14:20:00' },
+            { user: 'Mike Brown', action: 'Login', details: 'User logged in from new device', time: '2024-06-21 11:00:00' },
+            { user: 'Jane Smith', action: 'Connect GitHub', details: 'Connected repository project-repo', time: '2024-06-20 18:30:00' }
+        ];
+
+        var systemSettings = {
+            siteName: 'GroupSync',
+            emailVerification: true,
+            sessionTimeout: 30,
+            backupSchedule: 'Daily',
+            maintenanceMode: false
+        };
+
+        // ============================================
+        // CHART VARIABLES
+        // ============================================
+        var charts = {};
+
+        // ============================================
+        // PAGE FUNCTIONS
+        // ============================================
+
+        // ----- DASHBOARD -----
+        function renderDashboard() {
+            var container = document.getElementById('page-content');
+            var user = getUser();
+            
+            var totalUsers = adminUsers.length;
+            var activeUsers = adminUsers.filter(function(u) { return u.status === 'active'; }).length;
+            var totalCourses = adminCourses.length;
+            var activeCourses = adminCourses.filter(function(c) { return c.status === 'active'; }).length;
+
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <div class="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow p-6 text-white">
+                        <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Admin'}! 👋</h2>
+                        <p class="text-purple-100 mt-1">System Overview & Analytics</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('Total Users: ${totalUsers}', 'info')">
+                            <p class="text-sm text-gray-600">Total Users</p>
+                            <p class="text-2xl font-bold text-purple-600 mt-1">${totalUsers}</p>
+                            <p class="text-xs text-gray-500 mt-1">${activeUsers} active</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('Active Users: ${activeUsers}', 'success')">
+                            <p class="text-sm text-gray-600">Active Users</p>
+                            <p class="text-2xl font-bold text-green-600 mt-1">${activeUsers}</p>
+                            <p class="text-xs text-gray-500 mt-1">${Math.round(activeUsers/totalUsers*100)}% of total</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('Total Courses: ${totalCourses}', 'info')">
+                            <p class="text-sm text-gray-600">Total Courses</p>
+                            <p class="text-2xl font-bold text-blue-600 mt-1">${totalCourses}</p>
+                            <p class="text-xs text-gray-500 mt-1">${activeCourses} active</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('System Status: Online', 'success')">
+                            <p class="text-sm text-gray-600">System Status</p>
+                            <p class="text-2xl font-bold text-green-600 mt-1">🟢 Online</p>
+                            <p class="text-xs text-gray-500 mt-1">All systems operational</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-gray-800 mb-4">User Distribution</h3>
+                            <canvas id="userChart" height="250"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-gray-800 mb-4">Course Status</h3>
+                            <canvas id="courseChart" height="250"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">Recent Activity</h3>
+                            <span class="text-xs text-gray-500">Last 24 hours</span>
+                        </div>
+                        <div class="divide-y divide-gray-200">
+                            ${adminLogs.slice(0, 5).map(function(log) {
+                                var icon = log.action === 'Login' ? '🔐' : 
+                                          log.action === 'Submit Peer Review' ? '⭐' :
+                                          log.action === 'Create Course' ? '📚' :
+                                          log.action === 'User Management' ? '👥' :
+                                          log.action === 'Connect GitHub' ? '🔗' : '📋';
+                                return '<div class="flex items-center p-4 hover:bg-gray-50"><div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-lg">' + icon + '</div><div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900">' + log.user + '</p><p class="text-xs text-gray-500">' + log.action + ' - ' + log.details + '</p></div><div class="text-xs text-gray-400">' + log.time + '</div></div>';
+                            }).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Render charts
+            setTimeout(function() {
+                var ctx1 = document.getElementById('userChart')?.getContext('2d');
+                if (ctx1) {
+                    if (charts.user) charts.user.destroy();
+                    var studentCount = adminUsers.filter(function(u) { return u.role === 'student'; }).length;
+                    var professorCount = adminUsers.filter(function(u) { return u.role === 'professor'; }).length;
+                    charts.user = new Chart(ctx1, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Students', 'Professors'],
+                            datasets: [{
+                                data: [studentCount, professorCount],
+                                backgroundColor: ['#3b82f6', '#8b5cf6'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+                }
+
+                var ctx2 = document.getElementById('courseChart')?.getContext('2d');
+                if (ctx2) {
+                    if (charts.course) charts.course.destroy();
+                    var activeCourses = adminCourses.filter(function(c) { return c.status === 'active'; }).length;
+                    var inactiveCourses = adminCourses.filter(function(c) { return c.status === 'inactive'; }).length;
+                    charts.course = new Chart(ctx2, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Active', 'Inactive'],
+                            datasets: [{
+                                data: [activeCourses, inactiveCourses],
+                                backgroundColor: ['#10b981', '#ef4444'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        // ----- USER MANAGEMENT -----
+        function renderUsers() {
+            var container = document.getElementById('page-content');
+            
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">👥 User Management</h2>
+                        <button onclick="showCreateUserModal()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                            + Add User
+                        </button>
+                    </div>
+
+                    <!-- User Stats -->
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow text-center">
+                            <p class="text-2xl font-bold text-purple-600">${adminUsers.length}</p>
+                            <p class="text-xs text-gray-600">Total Users</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center">
+                            <p class="text-2xl font-bold text-green-600">${adminUsers.filter(u => u.status === 'active').length}</p>
+                            <p class="text-xs text-gray-600">Active</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center">
+                            <p class="text-2xl font-bold text-yellow-600">${adminUsers.filter(u => u.status === 'pending').length}</p>
+                            <p class="text-xs text-gray-600">Pending</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center">
+                            <p class="text-2xl font-bold text-red-600">${adminUsers.filter(u => u.status === 'inactive').length}</p>
+                            <p class="text-xs text-gray-600">Inactive</p>
+                        </div>
+                    </div>
+
+                    <!-- User Table -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b"><h3 class="font-semibold text-gray-800">All Users</h3></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${adminUsers.map(function(u) {
+                                        var statusClass = u.status === 'active' ? 'status-active' : u.status === 'pending' ? 'status-pending' : 'status-inactive';
+                                        var roleIcon = u.role === 'student' ? '🎓' : '👨‍🏫';
+                                        return `
+                                            <tr class="border-t hover:bg-gray-50">
+                                                <td class="px-4 py-2 text-sm font-medium text-gray-900">${u.name}</td>
+                                                <td class="px-4 py-2 text-sm">${u.email}</td>
+                                                <td class="px-4 py-2 text-sm">${roleIcon} ${u.role}</td>
+                                                <td class="px-4 py-2"><span class="status-badge ${statusClass}">${u.status}</span></td>
+                                                <td class="px-4 py-2 text-sm">${u.joined}</td>
+                                                <td class="px-4 py-2">
+                                                    <button onclick="showToast('Editing ${u.name}', 'info')" class="text-blue-600 hover:text-blue-800 text-sm mr-2">✏️</button>
+                                                    <button onclick="deleteUser(${u.id})" class="text-red-600 hover:text-red-800 text-sm">🗑️</button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Create User Modal -->
+                    <div id="createUserModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900">Add New User</h3>
+                                <button onclick="document.getElementById('createUserModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                            </div>
+                            <form onsubmit="createUser(event)">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Full Name</label>
+                                        <input type="text" id="userName" placeholder="e.g., John Doe" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Email</label>
+                                        <input type="email" id="userEmail" placeholder="user@example.com" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Role</label>
+                                        <select id="userRole" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                            <option value="student">Student</option>
+                                            <option value="professor">Professor</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Status</label>
+                                        <select id="userStatus" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                            <option value="active">Active</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="inactive">Inactive</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mt-6 flex space-x-3">
+                                    <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">Add User</button>
+                                    <button type="button" onclick="document.getElementById('createUserModal').classList.add('hidden')" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showCreateUserModal() {
+            document.getElementById('createUserModal').classList.remove('hidden');
+        }
+
+        function createUser(e) {
+            e.preventDefault();
+            var name = document.getElementById('userName').value;
+            var email = document.getElementById('userEmail').value;
+            var role = document.getElementById('userRole').value;
+            var status = document.getElementById('userStatus').value;
+            
+            adminUsers.push({
+                id: Date.now(),
+                name: name,
+                email: email,
+                role: role,
+                status: status,
+                joined: new Date().toISOString().split('T')[0]
+            });
+            
+            document.getElementById('createUserModal').classList.add('hidden');
+            showToast('User ' + name + ' created successfully! ✅', 'success');
+            renderUsers();
+        }
+
+        function deleteUser(id) {
+            if (confirm('Are you sure you want to delete this user?')) {
+                adminUsers = adminUsers.filter(function(u) { return u.id !== id; });
+                showToast('User deleted successfully!', 'success');
+                renderUsers();
+            }
+        }
+
+        // ----- COURSE MANAGEMENT (Admin) -----
+        function renderAdminCourses() {
+            var container = document.getElementById('page-content');
+            
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">📚 Course Management</h2>
+                        <button onclick="showToast('Create course form coming soon!', 'info')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                            + New Course
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${adminCourses.map(function(c) {
+                            var statusColor = c.status === 'active' ? 'status-active' : 'status-inactive';
+                            return `
+                                <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+                                    <div class="bg-gradient-to-r ${c.status === 'active' ? 'from-purple-500 to-purple-600' : 'from-gray-400 to-gray-500'} px-6 py-4">
+                                        <h3 class="text-lg font-semibold text-white">${c.code}</h3>
+                                        <p class="text-purple-100 text-sm">${c.title}</p>
+                                    </div>
+                                    <div class="p-6">
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between"><span class="text-sm text-gray-600">Teacher</span><span class="font-medium">${c.teacher}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-600">Students</span><span class="font-medium">${c.students}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-600">Status</span><span class="status-badge ${statusColor}">${c.status}</span></div>
+                                        </div>
+                                        <div class="mt-4 flex space-x-2">
+                                            <button onclick="showToast('Viewing ${c.code} details', 'info')" class="flex-1 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm transition">
+                                                View Details
+                                            </button>
+                                            <button onclick="showToast('Editing ${c.code}', 'info')" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm transition">✏️</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // ----- AUDIT LOGS -----
+        function renderLogs() {
+            var container = document.getElementById('page-content');
+            
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">📋 Audit Logs</h2>
+                        <button onclick="showToast('Logs exported successfully!', 'success')" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                            📥 Export Logs
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">System Activity Logs</h3>
+                            <span class="text-xs text-gray-500">${adminLogs.length} entries</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Details</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${adminLogs.map(function(log) {
+                                        return `
+                                            <tr class="border-t hover:bg-gray-50">
+                                                <td class="px-4 py-2 text-sm font-medium text-gray-900">${log.user}</td>
+                                                <td class="px-4 py-2 text-sm"><span class="px-2 py-0.5 bg-gray-100 rounded-full text-xs">${log.action}</span></td>
+                                                <td class="px-4 py-2 text-sm text-gray-600">${log.details}</td>
+                                                <td class="px-4 py-2 text-sm text-gray-500">${log.time}</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ----- SYSTEM SETTINGS -----
+        function renderSettings() {
+            var container = document.getElementById('page-content');
+            
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <h2 class="text-2xl font-bold text-gray-800">⚙️ System Settings</h2>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">General Settings</h3>
+                        <form onsubmit="saveSettings(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Site Name</label>
+                                <input type="text" id="siteName" value="${systemSettings.siteName}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="emailVerification" ${systemSettings.emailVerification ? 'checked' : ''} class="h-4 w-4 text-purple-600 rounded border-gray-300">
+                                <label class="ml-2 text-sm text-gray-700">Require Email Verification</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Session Timeout (minutes)</label>
+                                <input type="number" id="sessionTimeout" value="${systemSettings.sessionTimeout}" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Backup Schedule</label>
+                                <select id="backupSchedule" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                    <option value="Daily" ${systemSettings.backupSchedule === 'Daily' ? 'selected' : ''}>Daily</option>
+                                    <option value="Weekly" ${systemSettings.backupSchedule === 'Weekly' ? 'selected' : ''}>Weekly</option>
+                                    <option value="Monthly" ${systemSettings.backupSchedule === 'Monthly' ? 'selected' : ''}>Monthly</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="maintenanceMode" ${systemSettings.maintenanceMode ? 'checked' : ''} class="h-4 w-4 text-purple-600 rounded border-gray-300">
+                                <label class="ml-2 text-sm text-gray-700">Enable Maintenance Mode</label>
+                            </div>
+                            <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                                Save Settings
+                            </button>
+                        </form>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">System Status</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-sm text-gray-600">Database</p>
+                                <p class="text-lg font-semibold text-green-600">✅ Connected</p>
+                            </div>
+                            <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                                <p class="text-sm text-gray-600">API Services</p>
+                                <p class="text-lg font-semibold text-green-600">✅ Operational</p>
+                            </div>
+                            <div class="p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                                <p class="text-sm text-gray-600">Last Backup</p>
+                                <p class="text-lg font-semibold text-yellow-600">🕐 2 hours ago</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function saveSettings(e) {
+            e.preventDefault();
+            systemSettings.siteName = document.getElementById('siteName').value;
+            systemSettings.emailVerification = document.getElementById('emailVerification').checked;
+            systemSettings.sessionTimeout = document.getElementById('sessionTimeout').value;
+            systemSettings.backupSchedule = document.getElementById('backupSchedule').value;
+            systemSettings.maintenanceMode = document.getElementById('maintenanceMode').checked;
+            showToast('Settings saved successfully! ✅', 'success');
+        }
+
+        // ============================================
+        // PAGE NAVIGATION
+        // ============================================
+        function showPage(page) {
+            var links = document.querySelectorAll('.nav-link');
+            for (var i = 0; i < links.length; i++) {
+                links[i].classList.remove('active');
+            }
+            var activeLink = document.querySelector('.nav-link[data-page="' + page + '"]');
+            if (activeLink) activeLink.classList.add('active');
+
+            switch(page) {
+                case 'dashboard': renderDashboard(); break;
+                case 'users': renderUsers(); break;
+                case 'courses': renderAdminCourses(); break;
+                case 'logs': renderLogs(); break;
+                case 'settings': renderSettings(); break;
+                default: renderDashboard();
+            }
+
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            if (!isAuthenticated()) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            var user = getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = (user.first_name || 'Admin') + ' ' + (user.last_name || '');
+                var initials = ((user.first_name || 'A')[0] + (user.last_name || 'D')[0]).toUpperCase();
+                document.getElementById('user-avatar').textContent = initials;
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            document.addEventListener('click', function(e) {
+                var sidebar = document.getElementById('sidebar');
+                var menuBtn = document.getElementById('menuBtn');
+                if (window.innerWidth < 768 && sidebar && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                    sidebar.classList.add('-translate-x-full');
+                }
+            });
+
+            renderDashboard();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

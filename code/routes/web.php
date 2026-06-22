@@ -13,7 +13,17 @@ use App\Http\Controllers\ApiController;
 Route::get('/', function () {
     return view('app');
 });
+// Admin login page
+Route::get('/admin/login.html', function () {
+    $path = public_path("frontend/pages/admin/login.html");
+    return file_exists($path) ? response()->file($path) : view('app');
+});
 
+// Admin dashboard page
+Route::get('/admin/dashboard.html', function () {
+    $path = public_path("frontend/pages/admin/dashboard.html");
+    return file_exists($path) ? response()->file($path) : view('app');
+});
 // Serve public HTML pages (login, register, landing)
 Route::get('/{page}.html', function ($page) {
     $paths = [

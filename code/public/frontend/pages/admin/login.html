@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 card-hover">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="text-5xl mb-4">🔐</div>
+            <h1 class="text-3xl font-bold text-gray-900">Admin Login</h1>
+            <p class="text-gray-600 mt-2">Access the admin dashboard</p>
+        </div>
+
+        <!-- Login Form -->
+        <form id="adminLoginForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Admin Email</label>
+                <input type="email" id="adminEmail" placeholder="admin@groupsync.com" required
+                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="adminPassword" placeholder="••••••••" required
+                       class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+            </div>
+            <button type="submit" id="adminLoginBtn"
+                    class="w-full py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition font-medium text-lg shadow-lg hover:shadow-xl">
+                Login as Admin
+            </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="mt-6">
+            <div class="relative">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-300"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-white text-gray-500">Or</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to User Login -->
+        <div class="mt-6 text-center">
+            <a href="/login.html" class="text-purple-600 hover:text-purple-800 text-sm font-medium transition">
+                ← Back to User Login
+            </a>
+        </div>
+
+        <!-- Demo Credentials -->
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <p class="text-xs text-gray-500 text-center">
+                <span class="font-semibold">Demo Credentials:</span><br>
+                Email: <span class="font-mono text-purple-600">admin@demo.com</span><br>
+                Password: <span class="font-mono text-purple-600">123456</span>
+            </p>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div class="bg-white rounded-lg p-6 text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
+                <p class="mt-4 text-gray-700">Logging in...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // ADMIN LOGIN FUNCTIONALITY
+        // ============================================
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Get form values
+            var email = document.getElementById('adminEmail').value.trim();
+            var password = document.getElementById('adminPassword').value;
+            var btn = document.getElementById('adminLoginBtn');
+            var loadingOverlay = document.getElementById('loadingOverlay');
+
+            // Validation
+            if (!email || !password) {
+                showMessage('Please fill all fields', 'error');
+                return;
+            }
+
+            // Show loading
+            btn.textContent = 'Logging in...';
+            btn.disabled = true;
+            loadingOverlay.classList.remove('hidden');
+
+            try {
+                var response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+
+                var data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Check if user is admin
+                    if (data.user && data.user.role === 'admin') {
+                        // Store token and user data
+                        localStorage.setItem('groupsync_auth_token', data.token);
+                        localStorage.setItem('groupsync_user_data', JSON.stringify(data.user));
+                        
+                        showMessage('Admin login successful! ✅', 'success');
+                        
+                        // Redirect to admin dashboard
+                        setTimeout(function() {
+                            window.location.href = '/admin/dashboard.html';
+                        }, 1000);
+                    } else {
+                        showMessage('Access denied. Admin privileges required.', 'error');
+                    }
+                } else {
+                    showMessage(data.message || 'Invalid admin credentials', 'error');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showMessage('Network error. Please try again.', 'error');
+            } finally {
+                // Hide loading
+                btn.textContent = 'Login as Admin';
+                btn.disabled = false;
+                loadingOverlay.classList.add('hidden');
+            }
+        });
+
+        // ============================================
+        // MESSAGE SYSTEM
+        // ============================================
+        function showMessage(message, type) {
+            var container = document.getElementById('message-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'message-container';
+                container.className = 'fixed top-4 right-4 z-50 space-y-2 max-w-md';
+                document.body.appendChild(container);
+            }
+
+            var colors = {
+                success: 'bg-green-50 border-green-400 text-green-800',
+                error: 'bg-red-50 border-red-400 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                info: 'bg-blue-50 border-blue-400 text-blue-800'
+            };
+            var icons = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
+
+            var toast = document.createElement('div');
+            toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 ' + colors[type];
+            toast.innerHTML = '<div class="flex items-center"><span class="text-lg mr-2">' + icons[type] + '</span><p class="text-sm flex-1">' + message + '</p><button class="ml-2 text-gray-400 hover:text-gray-600" onclick="this.parentElement.parentElement.remove()">&times;</button></div>';
+            container.appendChild(toast);
+
+            setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
+            setTimeout(function() { if (toast.parentNode) toast.remove(); }, 5000);
+        }
+    </script>
+</body>
+</html>
