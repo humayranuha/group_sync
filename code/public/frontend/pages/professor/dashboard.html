@@ -11,12 +11,55 @@
         .card-hover { transition: all 0.3s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
         .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
+        .nav-link { cursor: pointer; transition: all 0.2s ease; }
+        .nav-link:hover { background-color: #f3f4f6; }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .modal-overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.5); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 999; 
+        }
+        .modal-box {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 30px;
+            position: relative;
+            animation: modalFade 0.3s ease;
+        }
+        @keyframes modalFade {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: #333; }
+        .edit-input { width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+        .edit-input:focus { outline: none; border-color: #3b82f6; ring: 2px solid #3b82f6; }
+        .empty-state { text-align: center; padding: 40px 20px; }
+        .empty-state .icon { font-size: 64px; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 20px; font-weight: 600; color: #1f2937; margin-bottom: 8px; }
+        .empty-state p { color: #6b7280; font-size: 14px; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div id="professor-dashboard">
+    <div id="app">
         <!-- Sidebar -->
         <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
             <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center">
@@ -24,19 +67,19 @@
                 <span class="ml-2 text-xs text-blue-200">Professor</span>
             </div>
             <nav class="p-4 space-y-1">
-                <a href="#" data-page="dashboard" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="#" onclick="showPage('dashboard')" class="nav-link active flex items-center px-3 py-2 rounded-lg" data-page="dashboard">
                     <span class="text-xl mr-3">📊</span><span>Dashboard</span>
                 </a>
-                <a href="#" data-page="courses" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="#" onclick="showPage('courses')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="courses">
                     <span class="text-xl mr-3">📚</span><span>Course Management</span>
                 </a>
-                <a href="#" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="#" onclick="showPage('analytics')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="analytics">
                     <span class="text-xl mr-3">📈</span><span>Group Analytics</span>
                 </a>
-                <a href="#" data-page="evaluation" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="#" onclick="showPage('evaluation')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="evaluation">
                     <span class="text-xl mr-3">🎓</span><span>Student Evaluation</span>
                 </a>
-                <a href="#" data-page="reports" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="#" onclick="showPage('reports')" class="nav-link flex items-center px-3 py-2 rounded-lg" data-page="reports">
                     <span class="text-xl mr-3">📄</span><span>PDF Reports</span>
                 </a>
             </nav>
@@ -47,7 +90,7 @@
                         <p id="user-name" class="text-sm font-medium text-gray-800">Professor</p>
                         <p class="text-xs text-gray-500">Professor</p>
                     </div>
-                    <button id="logoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+                    <button onclick="logoutUser()" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
                 </div>
             </div>
         </aside>
@@ -62,12 +105,7 @@
         <!-- Main Content -->
         <main class="md:ml-64 p-6">
             <div id="page-content">
-                <div class="flex items-center justify-center h-64">
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                        <p class="text-gray-600 mt-4">Loading GroupSync...</p>
-                    </div>
-                </div>
+                <!-- Pages will be loaded here -->
             </div>
         </main>
     </div>
@@ -76,318 +114,976 @@
         // ============================================
         // CONFIGURATION
         // ============================================
-        const API_BASE = '/api';
-        const STORAGE_KEYS = {
+        var STORAGE_KEYS = {
             TOKEN: 'groupsync_auth_token',
             USER: 'groupsync_user_data'
         };
 
         // ============================================
-        // TOAST SYSTEM
-        // ============================================
-        class ToastManager {
-            constructor() {
-                this.container = null;
-                this.init();
-            }
-            init() {
-                this.container = document.createElement('div');
-                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
-                document.body.appendChild(this.container);
-            }
-            show(message, type = 'info', duration = 5000) {
-                const toast = document.createElement('div');
-                const colors = {
-                    success: 'bg-green-50 border-green-400 text-green-800',
-                    error: 'bg-red-50 border-red-400 text-red-800',
-                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
-                    info: 'bg-blue-50 border-blue-400 text-blue-800'
-                };
-                const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ' + colors[type];
-                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm">' + message + '</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>';
-                this.container.appendChild(toast);
-                setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
-                toast.querySelector('button').onclick = function() { toast.remove(); };
-                setTimeout(function() { if(toast.parentNode) toast.remove(); }, duration);
-                return toast;
-            }
-            success(m) { this.show(m, 'success'); }
-            error(m) { this.show(m, 'error'); }
-            warning(m) { this.show(m, 'warning'); }
-            info(m) { this.show(m, 'info'); }
-        }
-
-        // ============================================
-        // LOADING SYSTEM
-        // ============================================
-        class LoadingManager {
-            show() {
-                if(this.loader) return;
-                this.loader = document.createElement('div');
-                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
-                document.body.appendChild(this.loader);
-            }
-            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
-        }
-
-        // ============================================
         // AUTH SERVICE
         // ============================================
-        var AuthService = {
-            getToken: function() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
-            getUser: function() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
-            isAuthenticated: function() { return !!this.getToken(); },
-            logout: function() {
-                localStorage.removeItem(STORAGE_KEYS.TOKEN);
-                localStorage.removeItem(STORAGE_KEYS.USER);
-                window.location.href = '/login.html';
-            }
-        };
+        function getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); }
+        function getUser() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; }
+        function isAuthenticated() { return !!getToken(); }
 
-        // ============================================
-        // API SERVICE
-        // ============================================
-        var ApiService = {
-            request: async function(endpoint, options) {
-                options = options || {};
-                var token = AuthService.getToken();
-                var headers = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                };
-                if (token) {
-                    headers['Authorization'] = 'Bearer ' + token;
-                }
-                var response = await fetch(API_BASE + endpoint, {
-                    method: options.method || 'GET',
-                    headers: headers,
-                    body: options.body || null
-                });
-                var data = await response.json();
-                if (!response.ok) {
-                    if (response.status === 401) AuthService.logout();
-                    throw new Error(data.message || 'Request failed');
-                }
-                return data;
-            },
-            get: function(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post: function(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
-        };
-
-        // ============================================
-        // GLOBALS
-        // ============================================
-        window.toast = new ToastManager();
-        window.loading = new LoadingManager();
-        window.api = ApiService;
-        window.auth = AuthService;
-
-        // ============================================
-        // PROFESSOR DASHBOARD LOGIC
-        // ============================================
-        var currentPage = 'dashboard';
-        var charts = {};
-
-        function getInitials(name) {
-            if (!name) return 'PR';
-            var parts = name.split(' ');
-            return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+        function logoutUser() {
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            window.location.href = '/login.html';
         }
 
-        function renderDashboard() {
-            var user = AuthService.getUser();
-            var container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow p-6 text-white">
-                        <h2 class="text-2xl font-bold">Welcome back, Prof. ${user?.first_name || 'Professor'}! 👋</h2>
-                        <p class="text-blue-100">Here's your academic overview</p>
-                    </div>
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        function showToast(message, type) {
+            type = type || 'info';
+            var colors = {
+                success: 'bg-green-50 border-green-400 text-green-800',
+                error: 'bg-red-50 border-red-400 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                info: 'bg-blue-50 border-blue-400 text-blue-800'
+            };
+            var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+            
+            var container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                document.body.appendChild(container);
+            }
+            
+            var toast = document.createElement('div');
+            toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 max-w-md ' + colors[type];
+            toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm flex-1">' + message + '</p><button class="ml-2 text-gray-400 hover:text-gray-600" onclick="this.parentElement.parentElement.remove()">&times;</button></div>';
+            container.appendChild(toast);
+            setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
+            setTimeout(function() { if(toast.parentNode) toast.remove(); }, 5000);
+        }
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Active Courses</p><p class="text-2xl font-bold" id="total-courses">0</p></div>
-                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Total Students</p><p class="text-2xl font-bold" id="total-students">0</p></div>
-                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Groups</p><p class="text-2xl font-bold" id="total-groups">0</p></div>
-                        <div class="bg-white p-5 rounded-lg shadow"><p class="text-sm text-gray-600">Free Riders</p><p class="text-2xl font-bold text-red-600" id="free-riders">0</p></div>
-                    </div>
+        // ============================================
+        // DATA STORE (Professor-specific)
+        // ============================================
+        var professorData = {
+            courses: [],
+            students: [],
+            groups: [],
+            alerts: []
+        };
 
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="font-semibold text-gray-800 mb-4">Risk Indicators by Course</h3>
-                        <canvas id="riskChart" height="250"></canvas>
-                    </div>
+        function getProfessorId() {
+            var user = getUser();
+            return user ? user.id : 'default';
+        }
 
-                    <div class="bg-white rounded-lg shadow overflow-hidden">
-                        <div class="px-6 py-4 border-b"><h3 class="font-semibold text-gray-800">Recent Alerts</h3></div>
-                        <div id="alerts-list" class="divide-y"><div class="p-6 text-center text-gray-500">No alerts</div></div>
+        function loadProfessorData() {
+            var profId = getProfessorId();
+            var key = 'professor_data_' + profId;
+            var stored = localStorage.getItem(key);
+            
+            if (stored) {
+                try {
+                    var parsed = JSON.parse(stored);
+                    professorData.courses = parsed.courses || [];
+                    professorData.students = parsed.students || [];
+                    professorData.groups = parsed.groups || [];
+                    professorData.alerts = parsed.alerts || [];
+                } catch(e) {
+                    console.error('Error loading data:', e);
+                }
+            } else {
+                professorData.courses = [];
+                professorData.students = [];
+                professorData.groups = [];
+                professorData.alerts = [];
+                saveProfessorData();
+            }
+        }
+
+        function saveProfessorData() {
+            var profId = getProfessorId();
+            var key = 'professor_data_' + profId;
+            localStorage.setItem(key, JSON.stringify({
+                courses: professorData.courses,
+                students: professorData.students,
+                groups: professorData.groups,
+                alerts: professorData.alerts
+            }));
+        }
+
+        // ============================================
+        // CHART VARIABLES
+        // ============================================
+        var charts = {};
+
+        // ============================================
+        // COURSE DETAILS MODAL
+        // ============================================
+        var currentEditingCourseId = null;
+
+        function showCourseDetails(courseId) {
+            var course = professorData.courses.find(function(c) { return c.id === courseId; });
+            if (!course) {
+                showToast('Course not found', 'error');
+                return;
+            }
+
+            var courseStudents = professorData.students.slice(0, course.students_count || 3);
+            
+            var modalHTML = `
+                <div class="modal-overlay" id="courseModal" onclick="if(event.target===this) closeModal()">
+                    <div class="modal-box">
+                        <span class="modal-close" onclick="closeModal()">&times;</span>
+                        
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-900">${course.code}</h2>
+                                <p class="text-gray-600">${course.title}</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-sm font-medium ${course.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                ${course.is_active ? '✅ Active' : '❌ Inactive'}
+                            </span>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                            <p class="text-gray-700">${course.description || 'No description available.'}</p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div class="bg-blue-50 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-blue-600">${course.semester}</p>
+                                <p class="text-xs text-gray-500">Semester</p>
+                            </div>
+                            <div class="bg-green-50 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-green-600">${course.students_count}</p>
+                                <p class="text-xs text-gray-500">Total Students</p>
+                            </div>
+                            <div class="bg-purple-50 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-purple-600">${course.groups_count}</p>
+                                <p class="text-xs text-gray-500">Total Groups</p>
+                            </div>
+                            <div class="bg-yellow-50 rounded-lg p-3 text-center">
+                                <p class="text-2xl font-bold text-yellow-600">${Math.round(course.students_count / (course.groups_count || 1))}</p>
+                                <p class="text-xs text-gray-500">Avg Group Size</p>
+                            </div>
+                        </div>
+
+                        <h4 class="font-semibold text-gray-800 mb-3">Students Enrolled</h4>
+                        <div class="max-h-40 overflow-y-auto">
+                            ${courseStudents.length > 0 ? courseStudents.map(function(s) {
+                                var badgeClass = s.classification === 'Active' ? 'bg-green-100 text-green-800' :
+                                                s.classification === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
+                                                s.classification === 'Passive' ? 'bg-orange-100 text-orange-800' :
+                                                'bg-red-100 text-red-800';
+                                return '<div class="flex items-center justify-between py-2 border-b border-gray-100"><span class="text-sm">' + s.name + '</span><span class="px-2 py-0.5 rounded-full text-xs ' + badgeClass + '">' + s.classification + '</span></div>';
+                            }).join('') : '<p class="text-gray-500 text-sm">No students enrolled yet.</p>'}
+                        </div>
+
+                        <div class="mt-4 flex space-x-3">
+                            <button onclick="closeModal(); openEditCourse(${course.id})" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                ✏️ Edit Course
+                            </button>
+                            <button onclick="closeModal(); generateCourseReportById(${course.id})" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                📄 Generate Report
+                            </button>
+                            <button onclick="closeModal()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                Close
+                            </button>
+                        </div>
                     </div>
                 </div>
             `;
-            loadDashboardStats();
+
+            var existingModal = document.getElementById('courseModal');
+            if (existingModal) existingModal.remove();
+            document.body.insertAdjacentHTML('beforeend', modalHTML);
         }
 
-        async function loadDashboardStats() {
-            try {
-                var user = AuthService.getUser();
-                var data = await ApiService.get('/courses/professor/' + user.id);
-                var courses = data.courses || [];
-                
-                document.getElementById('total-courses').textContent = courses.length || 0;
-                var totalStudents = 0;
-                var totalGroups = 0;
-                for (var i = 0; i < courses.length; i++) {
-                    totalStudents += courses[i].students_count || 0;
-                    totalGroups += courses[i].groups_count || 0;
-                }
-                document.getElementById('total-students').textContent = totalStudents;
-                document.getElementById('total-groups').textContent = totalGroups;
-                document.getElementById('free-riders').textContent = Math.floor(totalStudents * 0.05);
+        function closeModal() {
+            var modal = document.getElementById('courseModal');
+            if (modal) modal.remove();
+            var editModal = document.getElementById('editCourseModal');
+            if (editModal) editModal.remove();
+        }
 
-                var ctx = document.getElementById('riskChart')?.getContext('2d');
-                if (ctx && courses.length > 0) {
-                    if (charts.risk) charts.risk.destroy();
-                    charts.risk = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: courses.map(function(c) { return c.code; }),
-                            datasets: [
-                                { label: 'High Risk', data: courses.map(function() { return Math.floor(Math.random() * 3); }), backgroundColor: '#ef4444' },
-                                { label: 'Medium Risk', data: courses.map(function() { return Math.floor(Math.random() * 4); }), backgroundColor: '#f59e0b' },
-                                { label: 'Low Risk', data: courses.map(function() { return Math.floor(Math.random() * 20) + 10; }), backgroundColor: '#10b981' }
-                            ]
-                        },
-                        options: { responsive: true, maintainAspectRatio: true, scales: { x: { stacked: true }, y: { stacked: true } } }
-                    });
-                }
-            } catch (error) {
-                console.error('Error loading stats:', error);
+        // ============================================
+        // EDIT COURSE FUNCTION
+        // ============================================
+        function openEditCourse(courseId) {
+            var course = professorData.courses.find(function(c) { return c.id === courseId; });
+            if (!course) {
+                showToast('Course not found', 'error');
+                return;
             }
+            currentEditingCourseId = courseId;
+
+            var editHTML = `
+                <div class="modal-overlay" id="editCourseModal" onclick="if(event.target===this) closeEditModal()">
+                    <div class="modal-box">
+                        <span class="modal-close" onclick="closeEditModal()">&times;</span>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-4">✏️ Edit Course: ${course.code}</h2>
+                        
+                        <form id="editCourseForm" onsubmit="saveCourseChanges(event)">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Course Code</label>
+                                    <input type="text" id="editCode" value="${course.code}" class="edit-input" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Course Title</label>
+                                    <input type="text" id="editTitle" value="${course.title}" class="edit-input" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Semester</label>
+                                    <select id="editSemester" class="edit-input">
+                                        <option value="Fall 2024" ${course.semester === 'Fall 2024' ? 'selected' : ''}>Fall 2024</option>
+                                        <option value="Spring 2025" ${course.semester === 'Spring 2025' ? 'selected' : ''}>Spring 2025</option>
+                                        <option value="Summer 2025" ${course.semester === 'Summer 2025' ? 'selected' : ''}>Summer 2025</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                                    <textarea id="editDescription" rows="3" class="edit-input">${course.description || ''}</textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Status</label>
+                                    <select id="editStatus" class="edit-input">
+                                        <option value="true" ${course.is_active ? 'selected' : ''}>Active</option>
+                                        <option value="false" ${!course.is_active ? 'selected' : ''}>Inactive</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Students Count</label>
+                                    <input type="number" id="editStudents" value="${course.students_count}" class="edit-input" min="0">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Groups Count</label>
+                                    <input type="number" id="editGroups" value="${course.groups_count}" class="edit-input" min="0">
+                                </div>
+                            </div>
+                            <div class="mt-6 flex space-x-3">
+                                <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">💾 Save Changes</button>
+                                <button type="button" onclick="closeEditModal()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            var existingEditModal = document.getElementById('editCourseModal');
+            if (existingEditModal) existingEditModal.remove();
+            document.body.insertAdjacentHTML('beforeend', editHTML);
+        }
+
+        function closeEditModal() {
+            var modal = document.getElementById('editCourseModal');
+            if (modal) modal.remove();
+        }
+
+        function saveCourseChanges(e) {
+            e.preventDefault();
+            var course = professorData.courses.find(function(c) { return c.id === currentEditingCourseId; });
+            if (!course) {
+                showToast('Course not found', 'error');
+                return;
+            }
+
+            course.code = document.getElementById('editCode').value;
+            course.title = document.getElementById('editTitle').value;
+            course.semester = document.getElementById('editSemester').value;
+            course.description = document.getElementById('editDescription').value;
+            course.is_active = document.getElementById('editStatus').value === 'true';
+            course.students_count = parseInt(document.getElementById('editStudents').value) || 0;
+            course.groups_count = parseInt(document.getElementById('editGroups').value) || 0;
+
+            closeEditModal();
+            saveProfessorData();
+            showToast('✅ Course ' + course.code + ' updated successfully!', 'success');
+            var currentPage = document.querySelector('.nav-link.active')?.dataset?.page || 'courses';
+            showPage(currentPage);
+        }
+
+        // ============================================
+        // GENERATE REPORT FUNCTION
+        // ============================================
+        function generateCourseReportById(courseId) {
+            var course = professorData.courses.find(function(c) { return c.id === courseId; });
+            if (!course) {
+                showToast('❌ Course not found!', 'error');
+                return;
+            }
+
+            showToast('📄 Generating report for ' + course.code + '...', 'info');
+            
+            var reportContent = 
+                '============================================\n' +
+                '      GROUPSYNC - COURSE REPORT            \n' +
+                '============================================\n\n' +
+                'Course Code: ' + course.code + '\n' +
+                'Course Title: ' + course.title + '\n' +
+                'Semester: ' + course.semester + '\n' +
+                'Status: ' + (course.is_active ? 'Active ✅' : 'Inactive ❌') + '\n\n' +
+                '----------------------------\n' +
+                '     STATISTICS\n' +
+                '----------------------------\n' +
+                'Total Students: ' + course.students_count + '\n' +
+                'Total Groups: ' + course.groups_count + '\n' +
+                'Average Group Size: ' + Math.round(course.students_count / (course.groups_count || 1)) + '\n\n' +
+                '----------------------------\n' +
+                '     DESCRIPTION\n' +
+                '----------------------------\n' +
+                (course.description || 'No description available.') + '\n\n' +
+                '----------------------------\n' +
+                '     GENERATED\n' +
+                '----------------------------\n' +
+                'Date: ' + new Date().toLocaleDateString() + '\n' +
+                'Time: ' + new Date().toLocaleTimeString() + '\n' +
+                '============================================\n';
+            
+            try {
+                var blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = course.code + '_Report_' + new Date().toISOString().slice(0,10) + '.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+                showToast('✅ Report for ' + course.code + ' downloaded successfully!', 'success');
+            } catch (error) {
+                showToast('❌ Error generating report. Please try again.', 'error');
+            }
+        }
+
+        // ============================================
+        // COURSE MANAGEMENT FUNCTIONS
+        // ============================================
+
+        function showCreateCourseModal() {
+            var modal = document.getElementById('createCourseModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+            } else {
+                renderCourses();
+                setTimeout(function() {
+                    var modal2 = document.getElementById('createCourseModal');
+                    if (modal2) modal2.classList.remove('hidden');
+                }, 100);
+            }
+        }
+
+        function closeCreateCourseModal() {
+            var modal = document.getElementById('createCourseModal');
+            if (modal) {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function createCourse(e) {
+            e.preventDefault();
+            var code = document.getElementById('courseCode').value.trim();
+            var title = document.getElementById('courseTitle').value.trim();
+            var semester = document.getElementById('courseSemester').value;
+            var description = document.getElementById('courseDescription').value.trim();
+            
+            if (!code || !title) {
+                showToast('Please fill in all required fields', 'warning');
+                return;
+            }
+            
+            var exists = professorData.courses.some(function(c) { return c.code === code; });
+            if (exists) {
+                showToast('Course code "' + code + '" already exists!', 'error');
+                return;
+            }
+            
+            professorData.courses.push({
+                id: Date.now(),
+                code: code,
+                title: title,
+                semester: semester,
+                description: description || 'No description provided.',
+                students_count: 0,
+                groups_count: 0,
+                is_active: true
+            });
+            
+            saveProfessorData();
+            closeCreateCourseModal();
+            
+            document.getElementById('courseCode').value = '';
+            document.getElementById('courseTitle').value = '';
+            document.getElementById('courseDescription').value = '';
+            
+            showToast('Course ' + code + ' created successfully! ✅', 'success');
+            renderCourses();
         }
 
         function renderCourses() {
             var container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800">Course Management</h2>
-                        <button id="createCourseBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">+ New Course</button>
+            
+            if (professorData.courses.length === 0) {
+                container.innerHTML = `
+                    <div class="space-y-6 animate-fade-in">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-800">📚 Course Management</h2>
+                            <button onclick="showCreateCourseModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                + New Course
+                            </button>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-12 text-center">
+                            <div class="text-6xl mb-4">📖</div>
+                            <h3 class="text-2xl font-semibold text-gray-800">No Courses Created</h3>
+                            <p class="text-gray-500 mt-2">Create your first course to get started with GroupSync.</p>
+                            <button onclick="showCreateCourseModal()" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                + Create Course
+                            </button>
+                        </div>
                     </div>
-                    <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="col-span-full text-center py-12 text-gray-500">Loading courses...</div>
-                    </div>
-                </div>
-            `;
-            loadCourses();
-        }
-
-        async function loadCourses() {
-            try {
-                var user = AuthService.getUser();
-                var data = await ApiService.get('/courses/professor/' + user.id);
-                var container = document.getElementById('courses-grid');
-                var courses = data.courses || [];
-                
-                if (courses.length > 0) {
-                    var html = '';
-                    for (var i = 0; i < courses.length; i++) {
-                        var c = courses[i];
-                        html += `
-                            <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
-                                <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4">
-                                    <h3 class="text-lg font-semibold text-white">${c.code}</h3>
-                                    <p class="text-blue-100 text-sm">${c.title}</p>
-                                </div>
-                                <div class="p-6">
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between"><span class="text-sm text-gray-600">Semester</span><span class="font-medium">${c.semester}</span></div>
-                                        <div class="flex justify-between"><span class="text-sm text-gray-600">Students</span><span class="font-medium">${c.students_count || 0}</span></div>
-                                        <div class="flex justify-between"><span class="text-sm text-gray-600">Groups</span><span class="font-medium">${c.groups_count || 0}</span></div>
-                                    </div>
-                                    <button class="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">View Details</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">📚</div><h3 class="text-lg font-medium">No Courses Yet</h3><p class="text-gray-500">Create your first course to get started.</p></div>';
-                }
-            } catch (error) {
-                console.error('Error loading courses:', error);
-                window.toast.error('Failed to load courses');
+                `;
+                return;
             }
-        }
 
-        function renderAnalytics() {
-            document.getElementById('page-content').innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Group Analytics</h2>
-                    <div class="bg-white rounded-lg shadow p-6 text-center py-12">
-                        <div class="text-6xl mb-4">📊</div>
-                        <h3 class="text-xl font-semibold">Analytics Dashboard</h3>
-                        <p class="text-gray-500 mt-2">Select a course and group to view analytics</p>
-                        <div class="mt-4 flex justify-center space-x-4">
-                            <select class="px-4 py-2 border rounded-md"><option>Select Course</option></select>
-                            <select class="px-4 py-2 border rounded-md"><option>Select Group</option></select>
-                            <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">View</button>
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">📚 Course Management</h2>
+                        <button onclick="showCreateCourseModal()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                            + New Course
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${professorData.courses.map(function(course) {
+                            var statusColor = course.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                            var statusText = course.is_active ? 'Active' : 'Inactive';
+                            var gradient = course.is_active ? 'from-blue-500 to-blue-600' : 'from-gray-400 to-gray-500';
+                            return `
+                                <div class="bg-white rounded-lg shadow overflow-hidden card-hover">
+                                    <div class="bg-gradient-to-r ${gradient} px-6 py-4">
+                                        <h3 class="text-lg font-semibold text-white">${course.code}</h3>
+                                        <p class="text-blue-100 text-sm">${course.title}</p>
+                                    </div>
+                                    <div class="p-6">
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between"><span class="text-sm text-gray-600">Semester</span><span class="font-medium">${course.semester}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-600">Students</span><span class="font-medium">${course.students_count || 0}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-600">Groups</span><span class="font-medium">${course.groups_count || 0}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-600">Status</span><span class="px-2 py-0.5 rounded-full text-xs ${statusColor}">${statusText}</span></div>
+                                        </div>
+                                        <div class="mt-4 flex space-x-2">
+                                            <button onclick="showCourseDetails(${course.id})" class="flex-1 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition">
+                                                📋 View Details
+                                            </button>
+                                            <button onclick="showToast('Editing ${course.code}', 'info')" class="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm transition">
+                                                ✏️
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <!-- Create Course Modal -->
+                    <div id="createCourseModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+                        <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6" onclick="event.stopPropagation()">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900">Create New Course</h3>
+                                <button onclick="closeCreateCourseModal()" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                            </div>
+                            <form onsubmit="createCourse(event)">
+                                <div class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Course Code</label>
+                                        <input type="text" id="courseCode" placeholder="e.g., CS501" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Course Title</label>
+                                        <input type="text" id="courseTitle" placeholder="e.g., Advanced Programming" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Semester</label>
+                                        <select id="courseSemester" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                            <option value="Fall 2024">Fall 2024</option>
+                                            <option value="Spring 2025">Spring 2025</option>
+                                            <option value="Summer 2025">Summer 2025</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Description</label>
+                                        <textarea id="courseDescription" rows="3" placeholder="Course description..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                                    </div>
+                                </div>
+                                <div class="mt-6 flex space-x-3">
+                                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">Create Course</button>
+                                    <button type="button" onclick="closeCreateCourseModal()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
             `;
         }
 
+        // ============================================
+        // PAGE FUNCTIONS
+        // ============================================
+
+        function renderDashboard() {
+            var container = document.getElementById('page-content');
+            var user = getUser();
+            
+            var totalStudents = 0;
+            var totalGroups = 0;
+            for (var i = 0; i < professorData.courses.length; i++) {
+                totalStudents += professorData.courses[i].students_count || 0;
+                totalGroups += professorData.courses[i].groups_count || 0;
+            }
+            var freeRiders = professorData.students.filter(function(s) { return s.classification === 'Free Rider'; }).length;
+            var activeCourses = professorData.courses.filter(function(c) { return c.is_active; }).length;
+            var hasData = professorData.courses.length > 0 || professorData.students.length > 0;
+
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow p-6 text-white">
+                        <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Professor'}! 👋</h2>
+                        <p class="text-blue-100 mt-1">${hasData ? "Here's your academic overview" : "Start by creating your first course!"}</p>
+                    </div>
+
+                    ${!hasData ? `
+                        <div class="bg-white rounded-lg shadow p-12 text-center">
+                            <div class="text-6xl mb-4">📚</div>
+                            <h3 class="text-2xl font-semibold text-gray-800">No Courses Yet</h3>
+                            <p class="text-gray-500 mt-2">Create your first course to start tracking student contributions.</p>
+                            <button onclick="showPage('courses')" class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+                                + Create Course
+                            </button>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showPage('courses')">
+                                <p class="text-sm text-gray-600">Active Courses</p>
+                                <p class="text-2xl font-bold text-blue-600 mt-1">${activeCourses}</p>
+                                <p class="text-xs text-gray-500 mt-1">${activeCourses > 0 ? 'Active courses' : 'No active courses'}</p>
+                            </div>
+                            <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showPage('evaluation')">
+                                <p class="text-sm text-gray-600">Total Students</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1">${totalStudents}</p>
+                                <p class="text-xs text-gray-500 mt-1">${totalStudents > 0 ? 'Across all courses' : 'No students enrolled'}</p>
+                            </div>
+                            <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showPage('analytics')">
+                                <p class="text-sm text-gray-600">Groups</p>
+                                <p class="text-2xl font-bold text-gray-900 mt-1">${totalGroups}</p>
+                                <p class="text-xs text-gray-500 mt-1">${totalGroups > 0 ? 'Active groups' : 'No groups created'}</p>
+                            </div>
+                            <div class="bg-white p-5 rounded-lg shadow card-hover cursor-pointer" onclick="showPage('evaluation')">
+                                <p class="text-sm text-gray-600">Free Riders</p>
+                                <p class="text-2xl font-bold ${freeRiders > 0 ? 'text-red-600' : 'text-green-600'} mt-1">${freeRiders}</p>
+                                <p class="text-xs ${freeRiders > 0 ? 'text-red-600' : 'text-green-600'} mt-1">${freeRiders > 0 ? '⚠ Requires attention' : '✅ No free riders'}</p>
+                            </div>
+                        </div>
+
+                        ${activeCourses > 0 ? `
+                            <div class="bg-white rounded-lg shadow p-6">
+                                <h3 class="font-semibold text-gray-800 mb-4">Risk Indicators by Course</h3>
+                                <canvas id="riskChart" height="250"></canvas>
+                            </div>
+                        ` : ''}
+
+                        ${professorData.alerts.length > 0 ? `
+                            <div class="bg-white rounded-lg shadow overflow-hidden">
+                                <div class="px-6 py-4 border-b flex justify-between items-center">
+                                    <h3 class="font-semibold text-gray-800">Recent Alerts</h3>
+                                    <span class="text-xs text-gray-500">${professorData.alerts.length} alerts</span>
+                                </div>
+                                <div id="alerts-list" class="divide-y">
+                                    ${professorData.alerts.map(function(alert) {
+                                        var color = alert.severity === 'High' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
+                                        var icon = alert.severity === 'High' ? '⚠️' : '⚡';
+                                        var bg = alert.severity === 'High' ? 'bg-red-100' : 'bg-yellow-100';
+                                        return '<div class="flex items-center p-4 hover:bg-gray-50 cursor-pointer" onclick="showToast(\'' + alert.message + '\', \'' + alert.severity.toLowerCase() + '\')"><div class="flex-shrink-0"><div class="w-10 h-10 rounded-full ' + bg + ' flex items-center justify-center"><span class="text-lg">' + icon + '</span></div></div><div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900">' + alert.student_name + '</p><p class="text-xs text-gray-500">' + alert.message + '</p></div><div><span class="px-2 py-1 text-xs rounded-full ' + color + '">' + alert.severity + '</span></div></div>';
+                                    }).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                    `}
+                </div>
+            `;
+
+            if (activeCourses > 0) {
+                setTimeout(function() {
+                    var ctx = document.getElementById('riskChart')?.getContext('2d');
+                    if (ctx) {
+                        if (charts.risk) charts.risk.destroy();
+                        var activeCourseCodes = professorData.courses.filter(function(c) { return c.is_active; }).map(function(c) { return c.code; });
+                        var highRiskData = professorData.courses.filter(function(c) { return c.is_active; }).map(function() { return 0; });
+                        var mediumRiskData = professorData.courses.filter(function(c) { return c.is_active; }).map(function() { return 0; });
+                        var lowRiskData = professorData.courses.filter(function(c) { return c.is_active; }).map(function(c) { return c.students_count || 0; });
+                        
+                        charts.risk = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: activeCourseCodes,
+                                datasets: [
+                                    { label: 'High Risk', data: highRiskData, backgroundColor: '#ef4444' },
+                                    { label: 'Medium Risk', data: mediumRiskData, backgroundColor: '#f59e0b' },
+                                    { label: 'Low Risk', data: lowRiskData, backgroundColor: '#10b981' }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                scales: {
+                                    x: { stacked: true },
+                                    y: { stacked: true, title: { display: true, text: 'Students' } }
+                                },
+                                plugins: { legend: { position: 'top' } }
+                            }
+                        });
+                    }
+                }, 100);
+            }
+        }
+
+        // ----- GROUP ANALYTICS -----
+        function renderGroupAnalytics() {
+            var container = document.getElementById('page-content');
+            
+            if (professorData.groups.length === 0) {
+                container.innerHTML = `
+                    <div class="space-y-6 animate-fade-in">
+                        <h2 class="text-2xl font-bold text-gray-800">📈 Group Analytics</h2>
+                        <div class="bg-white rounded-lg shadow p-12 text-center">
+                            <div class="text-6xl mb-4">👥</div>
+                            <h3 class="text-2xl font-semibold text-gray-800">No Groups Yet</h3>
+                            <p class="text-gray-500 mt-2">Groups will appear here once students create them for your courses.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            var totalContributions = 0;
+            var totalMembers = 0;
+            professorData.groups.forEach(function(g) {
+                totalContributions += g.contribution_percentage || 0;
+                totalMembers += g.members_count || 0;
+            });
+            var avgActivity = professorData.groups.length > 0 ? Math.round(totalContributions / professorData.groups.length) : 0;
+            
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <h2 class="text-2xl font-bold text-gray-800">📈 Group Analytics</h2>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-white p-5 rounded-lg shadow card-hover">
+                            <p class="text-sm text-gray-600">Total Groups</p>
+                            <p class="text-2xl font-bold text-blue-600">${professorData.groups.length}</p>
+                            <p class="text-xs text-gray-500 mt-1">Across all courses</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow card-hover">
+                            <p class="text-sm text-gray-600">Total Members</p>
+                            <p class="text-2xl font-bold text-green-600">${totalMembers}</p>
+                            <p class="text-xs text-gray-500 mt-1">Students in groups</p>
+                        </div>
+                        <div class="bg-white p-5 rounded-lg shadow card-hover">
+                            <p class="text-sm text-gray-600">Average Activity</p>
+                            <p class="text-2xl font-bold text-purple-600">${avgActivity}%</p>
+                            <p class="text-xs text-gray-500 mt-1">Team average</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b"><h3 class="font-semibold text-gray-800">Group List</h3></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Group Name</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Course</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Members</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Activity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${professorData.groups.map(function(g) {
+                                        return `
+                                            <tr class="border-t hover:bg-gray-50 cursor-pointer" onclick="showToast('Viewing ${g.name} details', 'info')">
+                                                <td class="px-4 py-2 text-sm font-medium text-gray-900">${g.name}</td>
+                                                <td class="px-4 py-2 text-sm">${g.course_name || 'N/A'}</td>
+                                                <td class="px-4 py-2 text-sm">${g.members_count || 0}</td>
+                                                <td class="px-4 py-2 text-sm">${g.contribution_percentage || 0}%</td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ----- STUDENT EVALUATION -----
         function renderEvaluation() {
-            document.getElementById('page-content').innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Student Evaluation</h2>
+            var container = document.getElementById('page-content');
+            
+            if (professorData.students.length === 0) {
+                container.innerHTML = `
+                    <div class="space-y-6 animate-fade-in">
+                        <h2 class="text-2xl font-bold text-gray-800">🎓 Student Evaluation</h2>
+                        <div class="bg-white rounded-lg shadow p-12 text-center">
+                            <div class="text-6xl mb-4">👨‍🎓</div>
+                            <h3 class="text-2xl font-semibold text-gray-800">No Students Yet</h3>
+                            <p class="text-gray-500 mt-2">Students will appear here once they enroll in your courses.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            var activeCount = professorData.students.filter(function(s) { return s.classification === 'Active'; }).length;
+            var moderateCount = professorData.students.filter(function(s) { return s.classification === 'Moderate'; }).length;
+            var passiveCount = professorData.students.filter(function(s) { return s.classification === 'Passive' || s.classification === 'Free Rider'; }).length;
+            var total = professorData.students.length;
+            
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <h2 class="text-2xl font-bold text-gray-800">🎓 Student Evaluation</h2>
+                    
                     <div class="grid grid-cols-4 gap-4">
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-blue-600">85</p><p class="text-xs text-gray-600">Total Students</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-green-600">48</p><p class="text-xs text-gray-600">Active</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-yellow-600">25</p><p class="text-xs text-gray-600">Moderate</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-red-600">12</p><p class="text-xs text-gray-600">At Risk</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('Total Students: ${total}', 'info')">
+                            <p class="text-2xl font-bold text-blue-600">${total}</p>
+                            <p class="text-xs text-gray-600">Total Students</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('Active Students: ${activeCount}', 'success')">
+                            <p class="text-2xl font-bold text-green-600">${activeCount}</p>
+                            <p class="text-xs text-gray-600">Active</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('Moderate Students: ${moderateCount}', 'warning')">
+                            <p class="text-2xl font-bold text-yellow-600">${moderateCount}</p>
+                            <p class="text-xs text-gray-600">Moderate</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow card-hover cursor-pointer" onclick="showToast('Students at Risk: ${passiveCount}', 'error')">
+                            <p class="text-2xl font-bold text-red-600">${passiveCount}</p>
+                            <p class="text-xs text-gray-600">At Risk</p>
+                        </div>
                     </div>
-                    <div class="bg-white rounded-lg shadow p-6 text-center py-12">
-                        <div class="text-6xl mb-4">🎓</div>
-                        <h3 class="text-xl font-semibold">Student Performance</h3>
-                        <p class="text-gray-500">Select a course to view student performance</p>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b"><h3 class="font-semibold text-gray-800">Student Performance List</h3></div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Classification</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Activity Score</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${professorData.students.map(function(s) {
+                                        var badgeClass = s.classification === 'Active' ? 'bg-green-100 text-green-800' :
+                                                        s.classification === 'Moderate' ? 'bg-yellow-100 text-yellow-800' :
+                                                        s.classification === 'Passive' ? 'bg-orange-100 text-orange-800' :
+                                                        'bg-red-100 text-red-800';
+                                        return `
+                                            <tr class="border-t hover:bg-gray-50">
+                                                <td class="px-4 py-2 text-sm font-medium text-gray-900">${s.name}</td>
+                                                <td class="px-4 py-2 text-sm">${s.email}</td>
+                                                <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${badgeClass}">${s.classification}</span></td>
+                                                <td class="px-4 py-2">
+                                                    <div class="flex items-center">
+                                                        <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
+                                                            <div class="bg-blue-600 h-2 rounded-full" style="width: ${s.activity_score}%"></div>
+                                                        </div>
+                                                        <span>${s.activity_score}%</span>
+                                                    </div>
+                                                </td>
+                                                <td class="px-4 py-2">
+                                                    <button onclick="showToast('Viewing ${s.name} details', 'info')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">View</button>
+                                                    <button onclick="showToast('Generating report for ${s.name}', 'info')" class="text-green-600 hover:text-green-800 text-sm font-medium ml-2">📄</button>
+                                                </td>
+                                            </tr>
+                                        `;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             `;
         }
 
+        // ----- PDF REPORTS -----
         function renderReports() {
-            document.getElementById('page-content').innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Generate Reports</h2>
+            var container = document.getElementById('page-content');
+            
+            container.innerHTML = `
+                <div class="space-y-6 animate-fade-in">
+                    <h2 class="text-2xl font-bold text-gray-800">📄 PDF Reports</h2>
+                    
                     <div class="grid md:grid-cols-3 gap-6">
-                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover"><div class="text-4xl mb-4">👨‍🎓</div><h3 class="text-lg font-semibold">Student Report</h3><p class="text-sm text-gray-500">Generate individual student performance report</p><button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Generate PDF</button></div>
-                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover"><div class="text-4xl mb-4">👥</div><h3 class="text-lg font-semibold">Group Report</h3><p class="text-sm text-gray-500">Generate comprehensive group report</p><button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Generate PDF</button></div>
-                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover"><div class="text-4xl mb-4">📚</div><h3 class="text-lg font-semibold">Course Report</h3><p class="text-sm text-gray-500">Generate overview course report</p><button class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Generate PDF</button></div>
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover">
+                            <div class="text-5xl mb-4">👨‍🎓</div>
+                            <h3 class="text-lg font-semibold">Student Report</h3>
+                            <p class="text-sm text-gray-500 mt-1">Generate individual student performance report</p>
+                            <div class="mt-4">
+                                <select id="studentReportSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Student</option>
+                                    ${professorData.students.map(function(s) {
+                                        return '<option value="' + s.id + '">' + s.name + '</option>';
+                                    }).join('')}
+                                </select>
+                            </div>
+                            <button onclick="generateStudentReport()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition w-full">
+                                Generate PDF
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover">
+                            <div class="text-5xl mb-4">👥</div>
+                            <h3 class="text-lg font-semibold">Group Report</h3>
+                            <p class="text-sm text-gray-500 mt-1">Generate comprehensive group report</p>
+                            <div class="mt-4">
+                                <select id="groupReportSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Group</option>
+                                    ${professorData.groups.map(function(g) {
+                                        return '<option value="' + g.id + '">' + g.name + '</option>';
+                                    }).join('')}
+                                </select>
+                            </div>
+                            <button onclick="generateGroupReport()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition w-full">
+                                Generate PDF
+                            </button>
+                        </div>
+
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover">
+                            <div class="text-5xl mb-4">📚</div>
+                            <h3 class="text-lg font-semibold">Course Report</h3>
+                            <p class="text-sm text-gray-500 mt-1">Generate overview course report</p>
+                            <div class="mt-4">
+                                <select id="courseReportSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select Course</option>
+                                    ${professorData.courses.map(function(c) {
+                                        return '<option value="' + c.id + '">' + c.code + ' - ' + c.title + '</option>';
+                                    }).join('')}
+                                </select>
+                            </div>
+                            <button onclick="generateCourseReport()" class="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm transition w-full">
+                                Generate PDF
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b">
+                            <h3 class="font-semibold text-gray-800">Recently Generated Reports</h3>
+                        </div>
+                        <div id="recentReports" class="divide-y divide-gray-200">
+                            <div class="p-6 text-center text-gray-500">No reports generated yet</div>
+                        </div>
                     </div>
                 </div>
             `;
         }
 
         // ============================================
-        // NAVIGATION
+        // REPORT GENERATION FUNCTIONS
         // ============================================
-        function navigate(page) {
-            currentPage = page;
+        var recentReports = [];
+
+        function generateStudentReport() {
+            var select = document.getElementById('studentReportSelect');
+            var studentId = select.value;
+            if (!studentId) {
+                showToast('Please select a student first', 'warning');
+                return;
+            }
+            var student = professorData.students.find(function(s) { return s.id == studentId; });
+            showToast('Generating report for ' + student.name + '...', 'info');
+            setTimeout(function() {
+                addRecentReport('Student Report', student.name);
+                showToast('✅ Student report generated successfully!', 'success');
+            }, 1500);
+        }
+
+        function generateGroupReport() {
+            var select = document.getElementById('groupReportSelect');
+            var groupId = select.value;
+            if (!groupId) {
+                showToast('Please select a group first', 'warning');
+                return;
+            }
+            var group = professorData.groups.find(function(g) { return g.id == groupId; });
+            showToast('Generating report for ' + group.name + '...', 'info');
+            setTimeout(function() {
+                addRecentReport('Group Report', group.name);
+                showToast('✅ Group report generated successfully!', 'success');
+            }, 1500);
+        }
+
+        function generateCourseReport() {
+            var select = document.getElementById('courseReportSelect');
+            var courseId = select.value;
+            if (!courseId) {
+                showToast('Please select a course first', 'warning');
+                return;
+            }
+            var course = professorData.courses.find(function(c) { return c.id == courseId; });
+            showToast('Generating report for ' + course.code + '...', 'info');
+            setTimeout(function() {
+                addRecentReport('Course Report', course.code);
+                showToast('✅ Course report generated successfully!', 'success');
+            }, 1500);
+        }
+
+        function addRecentReport(type, name) {
+            recentReports.unshift({
+                type: type,
+                name: name,
+                time: new Date().toLocaleString()
+            });
+            updateRecentReports();
+        }
+
+        function updateRecentReports() {
+            var container = document.getElementById('recentReports');
+            if (recentReports.length === 0) {
+                container.innerHTML = '<div class="p-6 text-center text-gray-500">No reports generated yet</div>';
+                return;
+            }
+            container.innerHTML = recentReports.map(function(r) {
+                return '<div class="flex items-center justify-between p-4 hover:bg-gray-50"><div><p class="text-sm font-medium text-gray-900">' + r.type + ': ' + r.name + '</p><p class="text-xs text-gray-500">Generated ' + r.time + '</p></div><button onclick="showToast(\'Downloading ' + r.type + '\', \'info\')" class="text-blue-600 hover:text-blue-800 text-sm font-medium">Download</button></div>';
+            }).join('');
+        }
+
+        // ============================================
+        // PAGE NAVIGATION
+        // ============================================
+        function showPage(page) {
             var links = document.querySelectorAll('.nav-link');
             for (var i = 0; i < links.length; i++) {
                 links[i].classList.remove('active');
             }
             var activeLink = document.querySelector('.nav-link[data-page="' + page + '"]');
             if (activeLink) activeLink.classList.add('active');
-            
+
             switch(page) {
                 case 'dashboard': renderDashboard(); break;
                 case 'courses': renderCourses(); break;
-                case 'analytics': renderAnalytics(); break;
+                case 'analytics': renderGroupAnalytics(); break;
                 case 'evaluation': renderEvaluation(); break;
                 case 'reports': renderReports(); break;
                 default: renderDashboard();
+            }
+
+            if (window.innerWidth < 768) {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
             }
         }
 
@@ -395,42 +1091,33 @@
         // INITIALIZATION
         // ============================================
         function init() {
-            if (!AuthService.isAuthenticated()) {
+            if (!isAuthenticated()) {
                 window.location.href = '/login.html';
                 return;
             }
 
-            var user = AuthService.getUser();
+            var user = getUser();
             if (user) {
                 document.getElementById('user-name').textContent = 'Prof. ' + (user.first_name || 'Professor') + ' ' + (user.last_name || '');
-                document.getElementById('user-avatar').textContent = getInitials((user.first_name || 'P') + ' ' + (user.last_name || 'R'));
+                var initials = ((user.first_name || 'P')[0] + (user.last_name || 'R')[0]).toUpperCase();
+                document.getElementById('user-avatar').textContent = initials;
             }
+
+            loadProfessorData();
 
             document.getElementById('menuBtn')?.addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
 
-            var links = document.querySelectorAll('.nav-link');
-            for (var i = 0; i < links.length; i++) {
-                links[i].addEventListener('click', function(e) {
-                    e.preventDefault();
-                    var page = this.dataset.page;
-                    if (window.innerWidth < 768) {
-                        document.getElementById('sidebar').classList.add('-translate-x-full');
-                    }
-                    navigate(page);
-                });
-            }
-
-            document.getElementById('logoutBtn')?.addEventListener('click', function() {
-                AuthService.logout();
-            });
-            
-            document.getElementById('createCourseBtn')?.addEventListener('click', function() {
-                window.toast.info('Create course form coming soon!');
+            document.addEventListener('click', function(e) {
+                var sidebar = document.getElementById('sidebar');
+                var menuBtn = document.getElementById('menuBtn');
+                if (window.innerWidth < 768 && sidebar && !sidebar.contains(e.target) && !menuBtn.contains(e.target)) {
+                    sidebar.classList.add('-translate-x-full');
+                }
             });
 
-            navigate('dashboard');
+            renderDashboard();
         }
 
         document.addEventListener('DOMContentLoaded', init);
