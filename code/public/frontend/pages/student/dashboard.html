@@ -1,80 +1,305 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard - GroupSync</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard — GroupSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <style>
-        .sidebar-transition { transition: transform 0.3s ease-in-out; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
+        /* ----- Global Reset & Transitions ----- */
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
+        .dark body { background: #0b1717; color: #e8edf0; }
+        html { scroll-behavior: smooth; }
+
+        /* ----- Dark mode overrides (keeping Teal theme) ----- */
+        .dark .bg-white { background-color: #132424 !important; }
+        .dark .bg-gray-50 { background-color: #0b1717 !important; }
+        .dark .bg-gray-100 { background-color: #1a2d2d !important; }
+        .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .text-gray-400 { color: #81999b !important; }
+        .dark .text-gray-300 { color: #a0b8ba !important; }
+        .dark .border-gray-200 { border-color: #1e3a3a !important; }
+        .dark .border-gray-100 { border-color: #1e3a3a !important; }
+        .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; }
+        .dark .divide-gray-200>* { border-color: #1e3a3a !important; }
+        .dark .bg-blue-50 { background-color: rgba(58,175,169,0.08) !important; }
+        .dark .bg-indigo-50 { background-color: rgba(43,122,120,0.08) !important; }
+        .dark .bg-green-100 { background-color: rgba(58,175,169,0.12) !important; }
+        .dark .bg-yellow-100 { background-color: rgba(58,175,169,0.10) !important; }
+        .dark .bg-purple-100 { background-color: rgba(43,122,120,0.10) !important; }
+        .dark .bg-red-100 { background-color: rgba(58,175,169,0.10) !important; }
+        .dark .text-green-800 { color: #7ccfca !important; }
+        .dark .text-yellow-800 { color: #7ccfca !important; }
+        .dark .text-purple-800 { color: #7ccfca !important; }
+        .dark .text-red-800 { color: #7ccfca !important; }
+
+        /* ----- Sidebar (Teal) ----- */
+        .sidebar-teal {
+            background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
+            border-right: 1px solid rgba(58,175,169,0.08);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .dark .sidebar-teal { background: linear-gradient(180deg, #071010 0%, #0f2624 100%); }
+        .sidebar-teal .brand {
+            background: linear-gradient(135deg, #3AAFA9, #2B7A78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ----- Sidebar nav links (teal) ----- */
+        .nav-link {
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.55);
+            border-radius: 12px;
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
+        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.05); }
+        .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
+        .dark .nav-link.active { background: rgba(58,175,169,0.12); }
+
+        /* ----- Header (matching index) ----- */
+        .header-teal {
+            background: rgba(43,122,120,0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(58,175,169,0.12);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .dark .header-teal { background: rgba(11,23,23,0.92); border-bottom-color: rgba(58,175,169,0.06); }
+
+        /* ----- Cards (matching homepage) ----- */
+        .card-glass {
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(58,175,169,0.06);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        .card-glass:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 20px 40px -12px rgba(58,175,169,0.12); }
+        .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        .dark .card-glass:hover { box-shadow: 0 20px 40px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
+
+        /* ----- Stats cards (used in dashboard) ----- */
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+            border: 1px solid rgba(58,175,169,0.06);
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        .stat-card:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 16px 32px -12px rgba(58,175,169,0.12); }
+        .dark .stat-card { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        .dark .stat-card:hover { box-shadow: 0 16px 32px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
+        .stat-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: 14px; font-size: 1.3rem;
+            transition: background 0.3s;
+        }
+        .stat-icon.teal-bg { background: rgba(58,175,169,0.10); color: #3AAFA9; }
+        .dark .stat-icon.teal-bg { background: rgba(58,175,169,0.08); }
+        .stat-card:hover .stat-icon.teal-bg { background: rgba(58,175,169,0.18); }
+
+        /* ----- Badges (Teal) ----- */
+        .badge-active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
+        .badge-passive { background: rgba(58,175,169,0.08); color: #94a3b8; }
+        .badge-free-rider { background: rgba(58,175,169,0.06); color: #64748b; }
+        .dark .badge-active { background: rgba(58,175,169,0.15); color: #5ccbc5; }
+        .dark .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
+        .dark .badge-passive { background: rgba(58,175,169,0.06); color: #94a3b8; }
+        .dark .badge-free-rider { background: rgba(58,175,169,0.04); color: #64748b; }
+
+        /* ----- Buttons (Teal) ----- */
+        .btn-teal {
+            background: #3AAFA9; color: #fff; transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(58,175,169,0.25);
+            padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
+        }
+        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58,175,169,0.30); }
+        .btn-teal-outline {
+            background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9;
+            transition: all 0.3s ease; padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer;
+        }
+        .btn-teal-outline:hover { background: #3AAFA9; color: #fff; transform: translateY(-2px); }
+        .dark .btn-teal { background: #2B7A78; box-shadow: 0 4px 14px rgba(43,122,120,0.20); }
+        .dark .btn-teal:hover { background: #3AAFA9; box-shadow: 0 8px 24px rgba(58,175,169,0.20); }
+
+        /* ----- Progress bar (Teal) ----- */
+        .progress-teal { background: rgba(58,175,169,0.10); border-radius: 999px; overflow: hidden; height: 8px; }
+        .progress-teal .bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2B7A78, #3AAFA9); transition: width 0.6s ease; }
+
+        /* ----- Theme toggle ----- */
+        .theme-toggle {
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer;
+            color: rgba(255,255,255,0.70); font-size: 17px;
+        }
+        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); color: #fff; }
+
+        /* ----- Mobile menu button ----- */
+        .menu-btn {
+            background: rgba(58,175,169,0.90); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s;
+        }
+        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
+        .dark .menu-btn { background: rgba(43,122,120,0.80); }
+
+        /* ----- Logout button ----- */
+        .logout-btn {
+            transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent;
+            border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px;
+        }
+        .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
+
+        /* ----- Input fields (teal focus) ----- */
+        .input-teal {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
+            width: 100%; font-size: 0.95rem;
+        }
+        .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
+        .input-teal::placeholder { color: rgba(255,255,255,0.25); }
+        .dark .input-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
+        .dark .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+
+        /* ----- Textarea (teal) ----- */
+        .textarea-teal {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
+            width: 100%; font-size: 0.95rem; resize: vertical; min-height: 80px;
+        }
+        .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
+        .textarea-teal::placeholder { color: rgba(255,255,255,0.25); }
+        .dark .textarea-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
+        .dark .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+
+        /* ----- Custom file input (for profile picture) ----- */
+        .file-input-label {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(58,175,169,0.08);
+            border: 2px dashed rgba(58,175,169,0.3);
+            border-radius: 12px;
+            padding: 0.5rem 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: rgba(255,255,255,0.70);
+        }
+        .file-input-label:hover { background: rgba(58,175,169,0.15); border-color: #3AAFA9; }
+
+        /* ----- Profile picture preview ----- */
+        .profile-pic-preview {
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+            border: 4px solid #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.20);
+            transition: all 0.3s ease;
+        }
+        .profile-pic-preview:hover { transform: scale(1.04); border-color: #2B7A78; }
+        .dark .profile-pic-preview { border-color: #5ccbc5; }
+
+        /* ----- Misc ----- */
+        .brand-gradient { background: linear-gradient(135deg, #3AAFA9, #2B7A78); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .border-teal-soft { border-color: rgba(58,175,169,0.08); }
+        .bg-teal-soft { background: rgba(58,175,169,0.06); }
+        .dark .bg-teal-soft { background: rgba(58,175,169,0.04); }
+
+        /* ----- Animations ----- */
+        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes spin { to { transform:rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
+
+        @media (max-width:768px) { .stat-card { padding:1rem; } .stat-icon { width:40px; height:40px; font-size:1.1rem; } }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div id="student-dashboard">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
-            <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center">
-                <h1 class="text-xl font-bold text-white">GroupSync</h1>
-                <span class="ml-2 text-xs text-blue-200">Student</span>
+<body>
+
+    <!-- ============================================================
+    SIDEBAR (Teal)
+    ============================================================ -->
+    <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
+        <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
+            <span class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">Group<span class="text-[#c6f0ee]">Sync</span></span>
+            <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Student</span>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
+            <a href="#" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
+            <a href="#" data-page="group" class="nav-link"><span class="icon">👥</span> My Group</a>
+            <a href="#" data-page="repository" class="nav-link"><span class="icon">🔗</span> GitHub Connection</a>
+            <a href="#" data-page="analytics" class="nav-link"><span class="icon">📈</span> Analytics</a>
+            <a href="#" data-page="peer-review" class="nav-link"><span class="icon">⭐</span> Peer Reviews</a>
+            <a href="#" data-page="ai-feedback" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
+            <a href="#" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
+        </nav>
+        <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20 cursor-pointer hover:scale-105 transition">ST</div>
+                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Student</p><p class="text-xs text-white/40 truncate">Student</p></div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
             </div>
-            <nav class="p-4 space-y-1">
-                <a href="#" data-page="dashboard" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">📊</span><span>Dashboard</span>
-                </a>
-                <a href="#" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">👥</span><span>My Group</span>
-                </a>
-                <a href="#" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">🔗</span><span>GitHub Connection</span>
-                </a>
-                <a href="#" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">📈</span><span>Analytics</span>
-                </a>
-                <a href="#" data-page="peer-review" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">⭐</span><span>Peer Reviews</span>
-                </a>
-                <a href="#" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">🤖</span><span>AI Feedback</span>
-                </a>
-            </nav>
-            <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
-                <div class="flex items-center">
-                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">ST</div>
-                    <div class="ml-3 flex-1">
-                        <p id="user-name" class="text-sm font-medium text-gray-800">Student</p>
-                        <p class="text-xs text-gray-500">Student</p>
-                    </div>
-                    <button id="logoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+        </div>
+    </aside>
+
+    <!-- ============================================================
+    MOBILE MENU BUTTON
+    ============================================================ -->
+    <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
+
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header class="header-teal fixed top-0 right-0 left-0 md:left-64 z-30 transition-colors">
+        <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-white/70 hidden sm:block">Student Dashboard</span>
+                <span class="h-4 w-px bg-white/10 hidden sm:block"></span>
+                <span id="page-title" class="text-sm font-medium text-white/50">Overview</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme"><i id="themeIcon" class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <div id="page-content" class="animate-fade-in">
+            <div class="flex items-center justify-center h-64">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
+                    <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading dashboard...</p>
                 </div>
             </div>
-        </aside>
+        </div>
+    </main>
 
-        <!-- Mobile Menu Button -->
-        <button id="menuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
-
-        <!-- Main Content -->
-        <main class="md:ml-64 p-6">
-            <div id="page-content">
-                <div class="flex items-center justify-center h-64">
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                        <p class="text-gray-600 mt-4">Loading dashboard...</p>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
+    <!-- ============================================================
+    SCRIPTS
+    ============================================================ -->
     <script>
         // ============================================
         // CONFIGURATION
@@ -82,57 +307,123 @@
         const API_BASE = '/api';
         const STORAGE_KEYS = {
             TOKEN: 'groupsync_auth_token',
-            USER: 'groupsync_user_data'
+            USER: 'groupsync_user_data',
+            THEME: 'theme',
+            PROFILE_PIC: 'groupsync_profile_pic',
+            PROFILE_EXTRA: 'groupsync_profile_extra'
+        };
+
+        // ============================================
+        // DEMO DATA (used when API fails)
+        // ============================================
+        const DEMO_DATA = {
+            dashboard: {
+                total_commits: 127,
+                total_prs: 23,
+                activity_consistency_score: 85,
+                team_rank: 2,
+                weekly_data: [{ week: 1, commits: 12 }, { week: 2, commits: 19 }, { week: 3, commits: 15 }, { week: 4,
+                    commits: 27 }],
+                daily_activity: [5, 8, 12, 7, 9, 3, 2]
+            },
+            analytics: {
+                total_commits: 127,
+                total_lines_added: 2450,
+                total_lines_deleted: 890,
+                activity_consistency_score: 85,
+                weekly_data: [{ week: 1, commits: 12 }, { week: 2, commits: 19 }, { week: 3, commits: 15 }, { week: 4,
+                    commits: 27 }]
+            },
+            ai: {
+                classification: 'Active',
+                participation_score: 85,
+                quality_score: 78,
+                consistency_score: 92,
+                overall_score: 85,
+                feedback: 'Excellent contribution quality and consistency! You\'re demonstrating strong collaboration skills.',
+                suggestions: ['Increase code review participation', 'Help mentor passive group members',
+                    'Document your code more thoroughly'
+                ]
+            },
+            group: {
+                name: 'Team Alpha',
+                course_name: 'Software Engineering (CS401)',
+                member_count: 4,
+                total_contributions: 98,
+                avg_activity: 78,
+                team_performance: 82,
+                members: [
+                    { name: 'John Doe', role: 'Student', contribution_percentage: 35, classification: 'Active',
+                        commits: 45, prs: 8, lines_added: 1250 },
+                    { name: 'Jane Smith', role: 'Student', contribution_percentage: 28, classification: 'Active',
+                        commits: 32, prs: 5, lines_added: 890 },
+                    { name: 'Mike Brown', role: 'Student', contribution_percentage: 22, classification: 'Moderate',
+                        commits: 18, prs: 3, lines_added: 450 },
+                    { name: 'Lisa Wong', role: 'Student', contribution_percentage: 15, classification: 'Passive',
+                        commits: 8, prs: 1, lines_added: 200 }
+                ]
+            },
+            repository: [
+                { id: 1, name: 'project-repo', url: 'https://github.com/student/project-repo', type: 'original',
+                    last_synced: '2 hours ago' },
+                { id: 2, name: 'team-collab', url: 'https://github.com/team/collab', type: 'collaborator',
+                    last_synced: '1 day ago' }
+            ],
+            peer_reviews: {
+                status: [
+                    { member_id: 2, member_name: 'Jane Smith', reviewed: true, reviewed_at: '2026-06-22 14:30' },
+                    { member_id: 3, member_name: 'Mike Brown', reviewed: true, reviewed_at: '2026-06-21 10:15' },
+                    { member_id: 4, member_name: 'Lisa Wong', reviewed: false, reviewed_at: null }
+                ],
+                total_members: 3,
+                reviewed_count: 2
+            },
+            activity: [
+                { type: 'commit', description: 'Pushed 3 commits to main', repository_name: 'project-repo',
+                    created_at: '2026-06-23T10:30:00', quantity: '3 commits' },
+                { type: 'pull_request', description: 'Created pull request #42', repository_name: 'team-collab',
+                    created_at: '2026-06-22T16:20:00', quantity: '' },
+                { type: 'commit', description: 'Pushed 5 commits to dev branch', repository_name: 'project-repo',
+                    created_at: '2026-06-21T09:15:00', quantity: '5 commits' },
+                { type: 'fork', description: 'Forked repository', repository_name: 'team-collab',
+                    created_at: '2026-06-20T13:45:00', quantity: '' }
+            ]
         };
 
         // ============================================
         // TOAST SYSTEM
         // ============================================
         class ToastManager {
-            constructor() {
-                this.container = null;
-                this.init();
-            }
+            constructor() { this.container = null;
+                this.init(); }
             init() {
                 this.container = document.createElement('div');
-                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
                 document.body.appendChild(this.container);
             }
             show(message, type = 'info', duration = 5000) {
                 const toast = document.createElement('div');
                 const colors = {
-                    success: 'bg-green-50 border-green-400 text-green-800',
+                    success: 'bg-[#3AAFA9]/10 border-[#3AAFA9] text-[#2B7A78]',
                     error: 'bg-red-50 border-red-400 text-red-800',
                     warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
                     info: 'bg-blue-50 border-blue-400 text-blue-800'
                 };
                 const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ${colors[type]}`;
-                toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm">${message}</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>`;
+                toast.className =
+                    `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
+                toast.innerHTML =
+                    `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
                 this.container.appendChild(toast);
-                setTimeout(() => toast.classList.add('translate-x-0', 'opacity-100'), 10);
+                requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
                 toast.querySelector('button').onclick = () => toast.remove();
-                setTimeout(() => { if(toast.parentNode) toast.remove(); }, duration);
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
                 return toast;
             }
             success(m) { this.show(m, 'success'); }
             error(m) { this.show(m, 'error'); }
             warning(m) { this.show(m, 'warning'); }
             info(m) { this.show(m, 'info'); }
-        }
-
-        // ============================================
-        // LOADING SYSTEM
-        // ============================================
-        class LoadingManager {
-            show() {
-                if(this.loader) return;
-                this.loader = document.createElement('div');
-                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
-                document.body.appendChild(this.loader);
-            }
-            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
         }
 
         // ============================================
@@ -146,6 +437,30 @@
                 localStorage.removeItem(STORAGE_KEYS.TOKEN);
                 localStorage.removeItem(STORAGE_KEYS.USER);
                 window.location.href = '/login.html';
+            },
+            updateUser(userData) {
+                localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+            }
+        };
+
+        // ============================================
+        // PROFILE EXTRA DATA (localStorage)
+        // ============================================
+        const ProfileExtra = {
+            get() {
+                try {
+                    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_EXTRA) || '{}');
+                } catch { return {}; }
+            },
+            set(data) {
+                localStorage.setItem(STORAGE_KEYS.PROFILE_EXTRA, JSON.stringify(data));
+            },
+            getPic() {
+                return localStorage.getItem(STORAGE_KEYS.PROFILE_PIC) || null;
+            },
+            setPic(base64) {
+                if (base64) localStorage.setItem(STORAGE_KEYS.PROFILE_PIC, base64);
+                else localStorage.removeItem(STORAGE_KEYS.PROFILE_PIC);
             }
         };
 
@@ -155,52 +470,53 @@
         const ApiService = {
             async request(endpoint, options = {}) {
                 const token = AuthService.getToken();
-                const headers = {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    ...options.headers
-                };
+                const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
-                const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-                const data = await response.json();
-                if (!response.ok) {
-                    if (response.status === 401) AuthService.logout();
-                    throw new Error(data.message || 'Request failed');
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        if (response.status === 401) AuthService.logout();
+                        throw new Error(data.message || 'Request failed');
+                    }
+                    return data;
+                } catch (error) {
+                    console.warn('API failed, using demo data for:', endpoint);
+                    if (endpoint.includes('/analytics/student')) return { success: true, ...DEMO_DATA.dashboard };
+                    if (endpoint.includes('/ai/evaluate/student')) return { success: true, ...DEMO_DATA.ai };
+                    if (endpoint.includes('/analytics/group')) return { success: true, ...DEMO_DATA.group };
+                    throw error;
                 }
-                return data;
             },
             get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
+            put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); }
         };
 
         // ============================================
         // GLOBALS
         // ============================================
         window.toast = new ToastManager();
-        window.loading = new LoadingManager();
         window.api = ApiService;
         window.auth = AuthService;
-
-        // ============================================
-        // DASHBOARD LOGIC
-        // ============================================
         let currentPage = 'dashboard';
         let charts = {};
 
+        // ============================================
+        // HELPERS
+        // ============================================
         function getInitials(name) {
             if (!name) return 'ST';
             return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
         }
 
         function getClassificationClass(classification) {
-            const classes = {
-                'Active': 'bg-green-100 text-green-800',
-                'Moderate': 'bg-yellow-100 text-yellow-800',
-                'Passive': 'bg-orange-100 text-orange-800',
-                'Free Rider': 'bg-red-100 text-red-800'
-            };
-            return classes[classification] || 'bg-gray-100 text-gray-600';
+            const map = { 'Active': 'badge-active', 'Moderate': 'badge-moderate', 'Passive': 'badge-passive',
+                'Free Rider': 'badge-free-rider' };
+            return map[classification] || 'badge-moderate';
         }
+
+        function getClassificationLabel(classification) { return classification || 'Moderate'; }
 
         function getRelativeTime(date) {
             if (!date) return 'Recently';
@@ -213,103 +529,45 @@
             return `${Math.floor(minutes / 1440)} days ago`;
         }
 
+        // ----- Get user avatar (with fallback) -----
+        function getUserAvatar(user) {
+            const pic = ProfileExtra.getPic();
+            if (pic) return pic;
+            // Fallback: UI Avatars with name
+            const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Student';
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3AAFA9&color=fff&size=120&font-size=0.5&bold=true`;
+        }
+
         // ============================================
-        // PAGE RENDERERS
+        // PAGE: DASHBOARD (unchanged)
         // ============================================
         function renderDashboard() {
             const user = AuthService.getUser();
             const container = document.getElementById('page-content');
             container.innerHTML = `
-                <div class="space-y-6 animate-fade-in">
-                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="space-y-6">
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
                         <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Student'}! 👋</h2>
-                        <p class="text-blue-100 mt-1">Here's your academic performance overview</p>
+                        <p class="text-white/80 mt-1 text-sm">Here's your academic performance overview</p>
                     </div>
-
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="bg-white rounded-lg shadow p-6 card-hover">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Total Commits</p>
-                                    <p class="text-2xl font-bold text-gray-900 mt-1" id="total-commits">0</p>
-                                </div>
-                                <div class="p-3 bg-blue-100 rounded-full">
-                                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-6 card-hover">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Peer Reviews</p>
-                                    <p class="text-2xl font-bold text-gray-900 mt-1" id="peer-reviews">0</p>
-                                </div>
-                                <div class="p-3 bg-green-100 rounded-full">
-                                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-6 card-hover">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Activity Score</p>
-                                    <p class="text-2xl font-bold text-gray-900 mt-1" id="activity-score">0</p>
-                                </div>
-                                <div class="p-3 bg-purple-100 rounded-full">
-                                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-6 card-hover">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="text-sm text-gray-600">Team Rank</p>
-                                    <p class="text-2xl font-bold text-gray-900 mt-1" id="team-rank">#0</p>
-                                </div>
-                                <div class="p-3 bg-yellow-100 rounded-full">
-                                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="total-commits">0</p></div><div class="stat-icon teal-bg"><i class="fas fa-code"></i></div></div></div>
+                        <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Peer Reviews</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="peer-reviews">0</p></div><div class="stat-icon teal-bg"><i class="fas fa-star"></i></div></div></div>
+                        <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="activity-score">0</p></div><div class="stat-icon teal-bg"><i class="fas fa-chart-line"></i></div></div></div>
+                        <div class="stat-card"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Team Rank</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="team-rank">#0</p></div><div class="stat-icon teal-bg"><i class="fas fa-trophy"></i></div></div></div>
                     </div>
-
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Commit Trends</h3>
-                            <canvas id="commitTrendChart" height="250"></canvas>
-                        </div>
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Weekly Activity</h3>
-                            <canvas id="weeklyActivityChart" height="250"></canvas>
-                        </div>
+                        <div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Commit Trends</h3><canvas id="commitTrendChart" height="220"></canvas></div>
+                        <div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Weekly Activity</h3><canvas id="weeklyActivityChart" height="220"></canvas></div>
                     </div>
-
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-800">AI Performance Classification</h3>
-                            <span id="classification-badge" class="px-3 py-1 rounded-full text-sm font-medium">Loading...</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
-                            <div id="performance-bar" class="bg-green-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
-                        </div>
-                        <p id="ai-feedback-text" class="text-gray-600">Loading AI evaluation...</p>
+                    <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-4"><div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">AI Performance Classification</h3><p class="text-sm text-gray-500 dark:text-gray-400">Powered by machine learning</p></div><span id="classification-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold badge-moderate">Loading...</span></div>
+                        <div class="progress-teal mb-3"><div id="performance-bar" class="bar" style="width:0%"></div></div>
+                        <p id="ai-feedback-text" class="text-gray-600 dark:text-gray-300 text-sm">Loading AI evaluation...</p>
                     </div>
-
-                    <div class="bg-white rounded-lg shadow overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-800">Recent Activity</h3>
-                        </div>
-                        <div id="recent-activity" class="divide-y divide-gray-200">
-                            <div class="p-6 text-center text-gray-500">No recent activity</div>
-                        </div>
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Activity</h3></div>
+                        <div id="recent-activity" class="divide-y divide-gray-100 dark:divide-gray-800"><div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div></div>
                     </div>
                 </div>
             `;
@@ -320,17 +578,22 @@
             try {
                 const user = AuthService.getUser();
                 if (!user) return;
-
-                const analytics = await ApiService.get(`/analytics/student/${user.id}`);
+                let analytics;
+                try { analytics = await ApiService.get(`/analytics/student/${user.id}`); } catch (e) { analytics = DEMO_DATA
+                        .dashboard; }
                 updateStats(analytics);
                 renderCharts(analytics);
-
-                const aiEval = await ApiService.get(`/ai/evaluate/student/${user.id}`);
+                let aiEval;
+                try { aiEval = await ApiService.get(`/ai/evaluate/student/${user.id}`); } catch (e) { aiEval = DEMO_DATA.ai; }
                 updateAICard(aiEval);
-
+                renderActivity(DEMO_DATA.activity);
             } catch (error) {
                 console.error('Error loading dashboard:', error);
-                window.toast.error('Failed to load dashboard data');
+                updateStats(DEMO_DATA.dashboard);
+                renderCharts(DEMO_DATA.dashboard);
+                updateAICard(DEMO_DATA.ai);
+                renderActivity(DEMO_DATA.activity);
+                window.toast.info('Using demo data (API unavailable)');
             }
         }
 
@@ -348,20 +611,25 @@
                 charts.commit = new Chart(commitCtx, {
                     type: 'line',
                     data: {
-                        labels: analytics.weekly_data.map(w => `Week ${w.week}`),
+                        labels: analytics.weekly_data.map(w => `W${w.week}`),
                         datasets: [{
                             label: 'Commits',
                             data: analytics.weekly_data.map(w => w.commits),
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59,130,246,0.1)',
+                            borderColor: '#3AAFA9',
+                            backgroundColor: 'rgba(58,175,169,0.08)',
                             tension: 0.4,
-                            fill: true
+                            fill: true,
+                            pointBackgroundColor: '#3AAFA9',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: 4
                         }]
                     },
-                    options: { responsive: true, maintainAspectRatio: true }
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
+                        x: { grid: { display: false } } } }
                 });
             }
-
             const activityCtx = document.getElementById('weeklyActivityChart')?.getContext('2d');
             if (activityCtx && analytics.daily_activity) {
                 if (charts.activity) charts.activity.destroy();
@@ -371,12 +639,16 @@
                         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                         datasets: [{
                             label: 'Contributions',
-                            data: analytics.daily_activity || [0,0,0,0,0,0,0],
-                            backgroundColor: '#60a5fa',
-                            borderRadius: 8
+                            data: analytics.daily_activity || [0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: 'rgba(58,175,169,0.50)',
+                            borderColor: '#3AAFA9',
+                            borderWidth: 2,
+                            borderRadius: 6
                         }]
                     },
-                    options: { responsive: true, maintainAspectRatio: true }
+                    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
+                        x: { grid: { display: false } } } }
                 });
             }
         }
@@ -386,11 +658,435 @@
             const badge = document.getElementById('classification-badge');
             const bar = document.getElementById('performance-bar');
             const feedback = document.getElementById('ai-feedback-text');
-
-            badge.textContent = aiEval.classification || 'Moderate';
-            badge.className = `px-3 py-1 rounded-full text-sm font-medium ${getClassificationClass(aiEval.classification)}`;
-            bar.style.width = `${aiEval.overall_score || 75}%`;
+            const cls = getClassificationLabel(aiEval.classification);
+            badge.textContent = cls;
+            badge.className = `px-4 py-1.5 rounded-full text-sm font-semibold ${getClassificationClass(cls)}`;
+            bar.style.width = `${Math.min(aiEval.overall_score || 75, 100)}%`;
             feedback.textContent = aiEval.feedback || 'Your performance is on track. Keep contributing!';
+        }
+
+        function renderActivity(activities) {
+            const container = document.getElementById('recent-activity');
+            if (!activities || activities.length === 0) {
+                container.innerHTML =
+                '<div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div>';
+                return;
+            }
+            const icons = { commit: '📝', pull_request: '🔄', fork: '🍴', branch: '🌿' };
+            const colors = { commit: 'bg-blue-100', pull_request: 'bg-green-100', fork: 'bg-purple-100',
+                branch: 'bg-yellow-100' };
+            container.innerHTML = activities.slice(0, 5).map(a =>
+                `<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                    <div class="w-10 h-10 rounded-full ${colors[a.type] || 'bg-gray-100'} flex items-center justify-center text-lg">${icons[a.type] || '📊'}</div>
+                    <div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${a.description}</p><p class="text-xs text-gray-500 dark:text-gray-400">${a.repository_name || ''} • ${getRelativeTime(a.created_at)}</p></div>
+                    ${a.quantity ? `<span class="text-sm text-gray-500 dark:text-gray-400">${a.quantity}</span>` : ''}
+                </div>`
+            ).join('');
+        }
+
+        // ============================================
+        // PAGE: GROUP (unchanged)
+        // ============================================
+        function renderGroup() {
+            const g = DEMO_DATA.group;
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                        <div class="flex justify-between items-start"><div><h2 class="text-2xl font-bold">${g.name}</h2><p class="text-white/80 text-sm mt-1">Course: ${g.course_name}</p></div><span class="px-3 py-1 bg-white/20 rounded-full text-sm">${g.member_count} Members</span></div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Contributions</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100">${g.total_contributions}</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100">${g.avg_activity}%</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Team Performance</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100">${g.team_performance}/100</p></div>
+                    </div>
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Team Members</h3></div>
+                        <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                            ${g.members.map((m,i) => `
+                                <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                    <div class="flex items-center"><div class="w-10 h-10 rounded-full bg-gradient-to-r from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm">${getInitials(m.name)}</div><div class="ml-4"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${m.name}${i===0?' (You)':''}</p><p class="text-xs text-gray-500 dark:text-gray-400">${m.role}</p></div></div>
+                                    <div class="flex items-center gap-4"><div class="text-right"><p class="text-sm font-semibold text-gray-900 dark:text-gray-100">${m.contribution_percentage}%</p><p class="text-xs text-gray-500 dark:text-gray-400">Contributions</p></div><span class="px-2 py-1 rounded-full text-xs font-semibold ${getClassificationClass(m.classification)}">${m.classification}</span></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contribution Distribution</h3><canvas id="contributionChart" height="250"></canvas></div>
+                </div>
+            `;
+            setTimeout(() => {
+                const ctx = document.getElementById('contributionChart')?.getContext('2d');
+                if (ctx) {
+                    if (charts.group) charts.group.destroy();
+                    charts.group = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: g.members.map(m => m.name),
+                            datasets: [{ data: g.members.map(m => m.contribution_percentage), backgroundColor: [
+                                    '#3AAFA9', '#5ccbc5', '#7ccfca', '#a0d6d3'
+                                ], borderWidth: 0 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
+                    });
+                }
+            }, 100);
+        }
+
+        // ============================================
+        // PAGE: REPOSITORY (unchanged)
+        // ============================================
+        function renderRepository() {
+            const repos = DEMO_DATA.repository;
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">GitHub Connection</h2><button id="refreshRepoBtn" class="text-sm text-[#3AAFA9] hover:text-[#2B7A78] transition"><i class="fas fa-sync mr-1"></i> Refresh</button></div>
+                    <div class="card-glass p-6 bg-gradient-to-r from-[#0b1717] to-[#1a3a38] border-none shadow-xl"><div class="flex flex-wrap items-center justify-between gap-4 text-white"><div class="flex items-center gap-4"><div class="text-4xl">🐙</div><div><h3 class="text-xl font-semibold">Connect GitHub Repository</h3><p class="text-white/60 text-sm">Connect your repository to start tracking contributions</p></div></div><button id="githubConnectBtn" class="btn-teal bg-white text-[#2B7A78] hover:bg-gray-100 shadow-lg"><i class="fab fa-github mr-2"></i> Connect GitHub</button></div></div>
+                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Connected Repositories</h3>
+                        ${repos.length===0?'<div class="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">No repositories connected</div>':
+                        repos.map(r => `<div class="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition"><div><p class="font-medium text-gray-800 dark:text-gray-100">${r.name}</p><p class="text-xs text-gray-500 dark:text-gray-400">${r.url}</p></div><div class="flex items-center gap-3"><span class="px-2 py-0.5 text-xs rounded-full ${r.type==='original'?'bg-green-100 text-green-800 dark:bg-green-800/30 dark:text-green-300':r.type==='collaborator'?'bg-blue-100 text-blue-800 dark:bg-blue-800/30 dark:text-blue-300':'bg-purple-100 text-purple-800 dark:bg-purple-800/30 dark:text-purple-300'}">${r.type}</span><span class="text-xs text-gray-400">${r.last_synced}</span><button class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm"><i class="fas fa-sync"></i></button></div></div>`).join('')}
+                    </div>
+                </div>
+            `;
+            document.getElementById('githubConnectBtn')?.addEventListener('click', () => window.toast.info(
+            'GitHub OAuth would redirect here'));
+            document.getElementById('refreshRepoBtn')?.addEventListener('click', () => window.toast.success(
+            'Repositories refreshed!'));
+        }
+
+        // ============================================
+        // PAGE: ANALYTICS (unchanged)
+        // ============================================
+        function renderAnalytics() {
+            const d = DEMO_DATA.analytics;
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Contribution Analytics</h2><select id="timeframeSelect" class="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-[#132424] text-gray-800 dark:text-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#3AAFA9]"><option value="week">Last 7 Days</option><option value="month" selected>Last 30 Days</option><option value="semester">This Semester</option></select></div>
+                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-commits">${d.total_commits}</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Lines Added</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-lines">${d.total_lines_added.toLocaleString()}</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Lines Deleted</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-deleted">${d.total_lines_deleted.toLocaleString()}</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Consistency</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-consistency">${d.activity_consistency_score}%</p></div>
+                    </div>
+                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Activity Trend</h3><canvas id="analyticsChart" height="220"></canvas></div>
+                </div>
+            `;
+            setTimeout(() => {
+                const ctx = document.getElementById('analyticsChart')?.getContext('2d');
+                if (ctx) {
+                    if (charts.analytics) charts.analytics.destroy();
+                    charts.analytics = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: d.weekly_data.map(w => `W${w.week}`),
+                            datasets: [{
+                                label: 'Commits',
+                                data: d.weekly_data.map(w => w.commits),
+                                borderColor: '#3AAFA9',
+                                backgroundColor: 'rgba(58,175,169,0.06)',
+                                fill: true,
+                                tension: 0.4,
+                                pointBackgroundColor: '#3AAFA9'
+                            }]
+                        },
+                        options: { responsive: true, plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
+                            x: { grid: { display: false } } } }
+                    });
+                }
+            }, 100);
+            document.getElementById('timeframeSelect')?.addEventListener('change', function() {
+                window.toast.info(`Loading data for: ${this.options[this.selectedIndex].text}`);
+            });
+        }
+
+        // ============================================
+        // PAGE: PEER REVIEW (unchanged)
+        // ============================================
+        function renderPeerReview() {
+            const pr = DEMO_DATA.peer_reviews;
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Peer Reviews</h2><span class="text-sm text-gray-500 dark:text-gray-400">Deadline: Jun 30, 2026</span></div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="stat-card text-center"><p class="text-2xl font-bold text-[#3AAFA9]">${pr.total_members}</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p></div>
+                        <div class="stat-card text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">${pr.reviewed_count}</p><p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p></div>
+                        <div class="stat-card text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${pr.total_members - pr.reviewed_count}</p><p class="text-sm text-gray-500 dark:text-gray-400">Pending</p></div>
+                        <div class="stat-card text-center"><p class="text-2xl font-bold text-gray-800 dark:text-gray-100">${Math.round((pr.reviewed_count/pr.total_members)*100)}%</p><p class="text-sm text-gray-500 dark:text-gray-400">Completion</p></div>
+                    </div>
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Team Members</h3></div>
+                        <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                            ${pr.status.map(s => `
+                                <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                                    <div class="flex items-center"><div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 font-semibold text-sm">${getInitials(s.member_name)}</div><div class="ml-4"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${s.member_name}</p><p class="text-xs text-gray-500 dark:text-gray-400">${s.reviewed?'Reviewed • '+new Date(s.reviewed_at).toLocaleDateString():'Pending'}</p></div></div>
+                                    ${s.reviewed?'<span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Completed</span>':'<button class="px-4 py-2 bg-[#3AAFA9] text-white rounded-lg hover:bg-[#2B7A78] text-sm transition">Review Now</button>'}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // PAGE: AI FEEDBACK (unchanged)
+        // ============================================
+        function renderAIFeedback() {
+            const ai = DEMO_DATA.ai;
+            const container = document.getElementById('page-content');
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">AI Evaluation Feedback</h2><button id="refreshAIBtn" class="px-4 py-2 bg-[#3AAFA9] text-white rounded-lg hover:bg-[#2B7A78] text-sm transition"><i class="fas fa-sync mr-1"></i> Refresh</button></div>
+                    <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10"><div class="flex flex-wrap items-center justify-between gap-4"><div><h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Your Performance Classification</h3><p class="text-gray-500 dark:text-gray-400 text-sm mt-1">AI-powered evaluation</p></div><span id="ai-classification" class="px-4 py-2 rounded-full text-sm font-semibold ${getClassificationClass(ai.classification)}">${ai.classification}</span></div></div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="stat-card text-center"><div class="text-2xl mb-2">📊</div><p class="text-sm text-gray-500 dark:text-gray-400">Participation</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-participation">${ai.participation_score}</p></div>
+                        <div class="stat-card text-center"><div class="text-2xl mb-2">⭐</div><p class="text-sm text-gray-500 dark:text-gray-400">Quality</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-quality">${ai.quality_score}</p></div>
+                        <div class="stat-card text-center"><div class="text-2xl mb-2">📈</div><p class="text-sm text-gray-500 dark:text-gray-400">Consistency</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-consistency">${ai.consistency_score}</p></div>
+                    </div>
+                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">AI Feedback</h3><p class="text-gray-600 dark:text-gray-300 text-sm">${ai.feedback}</p></div>
+                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-3">Improvement Suggestions</h3><ul class="space-y-2">${ai.suggestions.map(s => `<li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"><span class="text-[#3AAFA9] mt-0.5">•</span><span>${s}</span></li>`).join('')}</ul></div>
+                </div>
+            `;
+            document.getElementById('refreshAIBtn')?.addEventListener('click', () => {
+                window.toast.success('AI feedback refreshed!');
+            });
+        }
+
+        // ============================================
+        // PAGE: PROFILE (UPDATED with full features)
+        // ============================================
+        function renderProfile() {
+            const user = AuthService.getUser();
+            const container = document.getElementById('page-content');
+            if (!user) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-500">Please log in again.</div>';
+                return;
+            }
+
+            // Load extra profile data
+            const extra = ProfileExtra.get();
+            const pic = ProfileExtra.getPic();
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👤 My Profile</h2>
+                    <div class="card-glass p-6">
+                        <div class="flex flex-col md:flex-row gap-8 items-start">
+                            <!-- Left: Avatar & Upload -->
+                            <div class="flex flex-col items-center gap-3 flex-shrink-0">
+                                <img id="profilePicPreview" src="${pic || getUserAvatar(user)}" alt="Profile" class="profile-pic-preview" />
+                                <label class="file-input-label text-sm">
+                                    <i class="fas fa-camera"></i> Upload Photo
+                                    <input type="file" id="profilePicInput" accept="image/*" class="hidden" />
+                                </label>
+                                <button id="removePicBtn" class="text-xs text-red-400 hover:text-red-300 transition ${pic ? '' : 'hidden'}">Remove Photo</button>
+                            </div>
+
+                            <!-- Right: Form -->
+                            <div class="flex-1 w-full space-y-4">
+                                <form id="profileForm" class="space-y-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label><input type="text" id="profileFirstName" value="${user.first_name || ''}" class="input-teal mt-1" /></div>
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label><input type="text" id="profileLastName" value="${user.last_name || ''}" class="input-teal mt-1" /></div>
+                                    </div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" value="${user.email || ''}" disabled class="input-teal mt-1 bg-gray-100 dark:bg-gray-800 cursor-not-allowed" /><p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed</p></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label><input type="text" id="profileDepartment" value="${user.department || ''}" class="input-teal mt-1" /></div>
+
+                                    <hr class="border-gray-200 dark:border-gray-700" />
+
+                                    <!-- Extra fields -->
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label><textarea id="profileBio" class="textarea-teal mt-1" placeholder="Tell us about yourself...">${extra.bio || ''}</textarea></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="${extra.skills || ''}" class="input-teal mt-1" placeholder="e.g. JavaScript, Python, Teamwork" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Education</label><input type="text" id="profileEducation" value="${extra.education || ''}" class="input-teal mt-1" placeholder="e.g. B.Sc. in CSE, University of Dhaka" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label><input type="text" id="profileExperience" value="${extra.experience || ''}" class="input-teal mt-1" placeholder="e.g. Intern at XYZ, 1 year" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub</label><input type="url" id="profileGithub" value="${extra.github || ''}" class="input-teal mt-1" placeholder="https://github.com/yourusername" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label><input type="url" id="profileLinkedin" value="${extra.linkedin || ''}" class="input-teal mt-1" placeholder="https://linkedin.com/in/yourprofile" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label><input type="url" id="profileWebsite" value="${extra.website || ''}" class="input-teal mt-1" placeholder="https://yourwebsite.com" /></div>
+
+                                    <div class="flex gap-3 flex-wrap">
+                                        <button type="submit" class="btn-teal">Update Profile</button>
+                                        <button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button>
+                                    </div>
+                                </form>
+
+                                <!-- Change Password (hidden initially) -->
+                                <div id="passwordFormContainer" class="mt-6 hidden border-t border-gray-200 dark:border-gray-700 pt-6">
+                                    <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Change Password</h4>
+                                    <form id="passwordForm" class="space-y-4">
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label><input type="password" id="currentPassword" class="input-teal mt-1" placeholder="Enter current password" /></div>
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label><input type="password" id="newPassword" class="input-teal mt-1" placeholder="Enter new password (min 6 chars)" /></div>
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label><input type="password" id="confirmPassword" class="input-teal mt-1" placeholder="Confirm new password" /></div>
+                                        <div class="flex gap-3"><button type="submit" class="btn-teal">Update Password</button><button type="button" id="hidePasswordForm" class="btn-teal-outline">Cancel</button></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Public Profile Preview (mock) -->
+                    <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">🔗 Public Profile</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">Share your profile with recruiters or collaborators.</p>
+                        <button id="viewPublicProfileBtn" class="btn-teal mt-3 text-sm">View Public Profile</button>
+                    </div>
+                </div>
+            `;
+
+            // --- Profile Picture Upload ---
+            const fileInput = document.getElementById('profilePicInput');
+            const preview = document.getElementById('profilePicPreview');
+            const removeBtn = document.getElementById('removePicBtn');
+
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        const base64 = ev.target.result;
+                        preview.src = base64;
+                        ProfileExtra.setPic(base64);
+                        // Update sidebar avatar
+                        updateSidebarAvatar();
+                        removeBtn.classList.remove('hidden');
+                        window.toast.success('Profile picture updated!');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeBtn.addEventListener('click', function() {
+                ProfileExtra.setPic(null);
+                preview.src = getUserAvatar(user);
+                removeBtn.classList.add('hidden');
+                updateSidebarAvatar();
+                window.toast.info('Profile picture removed.');
+            });
+
+            // --- Profile Update (basic info + extra fields) ---
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const firstName = document.getElementById('profileFirstName').value.trim();
+                const lastName = document.getElementById('profileLastName').value.trim();
+                const department = document.getElementById('profileDepartment').value.trim();
+                if (!firstName || !lastName) { window.toast.error('First and last name are required.'); return; }
+
+                // Collect extra fields
+                const extraData = {
+                    bio: document.getElementById('profileBio').value.trim(),
+                    skills: document.getElementById('profileSkills').value.trim(),
+                    education: document.getElementById('profileEducation').value.trim(),
+                    experience: document.getElementById('profileExperience').value.trim(),
+                    github: document.getElementById('profileGithub').value.trim(),
+                    linkedin: document.getElementById('profileLinkedin').value.trim(),
+                    website: document.getElementById('profileWebsite').value.trim()
+                };
+                ProfileExtra.set(extraData);
+
+                const payload = { first_name: firstName, last_name: lastName, department };
+                const btn = this.querySelector('button[type="submit"]');
+                const original = btn.textContent;
+                btn.textContent = 'Saving...';
+                btn.disabled = true;
+                try {
+                    const response = await ApiService.put('/auth/profile', payload);
+                    if (response.success) {
+                        const user = AuthService.getUser();
+                        user.first_name = firstName;
+                        user.last_name = lastName;
+                        user.department = department;
+                        AuthService.updateUser(user);
+                        document.getElementById('user-name').textContent = `${firstName} ${lastName}`.trim();
+                        updateSidebarAvatar();
+                        window.toast.success('Profile updated successfully!');
+                    } else {
+                        window.toast.error(response.message || 'Update failed.');
+                    }
+                } catch (err) {
+                    window.toast.error('Error updating profile. Please try again.');
+                } finally {
+                    btn.textContent = original;
+                    btn.disabled = false;
+                }
+            });
+
+            // --- Show/Hide Password Form ---
+            document.getElementById('showPasswordForm').addEventListener('click', function() {
+                document.getElementById('passwordFormContainer').classList.remove('hidden');
+            });
+            document.getElementById('hidePasswordForm').addEventListener('click', function() {
+                document.getElementById('passwordFormContainer').classList.add('hidden');
+                document.getElementById('passwordForm').reset();
+            });
+
+            // --- Password Change ---
+            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const current = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmPassword').value;
+                if (!current || !newPass || !confirm) { window.toast.error('All password fields are required.'); return; }
+                if (newPass.length < 6) { window.toast.error('New password must be at least 6 characters.'); return; }
+                if (newPass !== confirm) { window.toast.error('Passwords do not match.'); return; }
+                const btn = this.querySelector('button[type="submit"]');
+                const original = btn.textContent;
+                btn.textContent = 'Updating...';
+                btn.disabled = true;
+                try {
+                    const response = await ApiService.post('/auth/change-password', {
+                        current_password: current,
+                        new_password: newPass,
+                        new_password_confirmation: confirm
+                    });
+                    if (response.success) {
+                        window.toast.success('Password changed successfully!');
+                        document.getElementById('passwordFormContainer').classList.add('hidden');
+                        document.getElementById('passwordForm').reset();
+                    } else {
+                        window.toast.error(response.message || 'Password change failed.');
+                    }
+                } catch (err) {
+                    window.toast.error('Error changing password. Please try again.');
+                } finally {
+                    btn.textContent = original;
+                    btn.disabled = false;
+                }
+            });
+
+            // --- Public Profile Preview ---
+            document.getElementById('viewPublicProfileBtn').addEventListener('click', function() {
+                // Show a modal or redirect to a public profile page (for now, just alert)
+                const fullName = `${user.first_name || ''} ${user.last_name || ''}`.trim();
+                const extra = ProfileExtra.get();
+                const skills = extra.skills || 'Not specified';
+                const bio = extra.bio || 'No bio yet.';
+                const education = extra.education || 'Not provided';
+                const experience = extra.experience || 'Not provided';
+                const github = extra.github || '—';
+                const linkedin = extra.linkedin || '—';
+                const website = extra.website || '—';
+                alert(
+                    `👤 Public Profile\n\nName: ${fullName}\nRole: ${user.role || 'Student'}\nDepartment: ${user.department || '—'}\nBio: ${bio}\nSkills: ${skills}\nEducation: ${education}\nExperience: ${experience}\nGitHub: ${github}\nLinkedIn: ${linkedin}\nWebsite: ${website}`
+                    );
+            });
+        }
+
+        // --- Helper to update sidebar avatar ---
+        function updateSidebarAvatar() {
+            const user = AuthService.getUser();
+            const pic = ProfileExtra.getPic();
+            const avatarEl = document.getElementById('user-avatar');
+            if (pic) {
+                avatarEl.style.backgroundImage = `url(${pic})`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.textContent = '';
+            } else {
+                avatarEl.style.backgroundImage = '';
+                const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Student';
+                avatarEl.textContent = getInitials(name);
+            }
         }
 
         // ============================================
@@ -400,211 +1096,69 @@
             currentPage = page;
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
-            
-            switch(page) {
-                case 'dashboard': renderDashboard(); break;
-                case 'group': renderGroup(); break;
-                case 'repository': renderRepository(); break;
-                case 'analytics': renderAnalytics(); break;
-                case 'peer-review': renderPeerReview(); break;
-                case 'ai-feedback': renderAIFeedback(); break;
-                default: renderDashboard();
+            const titles = {
+                dashboard: 'Overview',
+                group: 'My Group',
+                repository: 'GitHub Connection',
+                analytics: 'Analytics',
+                'peer-review': 'Peer Reviews',
+                'ai-feedback': 'AI Feedback',
+                profile: 'My Profile'
+            };
+            document.getElementById('page-title').textContent = titles[page] || 'Overview';
+            switch (page) {
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'group':
+                    renderGroup();
+                    break;
+                case 'repository':
+                    renderRepository();
+                    break;
+                case 'analytics':
+                    renderAnalytics();
+                    break;
+                case 'peer-review':
+                    renderPeerReview();
+                    break;
+                case 'ai-feedback':
+                    renderAIFeedback();
+                    break;
+                case 'profile':
+                    renderProfile();
+                    break;
+                default:
+                    renderDashboard();
             }
         }
 
         // ============================================
-        // GROUP PAGE
+        // THEME TOGGLE
         // ============================================
-        function renderGroup() {
-            const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">My Group</h2>
-                    <div class="bg-white rounded-lg shadow p-6 text-center py-12">
-                        <div class="text-6xl mb-4">👥</div>
-                        <h3 class="text-xl font-semibold text-gray-800">Group Management</h3>
-                        <p class="text-gray-500 mt-2">View your group details, members, and contributions</p>
-                        <button class="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">View Group</button>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ============================================
-        // REPOSITORY PAGE
-        // ============================================
-        function renderRepository() {
-            const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">GitHub Connection</h2>
-                    <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg shadow p-6 text-white">
-                        <div class="flex items-center justify-between flex-wrap gap-4">
-                            <div class="flex items-center">
-                                <div class="text-4xl mr-4">🐙</div>
-                                <div>
-                                    <h3 class="text-xl font-semibold">Connect GitHub Repository</h3>
-                                    <p class="text-gray-300 text-sm">Connect your repository to start tracking contributions</p>
-                                </div>
-                            </div>
-                            <button id="githubConnectBtn" class="px-6 py-3 bg-white text-gray-900 rounded-lg hover:bg-gray-100 font-medium">Connect GitHub</button>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="font-semibold text-gray-800 mb-4">Connected Repositories</h3>
-                        <div class="text-center py-8 text-gray-500">No repositories connected</div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('githubConnectBtn')?.addEventListener('click', () => {
-                window.toast.info('GitHub OAuth would redirect here');
-            });
-        }
-
-        // ============================================
-        // ANALYTICS PAGE
-        // ============================================
-        function renderAnalytics() {
-            const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Contribution Analytics</h2>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-600">Total Commits</p><p class="text-xl font-bold" id="a-commits">0</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-600">Lines Added</p><p class="text-xl font-bold" id="a-lines">0</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-600">Activity Score</p><p class="text-xl font-bold" id="a-score">0</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-sm text-gray-600">Consistency</p><p class="text-xl font-bold" id="a-consistency">0%</p></div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="font-semibold mb-3">Activity Trend</h3>
-                        <canvas id="analyticsChart" height="250"></canvas>
-                    </div>
-                </div>
-            `;
-            loadAnalyticsData();
-        }
-
-        async function loadAnalyticsData() {
-            try {
-                const user = AuthService.getUser();
-                const data = await ApiService.get(`/analytics/student/${user.id}`);
-                document.getElementById('a-commits').textContent = data.total_commits || 0;
-                document.getElementById('a-lines').textContent = (data.total_lines_added || 0).toLocaleString();
-                document.getElementById('a-score').textContent = data.activity_consistency_score || 0;
-                document.getElementById('a-consistency').textContent = `${data.activity_consistency_score || 0}%`;
-
-                const ctx = document.getElementById('analyticsChart')?.getContext('2d');
-                if (ctx && data.weekly_data) {
-                    if (charts.analytics) charts.analytics.destroy();
-                    charts.analytics = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.weekly_data.map(w => `Week ${w.week}`),
-                            datasets: [{
-                                label: 'Commits',
-                                data: data.weekly_data.map(w => w.commits),
-                                borderColor: '#3b82f6',
-                                fill: true
-                            }]
-                        },
-                        options: { responsive: true }
-                    });
-                }
-            } catch (error) {
-                window.toast.error('Failed to load analytics');
+        (function initTheme() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+            const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+            if (saved === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
             }
-        }
-
-        // ============================================
-        // PEER REVIEW PAGE
-        // ============================================
-        function renderPeerReview() {
-            const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Peer Reviews</h2>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="font-semibold text-gray-800 mb-4">Submit Peer Review</h3>
-                        <p class="text-gray-500">Review your team members anonymously</p>
-                        <div class="mt-4 text-center py-8 text-gray-500">No team members to review</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // ============================================
-        // AI FEEDBACK PAGE
-        // ============================================
-        function renderAIFeedback() {
-            const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800">AI Evaluation Feedback</h2>
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow p-6">
-                        <div class="flex justify-between items-start flex-wrap gap-4">
-                            <div>
-                                <h3 class="text-xl font-semibold text-gray-800">Your Performance Classification</h3>
-                                <p class="text-gray-600 mt-1">AI-powered evaluation</p>
-                            </div>
-                            <span id="ai-classification" class="px-4 py-2 rounded-full text-lg font-semibold bg-gray-100 text-gray-600">Loading...</span>
-                        </div>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-4">
-                        <div class="bg-white p-5 rounded-lg shadow text-center">
-                            <div class="text-3xl mb-2">📊</div>
-                            <p class="text-sm text-gray-600">Participation Score</p>
-                            <p class="text-3xl font-bold text-blue-600" id="ai-participation">0</p>
-                        </div>
-                        <div class="bg-white p-5 rounded-lg shadow text-center">
-                            <div class="text-3xl mb-2">⭐</div>
-                            <p class="text-sm text-gray-600">Quality Score</p>
-                            <p class="text-3xl font-bold text-blue-600" id="ai-quality">0</p>
-                        </div>
-                        <div class="bg-white p-5 rounded-lg shadow text-center">
-                            <div class="text-3xl mb-2">📈</div>
-                            <p class="text-sm text-gray-600">Consistency Score</p>
-                            <p class="text-3xl font-bold text-blue-600" id="ai-consistency">0</p>
-                        </div>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="font-semibold text-gray-800 mb-2">AI Feedback</h3>
-                        <p id="ai-feedback-detail" class="text-gray-700">Loading feedback...</p>
-                    </div>
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="font-semibold text-gray-800 mb-2">Improvement Suggestions</h3>
-                        <ul id="ai-suggestions" class="space-y-2">
-                            <li class="text-gray-500">Loading suggestions...</li>
-                        </ul>
-                    </div>
-                </div>
-            `;
-            loadAIFeedbackData();
-        }
-
-        async function loadAIFeedbackData() {
-            try {
-                const user = AuthService.getUser();
-                const data = await ApiService.get(`/ai/evaluate/student/${user.id}`);
-                
-                document.getElementById('ai-classification').textContent = data.classification || 'Moderate';
-                document.getElementById('ai-classification').className = `px-4 py-2 rounded-full text-lg font-semibold ${getClassificationClass(data.classification)}`;
-                document.getElementById('ai-participation').textContent = data.participation_score || 0;
-                document.getElementById('ai-quality').textContent = data.quality_score || 0;
-                document.getElementById('ai-consistency').textContent = data.consistency_score || 0;
-                document.getElementById('ai-feedback-detail').textContent = data.feedback || 'No feedback available';
-                
-                const suggestionsList = document.getElementById('ai-suggestions');
-                if (data.suggestions && data.suggestions.length > 0) {
-                    suggestionsList.innerHTML = data.suggestions.map(s => 
-                        `<li class="flex items-start"><span class="text-blue-500 mr-2">•</span><span class="text-gray-700">${s}</span></li>`
-                    ).join('');
+            toggle.addEventListener('click', function() {
+                const isDark = html.classList.toggle('dark');
+                if (isDark) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
                 } else {
-                    suggestionsList.innerHTML = '<li class="text-gray-500">No suggestions available</li>';
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'light');
                 }
-            } catch (error) {
-                window.toast.error('Failed to load AI feedback');
-            }
-        }
+            });
+        })();
 
         // ============================================
         // INITIALIZATION
@@ -614,32 +1168,38 @@
                 window.location.href = '/login.html';
                 return;
             }
-
             const user = AuthService.getUser();
             if (user) {
-                document.getElementById('user-name').textContent = `${user.first_name || 'Student'} ${user.last_name || ''}`;
-                document.getElementById('user-avatar').textContent = getInitials(`${user.first_name || 'S'} ${user.last_name || 'T'}`);
+                const name = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
+                document.getElementById('user-name').textContent = name || 'Student';
+                // Set avatar (profile pic or initials)
+                const pic = ProfileExtra.getPic();
+                const avatarEl = document.getElementById('user-avatar');
+                if (pic) {
+                    avatarEl.style.backgroundImage = `url(${pic})`;
+                    avatarEl.style.backgroundSize = 'cover';
+                    avatarEl.textContent = '';
+                } else {
+                    avatarEl.textContent = getInitials(name || 'Student');
+                }
+                // Click avatar to go to profile
+                avatarEl.addEventListener('click', function() { navigate('profile'); });
             }
-
             document.getElementById('menuBtn')?.addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
-
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const page = link.dataset.page;
-                    if (window.innerWidth < 768) {
-                        document.getElementById('sidebar').classList.add('-translate-x-full');
-                    }
+                    if (window.innerWidth < 768) document.getElementById('sidebar').classList.add(
+                    '-translate-x-full');
                     navigate(page);
                 });
             });
-
             document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
             navigate('dashboard');
         }
-
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>

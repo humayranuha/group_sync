@@ -741,13 +741,103 @@ class ApiController extends Controller
     
     /**
      * ============================================
+     * CONTRIBUTION SCORE SECTION
+     * ============================================
+     */
+    
+    public function calculateContributionScore(Request $request, $studentId, $assignmentId)
+    {
+        $student = User::findOrFail($studentId);
+        $assignment = Assignment::findOrFail($assignmentId);
+        
+        $group = Group::where('course_id', $assignment->course_id)
+            ->whereHas('members', function($query) use ($studentId) {
+                $query->where('user_id', $studentId);
+            })->first();
+        
+        if (!$group) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Student is not in a group for this course'
+            ], 400);
+        }
+        
+        $weightage = json_decode($assignment->weightage, true);
+        
+        // Fetch metrics (replace with real implementation later)
+        $gitHubMetrics = $this->getGitHubMetrics($studentId, $assignmentId, $group->id);
+        $attendance = $this->getAttendance($studentId, $assignmentId);
+        $peerReviews = $this->getPeerReviewScore($studentId, $assignmentId);
+        $workingHours = $this->getWorkingHours($studentId, $assignmentId);
+        
+        $score = ($gitHubMetrics * $weightage['commits'] / 100) +
+                 ($attendance * $weightage['attendance'] / 100) +
+                 ($peerReviews * $weightage['peer_reviews'] / 100) +
+                 ($workingHours * $weightage['working_hours'] / 100);
+        
+        $status = 'normal';
+        if ($score < 30) {
+            $status = 'critical';
+            $this->notifyProfessor($studentId, $assignmentId, $score);
+        } elseif ($score < 50) {
+            $status = 'warning';
+        }
+        
+        $contributionScore = ContributionScore::updateOrCreate(
+            [
+                'student_id' => $studentId,
+                'assignment_id' => $assignmentId
+            ],
+            [
+                'group_id' => $group->id,
+                'score' => round($score, 2),
+                'status' => $status,
+                'breakdown' => json_encode([
+                    'github_commits' => $gitHubMetrics,
+                    'attendance' => $attendance,
+                    'peer_reviews' => $peerReviews,
+                    'working_hours' => $workingHours,
+                    'weightage_used' => $weightage
+                ]),
+                'calculated_at' => now()
+            ]
+        );
+        
+        return response()->json([
+            'success' => true,
+            'score' => round($score, 2),
+            'status' => $status,
+            'breakdown' => $contributionScore->breakdown
+        ]);
+    }
+    
+    public function getStudentScore($studentId, $assignmentId)
+    {
+        $score = ContributionScore::where('student_id', $studentId)
+            ->where('assignment_id', $assignmentId)
+            ->first();
+        
+        if (!$score) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Score not found. Please calculate the score first.'
+            ], 404);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'score' => $score
+        ]);
+    }
+    
+    /**
+     * ============================================
      * ANALYTICS SECTION
      * ============================================
      */
     
     public function getStudentAnalytics($id)
     {
-        // Get real data from database
         $scores = ContributionScore::where('student_id', $id)->get();
         $reviews = PeerReview::where('reviewee_id', $id)->get();
         
@@ -829,6 +919,108 @@ class ApiController extends Controller
     
     /**
      * ============================================
+     * NOTIFICATIONS SECTION
+     * ============================================
+     */
+    
+    public function getNotifications(Request $request)
+    {
+        $notifications = Notification::where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(50)
+            ->get();
+        
+        return response()->json([
+            'success' => true,
+            'notifications' => $notifications
+        ]);
+    }
+    
+    public function markNotificationRead(Request $request, $id)
+    {
+        $notification = Notification::findOrFail($id);
+        
+        if ($notification->user_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized'
+            ], 403);
+        }
+        
+        $notification->update([
+            'is_read' => true,
+            'read_at' => now()
+        ]);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Notification marked as read'
+        ]);
+    }
+    
+    /**
+     * ============================================
+     * GITHUB OAUTH SECTION
+     * ============================================
+     */
+    
+    public function githubRedirect()
+    {
+        $query = http_build_query([
+            'client_id' => env('GITHUB_CLIENT_ID'),
+            'redirect_uri' => env('GITHUB_REDIRECT_URI'),
+            'scope' => 'repo,user:email',
+            'state' => csrf_token(),
+        ]);
+        return redirect('https://github.com/login/oauth/authorize?' . $query);
+    }
+    
+    public function githubCallback(Request $request)
+    {
+        $code = $request->code;
+        $clientId = env('GITHUB_CLIENT_ID');
+        $clientSecret = env('GITHUB_CLIENT_SECRET');
+        
+        // Exchange code for access token
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://github.com/login/oauth/access_token');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'code' => $code,
+        ]));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        $data = json_decode($response, true);
+        
+        if (!isset($data['access_token'])) {
+            return response()->json(['success' => false, 'message' => 'GitHub authentication failed'], 400);
+        }
+        
+        // Save token to user
+        $user = $request->user();
+        $user->github_token = $data['access_token'];
+        
+        // Fetch GitHub username
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/user');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $data['access_token']]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $userInfo = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+        $user->github_username = $userInfo['login'] ?? null;
+        $user->save();
+        
+        $this->logActivity('github_connect', $user->id, 'Connected GitHub account');
+        
+        return redirect('/student/dashboard.html'); // or return JSON
+    }
+    
+    /**
+     * ============================================
      * PRIVATE HELPER METHODS
      * ============================================
      */
@@ -898,19 +1090,23 @@ class ApiController extends Controller
         return $suggestions[$classification] ?? ['Stay engaged with your team'];
     }
     
-    public function getGitHubMetrics($studentId, $assignmentId, $groupId)
+    // ============================================
+    // METRICS FETCHING (Placeholder - to be replaced with real integrations)
+    // ============================================
+    
+    private function getGitHubMetrics($studentId, $assignmentId, $groupId)
     {
-        // Placeholder - implement actual GitHub API integration
+        // TODO: Fetch real commit data from GitHub API using stored token
         return rand(40, 95);
     }
     
-    public function getAttendance($studentId, $assignmentId)
+    private function getAttendance($studentId, $assignmentId)
     {
-        // Placeholder - implement actual attendance tracking
+        // TODO: Fetch attendance records from database
         return rand(50, 100);
     }
     
-    public function getPeerReviewScore($studentId, $assignmentId)
+    private function getPeerReviewScore($studentId, $assignmentId)
     {
         $reviews = PeerReview::where('reviewee_id', $studentId)
             ->where('assignment_id', $assignmentId)
@@ -925,13 +1121,13 @@ class ApiController extends Controller
         return ($avg / 5) * 100;
     }
     
-    public function getWorkingHours($studentId, $assignmentId)
+    private function getWorkingHours($studentId, $assignmentId)
     {
-        // Placeholder - implement actual working hours tracking
+        // TODO: Fetch working hours from logs/database
         return rand(20, 80);
     }
     
-    public function notifyProfessor($studentId, $assignmentId, $score)
+    private function notifyProfessor($studentId, $assignmentId, $score)
     {
         try {
             $student = User::find($studentId);
@@ -950,40 +1146,5 @@ class ApiController extends Controller
         } catch (\Exception $e) {
             // Silent fail
         }
-    }
-    
-    public function getNotifications(Request $request)
-    {
-        $notifications = Notification::where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(50)
-            ->get();
-        
-        return response()->json([
-            'success' => true,
-            'notifications' => $notifications
-        ]);
-    }
-    
-    public function markNotificationRead(Request $request, $id)
-    {
-        $notification = Notification::findOrFail($id);
-        
-        if ($notification->user_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
-        }
-        
-        $notification->update([
-            'is_read' => true,
-            'read_at' => now()
-        ]);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification marked as read'
-        ]);
     }
 }
