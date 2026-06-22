@@ -5,141 +5,371 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - GroupSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body {
+            transition: background 0.5s, color 0.3s;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .dark body {
+            background-color: #0b0e1a;
+            color: #e2e8f0;
+        }
+        /* ----- Modern Gradient Backgrounds ----- */
+        .register-bg {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: relative;
+            overflow: hidden;
+        }
+        .register-bg::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at 30% 40%, rgba(236, 72, 153, 0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 60%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            animation: bgFloat 15s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+        @keyframes bgFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -3%) scale(1.05); }
+        }
+        /* ----- 3D Card Effect ----- */
+        .card-3d {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            transform: perspective(1200px) rotateX(2deg) rotateY(-1deg);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .card-3d:hover {
+            transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-6px);
+            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+        /* ----- Input Fields with Neon Glow ----- */
+        .input-neon {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+        .input-neon:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .input-neon::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .dark .input-neon {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .dark .input-neon:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+        /* ----- Button with 3D effect ----- */
+        .btn-3d {
+            background: linear-gradient(135deg, #7c3aed, #ec4899);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 0 #4c1d95, 0 10px 30px -5px rgba(124, 58, 237, 0.4);
+            transition: all 0.15s ease;
+            transform: translateY(0);
+        }
+        .btn-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #4c1d95, 0 15px 40px -5px rgba(124, 58, 237, 0.5);
+        }
+        .btn-3d:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #4c1d95;
+        }
+        /* ----- Dark mode adjustments ----- */
+        .dark .card-3d {
+            background: rgba(15, 15, 35, 0.7);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+        .dark .btn-3d {
+            box-shadow: 0 8px 0 #2e1065, 0 10px 30px -5px rgba(124, 58, 237, 0.3);
+        }
+        .dark .btn-3d:hover {
+            box-shadow: 0 10px 0 #2e1065, 0 15px 40px -5px rgba(124, 58, 237, 0.4);
+        }
+        /* ----- NEW: Modern Header & Footer Colors ----- */
+        .header-gradient {
+            background: linear-gradient(135deg, rgba(15, 12, 41, 0.85), rgba(48, 43, 99, 0.85));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .dark .header-gradient {
+            background: linear-gradient(135deg, rgba(5, 3, 20, 0.9), rgba(20, 15, 50, 0.9));
+        }
+        .footer-gradient {
+            background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .dark .footer-gradient {
+            background: linear-gradient(135deg, #0b081f, #1a1640, #2d1b69);
+        }
+        /* ----- Theme toggle icon ----- */
+        .theme-toggle {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+        /* ----- Social icons footer ----- */
+        .social-icon {
+            transition: color 0.3s, transform 0.3s;
+        }
+        .social-icon:hover {
+            transform: translateY(-2px) scale(1.1);
+        }
+        /* ----- Typography ----- */
+        .brand-gradient {
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        /* ----- Responsive tweaks ----- */
+        @media (max-width: 768px) {
+            .card-3d {
+                transform: none;
+            }
+            .card-3d:hover {
+                transform: translateY(-4px);
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
-    <div class="flex w-full max-w-6xl">
-        <!-- Left Side -->
-        <div class="hidden lg:flex lg:w-1/2 bg-blue-600 rounded-l-2xl items-center justify-center p-12">
-            <div class="text-center text-white">
-                <div class="text-6xl mb-6">🚀</div>
-                <h1 class="text-4xl font-bold mb-4">Join GroupSync</h1>
-                <p class="text-xl mb-6">Start your academic collaboration journey</p>
-                <p class="text-blue-100">Create an account to access powerful analytics and AI insights</p>
-            </div>
-        </div>
-        
-        <!-- Right Side -->
-        <div class="w-full lg:w-1/2 bg-white rounded-r-2xl shadow-2xl p-8 lg:p-12">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-900">Create Account</h2>
-                <p class="text-gray-600 mt-2">Join GroupSync today</p>
-            </div>
-            
-            <form id="registerForm" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">First Name</label>
-                        <input type="text" id="firstName" placeholder="John" required
-                               class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Last Name</label>
-                        <input type="text" id="lastName" placeholder="Doe" required
-                               class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input type="email" id="email" placeholder="student@university.edu" required
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">I am a...</label>
-                    <select id="role" class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="student">Student</option>
-                        <option value="professor">Professor</option>
-                    </select>
-                </div>
-                
-                <div id="departmentField" style="display: none;">
-                    <label class="block text-sm font-medium text-gray-700">Department</label>
-                    <input type="text" id="department" placeholder="e.g., Computer Science"
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <p class="mt-1 text-xs text-gray-500">Must be at least 6 characters</p>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Confirm Password</label>
-                    <input type="password" id="confirmPassword" placeholder="••••••••" required
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                
-                <button type="submit" id="registerBtn"
-                        class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-lg">
-                    Create Account
+<body>
+    <!-- ===== NAVIGATION (Header with new gradient) ===== -->
+    <nav class="header-gradient sticky top-0 z-50 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-white">Group<span class="brand-gradient">Sync</span></a>
+            <div class="flex items-center space-x-6">
+                <a href="/login.html" class="text-gray-300 hover:text-white transition">Login</a>
+                <a href="/register.html" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition">Register</a>
+                <button id="themeToggle" class="theme-toggle text-xl text-gray-300 dark:text-yellow-400 p-2 rounded-full hover:bg-white/10">
+                    <i id="themeIcon" class="fas fa-sun"></i>
                 </button>
-            </form>
-            
-            <p class="mt-6 text-center text-sm text-gray-600">
-                Already have an account? <a href="/login.html" class="text-blue-600 hover:text-blue-500 font-medium">Sign in</a>
-            </p>
+            </div>
         </div>
-    </div>
+    </nav>
 
+    <!-- ===== REGISTER SECTION ===== -->
+    <section class="register-bg min-h-screen flex items-center justify-center px-4 py-16 relative">
+        <div class="max-w-5xl w-full relative z-10">
+            <div class="card-3d p-8 md:p-12">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Left Branding -->
+                    <div class="lg:w-1/2 space-y-6 text-white">
+                        <div class="text-6xl">🚀</div>
+                        <h1 class="text-4xl font-extrabold tracking-tight">Join <span class="brand-gradient">GroupSync</span></h1>
+                        <p class="text-gray-300 text-lg">Start your academic collaboration journey with AI-powered insights.</p>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex items-center"><span class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center mr-3"><i class="fas fa-check text-purple-400 text-xs"></i></span> Real-time GitHub analytics</li>
+                            <li class="flex items-center"><span class="w-5 h-5 rounded-full bg-pink-500/20 flex items-center justify-center mr-3"><i class="fas fa-check text-pink-400 text-xs"></i></span> AI-powered free rider detection</li>
+                            <li class="flex items-center"><span class="w-5 h-5 rounded-full bg-blue-500/20 flex items-center justify-center mr-3"><i class="fas fa-check text-blue-400 text-xs"></i></span> Peer review & contribution scoring</li>
+                            <li class="flex items-center"><span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center mr-3"><i class="fas fa-check text-indigo-400 text-xs"></i></span> Automated PDF reports</li>
+                        </ul>
+                        <div class="pt-4">
+                            <p class="text-xs text-gray-400">Already have an account? <a href="/login.html" class="text-purple-300 hover:text-white font-medium">Sign in →</a></p>
+                        </div>
+                    </div>
+
+                    <!-- Right Form -->
+                    <div class="lg:w-1/2">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-white">Create Account</h2>
+                            <p class="text-gray-400">Join thousands of students & professors</p>
+                        </div>
+                        <form id="register-form" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300">First Name</label>
+                                    <input type="text" id="first_name" required placeholder="John" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300">Last Name</label>
+                                    <input type="text" id="last_name" required placeholder="Doe" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">Email Address</label>
+                                <input type="email" id="email" required placeholder="student@university.edu" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">I am a...</label>
+                                <select id="role" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl appearance-none">
+                                    <option value="student" class="bg-gray-800">Student</option>
+                                    <option value="professor" class="bg-gray-800">Professor</option>
+                                </select>
+                            </div>
+                            <div id="student_id_field" class="block">
+                                <label class="block text-sm font-medium text-gray-300">Student ID (optional)</label>
+                                <input type="text" id="student_id" placeholder="e.g., 2023-1-60-..." class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                                <p class="mt-1 text-xs text-gray-400">Optional for students</p>
+                            </div>
+                            <div id="department_field" style="display: none;">
+                                <label class="block text-sm font-medium text-gray-300">Department (if professor)</label>
+                                <input type="text" id="department" placeholder="e.g., Computer Science" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">Password</label>
+                                <input type="password" id="password" required placeholder="••••••••" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                                <p class="mt-1 text-xs text-gray-400">Minimum 6 characters</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">Confirm Password</label>
+                                <input type="password" id="confirm_password" required placeholder="••••••••" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="terms" required class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded bg-transparent">
+                                <label for="terms" class="ml-2 text-sm text-gray-300">
+                                    I agree to the <a href="#" class="text-purple-400 hover:text-white">Terms</a> &amp; <a href="#" class="text-purple-400 hover:text-white">Privacy Policy</a>
+                                </label>
+                            </div>
+                            <button type="submit" id="registerBtn" class="btn-3d w-full text-lg">
+                                Create Account
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER (New gradient) ===== -->
+    <footer class="footer-gradient text-white py-10 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Group<span class="brand-gradient">Sync</span></h2>
+                <p class="text-gray-300 mt-2 text-sm">AI-Powered Academic Collaboration Analytics</p>
+                <p class="text-gray-400 mt-4 text-sm"><i class="fas fa-map-marker-alt mr-2"></i> Dhaka, Bangladesh</p>
+                <p class="text-gray-400 text-sm"><i class="fas fa-envelope mr-2"></i> support@groupsync.com</p>
+                <p class="text-gray-400 text-sm"><i class="fas fa-phone mr-2"></i> +880 1234 567 890</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">About Us</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">Terms of Service</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">FAQ</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">Support</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4">Connect With Us</h3>
+                <div class="flex space-x-4 mb-4">
+                    <a href="#" class="social-icon text-gray-300 hover:text-blue-400 text-2xl"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-sky-400 text-2xl"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-pink-400 text-2xl"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-red-400 text-2xl"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-gray-200 text-2xl"><i class="fab fa-github"></i></a>
+                </div>
+                <p class="text-gray-300 text-sm">Subscribe to our newsletter</p>
+                <div class="flex mt-2">
+                    <input type="email" placeholder="Your email" class="px-4 py-2 w-full rounded-l-xl bg-white/10 border border-white/10 text-white focus:outline-none focus:border-purple-400 text-sm">
+                    <button class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 rounded-r-xl transition text-sm font-medium">Subscribe</button>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-white/10 mt-8 pt-6 text-center text-gray-400 text-sm">
+            &copy; 2026 GroupSync. All rights reserved. Designed with <i class="fas fa-heart text-pink-500"></i> for academic excellence.
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
     <script>
-        const form = document.getElementById('registerForm');
-        const btn = document.getElementById('registerBtn');
+        // Dark/Light Toggle
+        (function() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+
+            if (localStorage.getItem('theme') === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+
+            toggle.addEventListener('click', function() {
+                html.classList.toggle('dark');
+                if (html.classList.contains('dark')) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        })();
+
+        // Toggle student / professor fields
         const roleSelect = document.getElementById('role');
-        const departmentField = document.getElementById('departmentField');
+        const studentField = document.getElementById('student_id_field');
+        const deptField = document.getElementById('department_field');
 
-        // Show/hide department field based on role
-        roleSelect.addEventListener('change', function() {
-            if (this.value === 'professor') {
-                departmentField.style.display = 'block';
+        function toggleFields() {
+            if (roleSelect.value === 'student') {
+                studentField.style.display = 'block';
+                deptField.style.display = 'none';
             } else {
-                departmentField.style.display = 'none';
+                studentField.style.display = 'none';
+                deptField.style.display = 'block';
             }
-        });
+        }
+        roleSelect.addEventListener('change', toggleFields);
+        toggleFields();
 
-        form.addEventListener('submit', async (e) => {
+        // Registration form submission
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            const firstName = document.getElementById('firstName').value.trim();
-            const lastName = document.getElementById('lastName').value.trim();
-            const email = document.getElementById('email').value.trim();
+
             const password = document.getElementById('password').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const role = roleSelect.value;
-            const department = document.getElementById('department').value.trim();
+            const confirm = document.getElementById('confirm_password').value;
 
-            if (!firstName || !lastName || !email || !password) {
-                alert('Please fill all required fields');
-                return;
-            }
-
-            if (password !== confirmPassword) {
+            if (password !== confirm) {
                 alert('Passwords do not match');
                 return;
             }
-
             if (password.length < 6) {
                 alert('Password must be at least 6 characters');
                 return;
             }
 
             const userData = {
-                first_name: firstName,
-                last_name: lastName,
-                email: email,
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value,
+                email: document.getElementById('email').value,
                 password: password,
-                role: role,
-                department: role === 'professor' ? department : null
+                role: document.getElementById('role').value,
+                student_id: document.getElementById('student_id').value,
+                department: document.getElementById('department').value
             };
 
-            btn.textContent = 'Creating account...';
+            const btn = document.getElementById('registerBtn');
             btn.disabled = true;
+            btn.textContent = 'Creating...';
 
             try {
                 const response = await fetch('/api/auth/register', {
@@ -147,23 +377,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(userData)
                 });
-                
                 const data = await response.json();
-                
                 if (data.success) {
-                    alert('Registration successful! Please login.');
-                    setTimeout(() => {
-                        window.location.href = '/login.html';
-                    }, 1000);
+                    alert('✅ Registration successful! Please login.');
+                    window.location.href = '/login.html';
                 } else {
-                    const errors = data.errors ? Object.values(data.errors).flat().join(', ') : data.message || 'Registration failed';
-                    alert(errors);
+                    alert(data.message || 'Registration failed');
                 }
             } catch (error) {
                 alert('Network error. Please try again.');
             } finally {
-                btn.textContent = 'Create Account';
                 btn.disabled = false;
+                btn.textContent = 'Create Account';
             }
         });
     </script>

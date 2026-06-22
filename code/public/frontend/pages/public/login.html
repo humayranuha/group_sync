@@ -5,101 +5,321 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - GroupSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body {
+            transition: background 0.5s, color 0.3s;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .dark body {
+            background-color: #0b0e1a;
+            color: #e2e8f0;
+        }
+        /* ----- Modern Gradient Backgrounds ----- */
+        .login-bg {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            position: relative;
+            overflow: hidden;
+        }
+        .login-bg::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: radial-gradient(ellipse at 30% 40%, rgba(236, 72, 153, 0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse at 70% 60%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            animation: bgFloat 15s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+        @keyframes bgFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(-3%, -3%) scale(1.05); }
+        }
+        /* ----- 3D Card Effect ----- */
+        .card-3d {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 32px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+            transform: perspective(1200px) rotateX(2deg) rotateY(-1deg);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .card-3d:hover {
+            transform: perspective(1200px) rotateX(0deg) rotateY(0deg) translateY(-6px);
+            box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+        /* ----- Neon Inputs ----- */
+        .input-neon {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.3s ease;
+            color: #fff;
+        }
+        .input-neon:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.3), 0 0 60px rgba(168, 85, 247, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+        }
+        .input-neon::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+        .dark .input-neon {
+            background: rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+        .dark .input-neon:focus {
+            border-color: #a855f7;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+        /* ----- 3D Button ----- */
+        .btn-3d {
+            background: linear-gradient(135deg, #7c3aed, #ec4899);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 24px;
+            border-radius: 16px;
+            box-shadow: 0 8px 0 #4c1d95, 0 10px 30px -5px rgba(124, 58, 237, 0.4);
+            transition: all 0.15s ease;
+            transform: translateY(0);
+        }
+        .btn-3d:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 0 #4c1d95, 0 15px 40px -5px rgba(124, 58, 237, 0.5);
+        }
+        .btn-3d:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #4c1d95;
+        }
+        .dark .card-3d {
+            background: rgba(15, 15, 35, 0.7);
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+        .dark .btn-3d {
+            box-shadow: 0 8px 0 #2e1065, 0 10px 30px -5px rgba(124, 58, 237, 0.3);
+        }
+        .dark .btn-3d:hover {
+            box-shadow: 0 10px 0 #2e1065, 0 15px 40px -5px rgba(124, 58, 237, 0.4);
+        }
+        /* ----- Modern Header & Footer ----- */
+        .header-gradient {
+            background: linear-gradient(135deg, rgba(15, 12, 41, 0.85), rgba(48, 43, 99, 0.85));
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .dark .header-gradient {
+            background: linear-gradient(135deg, rgba(5, 3, 20, 0.9), rgba(20, 15, 50, 0.9));
+        }
+        .footer-gradient {
+            background: linear-gradient(135deg, #1e1b4b, #312e81, #4c1d95);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        .dark .footer-gradient {
+            background: linear-gradient(135deg, #0b081f, #1a1640, #2d1b69);
+        }
+        /* ----- Theme toggle & social icons ----- */
+        .theme-toggle {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+        .social-icon {
+            transition: color 0.3s, transform 0.3s;
+        }
+        .social-icon:hover {
+            transform: translateY(-2px) scale(1.1);
+        }
+        .brand-gradient {
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        @media (max-width: 768px) {
+            .card-3d {
+                transform: none;
+            }
+            .card-3d:hover {
+                transform: translateY(-4px);
+            }
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center">
-    <div class="flex w-full max-w-6xl">
-        <!-- Left Side -->
-        <div class="hidden lg:flex lg:w-1/2 bg-blue-600 rounded-l-2xl items-center justify-center p-12">
-            <div class="text-center text-white">
-                <div class="text-6xl mb-6">📊</div>
-                <h1 class="text-4xl font-bold mb-4">GroupSync</h1>
-                <p class="text-xl mb-6">AI-Powered Academic Collaboration Analytics</p>
-                <p class="text-blue-100">Monitor student contributions, detect free riders, and enhance group collaboration</p>
-            </div>
-        </div>
-        
-        <!-- Right Side -->
-        <div class="w-full lg:w-1/2 bg-white rounded-r-2xl shadow-2xl p-8 lg:p-12">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-900">Welcome Back</h2>
-                <p class="text-gray-600 mt-2">Sign in to your account</p>
-            </div>
-            
-            <form id="loginForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Email Address</label>
-                    <input type="email" id="email" placeholder="student@demo.com" required
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Password</label>
-                    <input type="password" id="password" placeholder="••••••••" required
-                           class="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input type="checkbox" id="remember" class="h-4 w-4 text-blue-600 rounded border-gray-300">
-                        <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
-                    </div>
-                    <a href="#" class="text-sm text-blue-600 hover:text-blue-500">Forgot password?</a>
-                </div>
-                
-                <button type="submit" id="loginBtn"
-                        class="w-full py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-lg">
-                    Sign In
-                </button>
-            </form>
-            
-            <div class="mt-6">
-                <div class="relative">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-4 bg-white text-gray-500">Or continue with</span>
-                    </div>
-                </div>
-                
-                <button id="githubLogin" class="mt-6 w-full flex justify-center items-center py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.682-.103-.253-.447-1.27.098-2.646 0 0 .84-.269 2.75 1.025.8-.223 1.65-.334 2.5-.334.85 0 1.7.111 2.5.334 1.91-1.294 2.75-1.025 2.75-1.025.545 1.376.201 2.393.099 2.646.64.698 1.03 1.591 1.03 2.682 0 3.841-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.14 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z"/>
-                    </svg>
-                    Sign in with GitHub
-                </button>
-            </div>
-            
-            <p class="mt-6 text-center text-sm text-gray-600">
-                Don't have an account? <a href="/register.html" class="text-blue-600 hover:text-blue-500 font-medium">Sign up</a>
-            </p>
-            <p class="mt-2 text-center text-xs text-gray-400">
-                Demo: student@demo.com / 123456
-            </p>
-        </div>
-    </div>
+<body>
 
+    <!-- ===== NAVIGATION (Header with gradient) ===== -->
+    <nav class="header-gradient sticky top-0 z-50 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-white">Group<span class="brand-gradient">Sync</span></a>
+            <div class="flex items-center space-x-6">
+                <a href="/login.html" class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:shadow-lg hover:shadow-purple-500/25 transition">Login</a>
+                <a href="/register.html" class="text-gray-300 hover:text-white transition">Register</a>
+                <button id="themeToggle" class="theme-toggle text-xl text-gray-300 dark:text-yellow-400 p-2 rounded-full hover:bg-white/10">
+                    <i id="themeIcon" class="fas fa-sun"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== LOGIN SECTION ===== -->
+    <section class="login-bg min-h-screen flex items-center justify-center px-4 py-16 relative">
+        <div class="max-w-5xl w-full relative z-10">
+            <div class="card-3d p-8 md:p-12">
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Left Branding -->
+                    <div class="lg:w-1/2 space-y-6 text-white">
+                        <div class="text-6xl">📊</div>
+                        <h1 class="text-4xl font-extrabold tracking-tight">Welcome <span class="brand-gradient">Back</span></h1>
+                        <p class="text-gray-300 text-lg">Sign in to continue your academic collaboration journey.</p>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li class="flex items-center"><span class="w-5 h-5 rounded-full bg-purple-500/20 flex items-center justify-center mr-3"><i class="fas fa-check text-purple-400 text-xs"></i></span> Real-time GitHub analytics</li>
+                            <li class="flex items-center"><span class="w-5 h-5 rounded-full bg-pink-500/20 flex items-center justify-center mr-3"><i class="fas fa-check text-pink-400 text-xs"></i></span> AI-powered free rider detection</li>
+                            <li class="flex items-center"><span class="w-5 h-5 rounded-full bg-indigo-500/20 flex items-center justify-center mr-3"><i class="fas fa-check text-indigo-400 text-xs"></i></span> Automated PDF reports</li>
+                        </ul>
+                        <div class="pt-4">
+                            <p class="text-xs text-gray-400">New here? <a href="/register.html" class="text-purple-300 hover:text-white font-medium">Create account →</a></p>
+                        </div>
+                    </div>
+
+                    <!-- Right Form -->
+                    <div class="lg:w-1/2">
+                        <div class="text-center mb-8">
+                            <h2 class="text-2xl font-bold text-white">Sign In</h2>
+                            <p class="text-gray-400">Access your dashboard</p>
+                        </div>
+                        <form id="loginForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">Email Address</label>
+                                <input type="email" id="email" required placeholder="student@demo.com" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-300">Password</label>
+                                <input type="password" id="password" required placeholder="••••••••" class="input-neon mt-1 block w-full px-4 py-3 rounded-xl">
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <input type="checkbox" id="remember" class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-600 rounded bg-transparent">
+                                    <label for="remember" class="ml-2 text-sm text-gray-300">Remember me</label>
+                                </div>
+                                <a href="#" class="text-sm text-purple-400 hover:text-white">Forgot password?</a>
+                            </div>
+                            <button type="submit" id="loginBtn" class="btn-3d w-full text-lg">
+                                Sign In
+                            </button>
+                        </form>
+                        <div class="mt-6">
+                            <div class="relative">
+                                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-white/10"></div></div>
+                                <div class="relative flex justify-center text-sm"><span class="px-4 bg-transparent text-gray-400">Or continue with</span></div>
+                            </div>
+                            <button id="githubLogin" class="mt-6 w-full flex justify-center items-center py-3 border border-white/10 rounded-xl hover:bg-white/5 transition text-gray-300">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.03-2.682-.103-.253-.447-1.27.098-2.646 0 0 .84-.269 2.75 1.025.8-.223 1.65-.334 2.5-.334.85 0 1.7.111 2.5.334 1.91-1.294 2.75-1.025 2.75-1.025.545 1.376.201 2.393.099 2.646.64.698 1.03 1.591 1.03 2.682 0 3.841-2.337 4.687-4.565 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.14 18.163 20 14.418 20 10c0-5.523-4.477-10-10-10z"/>
+                                </svg>
+                                Sign in with GitHub
+                            </button>
+                        </div>
+                        <p class="mt-6 text-center text-xs text-gray-400">Demo: student@demo.com / 123456</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PROFESSIONAL FOOTER (Vibrant Gradient) ===== -->
+    <footer class="footer-gradient text-white py-10 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+                <h2 class="text-2xl font-bold text-white">Group<span class="brand-gradient">Sync</span></h2>
+                <p class="text-gray-300 mt-2 text-sm">AI-Powered Academic Collaboration Analytics</p>
+                <p class="text-gray-400 mt-4 text-sm"><i class="fas fa-map-marker-alt mr-2 text-purple-400"></i> Dhaka, Bangladesh</p>
+                <p class="text-gray-400 text-sm"><i class="fas fa-envelope mr-2 text-purple-400"></i> support@groupsync.com</p>
+                <p class="text-gray-400 text-sm"><i class="fas fa-phone mr-2 text-purple-400"></i> +880 1234 567 890</p>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">About Us</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">Terms of Service</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">FAQ</a></li>
+                    <li><a href="#" class="text-gray-300 hover:text-white transition">Support</a></li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4">Connect With Us</h3>
+                <div class="flex space-x-4 mb-4">
+                    <a href="#" class="social-icon text-gray-300 hover:text-blue-400 text-2xl"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-sky-400 text-2xl"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-pink-400 text-2xl"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-red-400 text-2xl"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="social-icon text-gray-300 hover:text-gray-200 text-2xl"><i class="fab fa-github"></i></a>
+                </div>
+                <p class="text-gray-300 text-sm">Subscribe to our newsletter</p>
+                <div class="flex mt-2">
+                    <input type="email" placeholder="Your email" class="px-4 py-2 w-full rounded-l-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-purple-500 text-sm">
+                    <button class="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 rounded-r-xl transition text-sm font-medium">Subscribe</button>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-purple-500/20 mt-8 pt-6 text-center text-gray-400 text-sm">
+            &copy; 2026 GroupSync. All rights reserved. Designed with <i class="fas fa-heart text-pink-500"></i> for academic excellence.
+        </div>
+    </footer>
+
+    <!-- ===== SCRIPTS ===== -->
     <script>
+        // Dark/Light Toggle (persistent)
+        (function() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+
+            if (localStorage.getItem('theme') === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+
+            toggle.addEventListener('click', function() {
+                html.classList.toggle('dark');
+                if (html.classList.contains('dark')) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        })();
+
+        // Login form submission
         const form = document.getElementById('loginForm');
         const btn = document.getElementById('loginBtn');
 
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            
+
             if (!email || !password) {
                 alert('Please fill all fields');
                 return;
             }
 
-            btn.textContent = 'Signing in...';
             btn.disabled = true;
+            btn.textContent = 'Signing in...';
 
             try {
                 const response = await fetch('/api/auth/login', {
@@ -107,13 +327,12 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-                
                 const data = await response.json();
-                
+
                 if (data.success) {
                     localStorage.setItem('groupsync_auth_token', data.token);
                     localStorage.setItem('groupsync_user_data', JSON.stringify(data.user));
-                    alert('Login successful!');
+                    alert('✅ Login successful!');
                     setTimeout(() => {
                         window.location.href = data.redirect || '/student/dashboard.html';
                     }, 500);
@@ -123,12 +342,12 @@
             } catch (error) {
                 alert('Network error. Please try again.');
             } finally {
-                btn.textContent = 'Sign In';
                 btn.disabled = false;
+                btn.textContent = 'Sign In';
             }
         });
 
-        document.getElementById('githubLogin')?.addEventListener('click', () => {
+        document.getElementById('githubLogin')?.addEventListener('click', function() {
             alert('GitHub OAuth coming soon!');
         });
     </script>
