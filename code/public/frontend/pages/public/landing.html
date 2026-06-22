@@ -5,68 +5,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GroupSync - Academic Collaboration Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        /* ----- Global Transitions & Dark Mode ----- */
+        body {
+            transition: background 0.5s, color 0.3s;
+        }
+        .dark body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        .dark .bg-white {
+            background-color: #1e293b !important;
+        }
+        .dark .text-gray-600,
+        .dark .text-gray-700 {
+            color: #cbd5e1 !important;
+        }
+        .dark .text-gray-500 {
+            color: #94a3b8 !important;
+        }
+        .dark .bg-gradient-to-br {
+            background: linear-gradient(135deg, #0f172a, #1e293b) !important;
+        }
+        .dark .shadow-sm {
+            box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.05);
+        }
+        .dark .border {
+            border-color: #334155 !important;
+        }
+        .dark .shadow {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 10px 25px -5px rgba(255, 255, 255, 0.05);
+        }
+        /* ----- Card hover effect ----- */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .dark .card-hover:hover {
+            box-shadow: 0 20px 25px -5px rgba(255, 255, 255, 0.05);
+        }
+        /* ----- Hero gradient animation ----- */
+        .hero-gradient {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #d946ef);
+            background-size: 300% 300%;
+            animation: gradientMove 8s ease-in-out infinite alternate;
+        }
+        @keyframes gradientMove {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        /* ----- Toggle button style ----- */
+        .theme-toggle {
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .theme-toggle:hover {
+            transform: rotate(20deg);
+        }
+        /* ----- Footer social icons hover ----- */
+        .social-icon {
+            transition: color 0.3s, transform 0.3s;
+        }
+        .social-icon:hover {
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm">
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="bg-white/90 backdrop-blur-sm shadow-sm dark:bg-slate-900/90 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-50 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-blue-600">GroupSync</h1>
-            <div>
-                <a href="/login.html" class="mr-4 text-gray-700 hover:text-gray-900">Login</a>
-                <a href="/register.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Register</a>
+            <h1 class="text-2xl font-bold text-blue-600 dark:text-blue-400">GroupSync</h1>
+            <div class="flex items-center space-x-6">
+                <a href="/login.html" class="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition">Login</a>
+                <a href="/register.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 transition shadow-md hover:shadow-lg">Register</a>
+                <!-- Day/Night Toggle -->
+                <button id="themeToggle" class="theme-toggle text-xl text-gray-600 dark:text-yellow-400 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700">
+                    <i id="themeIcon" class="fas fa-sun"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Hero -->
-    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 py-20 text-center">
-        <div class="max-w-4xl mx-auto px-4">
-            <h1 class="text-5xl font-bold">
+    <!-- ===== HERO SECTION ===== -->
+    <div class="hero-gradient py-20 text-center text-white relative overflow-hidden">
+        <div class="max-w-4xl mx-auto px-4 relative z-10">
+            <h1 class="text-5xl font-bold drop-shadow-lg">
                 AI-Powered Academic<br>
-                <span class="text-blue-600">Collaboration Analytics</span>
+                <span class="text-white">Collaboration Analytics</span>
             </h1>
-            <p class="mt-4 text-xl text-gray-600 max-w-2xl mx-auto">
+            <p class="mt-4 text-xl text-white/90 max-w-2xl mx-auto drop-shadow">
                 Monitor student contributions, detect free riders, and enhance group collaboration with real-time GitHub analytics and AI evaluation.
             </p>
             <div class="mt-8 space-x-4">
-                <a href="/register.html" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Get Started</a>
-                <a href="#features" class="px-6 py-3 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50">Learn More</a>
+                <a href="/register.html" class="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-gray-100 font-semibold shadow-lg transition">Get Started</a>
+                <a href="#features" class="px-6 py-3 border border-white text-white rounded-lg hover:bg-white/10 transition">Learn More</a>
             </div>
         </div>
+        <!-- Subtle floating shapes -->
+        <div class="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full blur-xl"></div>
+        <div class="absolute bottom-10 right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
     </div>
 
-    <!-- Features -->
-    <div id="features" class="py-16 max-w-7xl mx-auto px-4">
+    <!-- ===== FEATURES ===== -->
+    <div id="features" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 transition-colors dark:text-gray-100">
         <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold">Everything You Need</h2>
-            <p class="text-gray-600 mt-2">Powerful tools to track, analyze, and improve student collaboration</p>
+            <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Everything You Need</h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-2">Powerful tools to track, analyze, and improve student collaboration</p>
         </div>
         <div class="grid md:grid-cols-3 gap-8">
-            <div class="bg-white p-6 rounded-lg shadow card-hover">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow card-hover border border-gray-100 dark:border-slate-700 transition-colors">
                 <div class="text-4xl mb-3">📊</div>
-                <h3 class="text-xl font-semibold">GitHub Analytics</h3>
-                <p class="text-gray-600 mt-2">Track commits, pull requests, forks, and code contributions in real-time</p>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">GitHub Analytics</h3>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Track commits, pull requests, forks, and code contributions in real-time</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow card-hover">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow card-hover border border-gray-100 dark:border-slate-700 transition-colors">
                 <div class="text-4xl mb-3">🤖</div>
-                <h3 class="text-xl font-semibold">AI Evaluation</h3>
-                <p class="text-gray-600 mt-2">AI-powered free rider detection and contribution quality analysis</p>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">AI Evaluation</h3>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">AI-powered free rider detection and contribution quality analysis</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow card-hover">
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow card-hover border border-gray-100 dark:border-slate-700 transition-colors">
                 <div class="text-4xl mb-3">📈</div>
-                <h3 class="text-xl font-semibold">Performance Metrics</h3>
-                <p class="text-gray-600 mt-2">Visual dashboards with contribution heatmaps and activity trends</p>
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Performance Metrics</h3>
+                <p class="text-gray-600 dark:text-gray-400 mt-2">Visual dashboards with contribution heatmaps and activity trends</p>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-8 text-center">
-        <p>&copy; 2026 GroupSync. All rights reserved.</p>
+    <!-- ===== FOOTER (Professional) ===== -->
+    <footer class="bg-gray-800 dark:bg-slate-900 text-white py-12 border-t border-gray-700 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Company Info -->
+            <div>
+                <h2 class="text-2xl font-bold text-blue-400">GroupSync</h2>
+                <p class="text-gray-400 mt-2 text-sm">AI-Powered Academic Collaboration Analytics Platform</p>
+                <p class="text-gray-500 mt-4 text-sm">
+                    <i class="fas fa-map-marker-alt mr-2"></i> Dhaka, Bangladesh
+                </p>
+                <p class="text-gray-500 text-sm">
+                    <i class="fas fa-envelope mr-2"></i> support@groupsync.com
+                </p>
+                <p class="text-gray-500 text-sm">
+                    <i class="fas fa-phone mr-2"></i> +880 1234 567 890
+                </p>
+            </div>
+            <!-- Quick Links -->
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4">Quick Links</h3>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">About Us</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">Privacy Policy</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">Terms of Service</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">FAQ</a></li>
+                    <li><a href="#" class="text-gray-400 hover:text-white transition">Support</a></li>
+                </ul>
+            </div>
+            <!-- Social & Newsletter -->
+            <div>
+                <h3 class="text-lg font-semibold text-white mb-4">Connect With Us</h3>
+                <div class="flex space-x-4 mb-4">
+                    <a href="#" class="social-icon text-gray-400 hover:text-blue-400 text-2xl"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon text-gray-400 hover:text-sky-400 text-2xl"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon text-gray-400 hover:text-purple-400 text-2xl"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-icon text-gray-400 hover:text-red-400 text-2xl"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="social-icon text-gray-400 hover:text-gray-200 text-2xl"><i class="fab fa-github"></i></a>
+                </div>
+                <p class="text-gray-400 text-sm">Subscribe to our newsletter</p>
+                <div class="flex mt-2">
+                    <input type="email" placeholder="Your email" class="px-4 py-2 w-full rounded-l-lg bg-gray-700 border border-gray-600 text-white focus:outline-none focus:border-blue-500 text-sm">
+                    <button class="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-r-lg transition text-sm font-medium">Subscribe</button>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-700 dark:border-slate-700 mt-8 pt-6 text-center text-gray-500 text-sm">
+            &copy; 2026 GroupSync. All rights reserved. Designed with <i class="fas fa-heart text-red-500"></i> for academic excellence.
+        </div>
     </footer>
+
+    <!-- ===== DAY/NIGHT TOGGLE SCRIPT ===== -->
+    <script>
+        (function() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+
+            // Check local storage for theme
+            if (localStorage.getItem('theme') === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+
+            toggle.addEventListener('click', function() {
+                html.classList.toggle('dark');
+                if (html.classList.contains('dark')) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
