@@ -1,65 +1,190 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - GroupSync</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard — GroupSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <style>
         * { font-family: 'Inter', system-ui, sans-serif; }
         body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
         .dark body { background: #0b1717; color: #e8edf0; }
-        .sidebar-teal { background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%); border-right: 1px solid rgba(58,175,169,0.08); }
+        html { scroll-behavior: smooth; }
+
+        .dark .bg-white { background-color: #132424 !important; }
+        .dark .bg-gray-50 { background-color: #0b1717 !important; }
+        .dark .bg-gray-100 { background-color: #1a2d2d !important; }
+        .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .text-gray-400 { color: #81999b !important; }
+        .dark .border-gray-200 { border-color: #1e3a3a !important; }
+        .dark .border-gray-100 { border-color: #1e3a3a !important; }
+        .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; }
+        .dark .divide-gray-200>* { border-color: #1e3a3a !important; }
+        .dark .bg-blue-50 { background-color: rgba(58,175,169,0.08) !important; }
+
+        .sidebar-teal {
+            background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
+            border-right: 1px solid rgba(58,175,169,0.08);
+            transition: background 0.4s, border-color 0.4s;
+        }
         .dark .sidebar-teal { background: linear-gradient(180deg, #071010 0%, #0f2624 100%); }
-        .nav-link { transition: all 0.3s ease; color: rgba(255,255,255,0.55); border-radius: 12px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem; font-weight: 500; font-size: 0.95rem; }
+        .sidebar-teal .brand {
+            background: linear-gradient(135deg, #3AAFA9, #2B7A78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.55);
+            border-radius: 12px;
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
         .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
         .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.05); }
         .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
         .dark .nav-link.active { background: rgba(58,175,169,0.12); }
-        .header-teal { background: rgba(43,122,120,0.88); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(58,175,169,0.12); }
-        .dark .header-teal { background: rgba(11,23,23,0.92); }
-        .card-glass { background: rgba(255,255,255,0.80); backdrop-filter: blur(4px); border: 1px solid rgba(58,175,169,0.06); border-radius: 20px; transition: all 0.4s; }
-        .dark .card-glass { background: rgba(19,36,36,0.80); }
-        .stat-card { transition: all 0.4s; border: 1px solid rgba(58,175,169,0.06); background: rgba(255,255,255,0.80); backdrop-filter: blur(4px); border-radius: 20px; padding: 1.5rem; cursor: pointer; }
+
+        .header-teal {
+            background: rgba(43,122,120,0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(58,175,169,0.12);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .dark .header-teal { background: rgba(11,23,23,0.92); border-bottom-color: rgba(58,175,169,0.06); }
+
+        .card-glass {
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(58,175,169,0.06);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        .card-glass:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 20px 40px -12px rgba(58,175,169,0.12); }
+        .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        .dark .card-glass:hover { box-shadow: 0 20px 40px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
+
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+            border: 1px solid rgba(58,175,169,0.06);
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+        }
         .stat-card:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 16px 32px -12px rgba(58,175,169,0.12); }
-        .dark .stat-card { background: rgba(19,36,36,0.80); }
-        .stat-icon { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 14px; font-size: 1.3rem; transition: background 0.3s; }
+        .dark .stat-card { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        .dark .stat-card:hover { box-shadow: 0 16px 32px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
+
+        .stat-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: 14px; font-size: 1.3rem;
+            transition: background 0.3s;
+        }
         .stat-icon.teal-bg { background: rgba(58,175,169,0.10); color: #3AAFA9; }
         .dark .stat-icon.teal-bg { background: rgba(58,175,169,0.08); }
-        .btn-teal { background: #3AAFA9; color: #fff; transition: all 0.3s ease; box-shadow: 0 4px 14px rgba(58,175,169,0.25); padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; }
+        .stat-card:hover .stat-icon.teal-bg { background: rgba(58,175,169,0.18); }
+
+        .btn-teal {
+            background: #3AAFA9; color: #fff; transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(58,175,169,0.25);
+            padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
+        }
         .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58,175,169,0.30); }
-        .theme-toggle { transition: transform 0.4s; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer; color: rgba(255,255,255,0.70); font-size: 17px; }
+        .btn-teal-outline {
+            background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9;
+            transition: all 0.3s ease; padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer;
+        }
+        .btn-teal-outline:hover { background: #3AAFA9; color: #fff; transform: translateY(-2px); }
+        .dark .btn-teal { background: #2B7A78; box-shadow: 0 4px 14px rgba(43,122,120,0.20); }
+        .dark .btn-teal:hover { background: #3AAFA9; box-shadow: 0 8px 24px rgba(58,175,169,0.20); }
+
+        .theme-toggle {
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer;
+            color: rgba(255,255,255,0.70); font-size: 17px;
+        }
         .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); color: #fff; }
-        .logout-btn { transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px; }
+
+        .menu-btn {
+            background: rgba(58,175,169,0.90); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s;
+        }
+        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
+        .dark .menu-btn { background: rgba(43,122,120,0.80); }
+
+        .logout-btn {
+            transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent;
+            border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px;
+        }
         .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
-        .status-badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
-        .status-active { background-color: #dcfce7; color: #166534; }
-        .status-inactive { background-color: #fee2e2; color: #991b1b; }
-        .status-pending { background-color: #fef9c3; color: #854d0e; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-box {
+            background: white; border-radius: 24px; max-width: 700px; width: 95%;
+            max-height: 85vh; overflow-y: auto; padding: 30px;
+            position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .dark .modal-box { background: #132424; }
+        .modal-close {
+            position: absolute; top: 16px; right: 20px; font-size: 28px;
+            cursor: pointer; color: #999; transition: color 0.2s;
+        }
+        .modal-close:hover { color: #333; }
+        .dark .modal-close { color: #666; }
+        .dark .modal-close:hover { color: #ccc; }
+
+        .input-teal {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
+            width: 100%; font-size: 0.95rem;
+        }
+        .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
+        .input-teal::placeholder { color: rgba(255,255,255,0.25); }
+        .dark .input-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
+        .dark .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+
+        .badge-active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .badge-pending { background: #fef9c3; color: #854d0e; }
+        .badge-inactive { background: rgba(58,175,169,0.06); color: #64748b; }
+
         @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
         @keyframes spin { to { transform:rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
+
         .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
         .sidebar-scroll::-webkit-scrollbar { width: 4px; }
         .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
+
         @media (max-width:768px) { .stat-card { padding:1rem; } .stat-icon { width:40px; height:40px; font-size:1.1rem; } }
-        .brand-gradient { background: linear-gradient(135deg, #3AAFA9, #2B7A78); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; backdrop-filter: blur(4px); animation: fadeIn 0.3s ease; }
-        .modal-box { background: white; border-radius: 24px; max-width: 700px; width: 95%; max-height: 85vh; overflow-y: auto; padding: 30px; position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
-        .dark .modal-box { background: #132424; }
-        .modal-close { position: absolute; top: 16px; right: 20px; font-size: 28px; cursor: pointer; color: #999; transition: color 0.2s; }
-        .modal-close:hover { color: #333; }
-        .dark .modal-close { color: #666; }
-        .dark .modal-close:hover { color: #ccc; }
     </style>
 </head>
 <body>
 
-    <!-- ===== SIDEBAR (Admin) ===== -->
+    <!-- ===== SIDEBAR ===== -->
     <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
         <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
             <a href="/" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm hover:opacity-80 transition">
@@ -71,13 +196,13 @@
             <a href="#" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
             <a href="#" data-page="users" class="nav-link"><span class="icon">👥</span> Users</a>
             <a href="#" data-page="courses" class="nav-link"><span class="icon">📚</span> Courses</a>
-            <a href="#" data-page="logs" class="nav-link"><span class="icon">📋</span> Audit Logs</a>
+            <a href="#" data-page="audit" class="nav-link"><span class="icon">📋</span> Audit Logs</a>
             <a href="#" data-page="settings" class="nav-link"><span class="icon">⚙️</span> Settings</a>
         </nav>
         <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
             <div class="flex items-center gap-3">
                 <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20 cursor-pointer hover:scale-105 transition">AD</div>
-                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Admin</p><p class="text-xs text-white/40 truncate">Administrator</p></div>
+                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Admin User</p><p class="text-xs text-white/40 truncate">Administrator</p></div>
                 <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
             </div>
         </div>
@@ -95,7 +220,7 @@
                 <span id="page-title" class="text-sm font-medium text-white/50">Overview</span>
             </div>
             <div class="flex items-center gap-3">
-                <button id="themeToggle" class="theme-toggle"><i id="themeIcon" class="fas fa-sun"></i></button>
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme"><i id="themeIcon" class="fas fa-sun"></i></button>
             </div>
         </div>
     </header>
@@ -121,28 +246,28 @@
         // ============================================
         // DEMO DATA
         // ============================================
-        var adminUsers = [
-            { id: 1, name: 'John Doe', email: 'john@example.com', role: 'student', status: 'active', joined: '2024-01-15' },
-            { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'student', status: 'active', joined: '2024-01-20' },
-            { id: 3, name: 'Prof. Bob Bobbi', email: 'bob@example.com', role: 'professor', status: 'active', joined: '2023-12-01' },
-            { id: 4, name: 'Mike Brown', email: 'mike@example.com', role: 'student', status: 'inactive', joined: '2024-02-10' },
-            { id: 5, name: 'Prof. Alice Wonder', email: 'alice@example.com', role: 'professor', status: 'pending', joined: '2024-03-01' }
+        let DEMO_USERS = [
+            { id: 1, name: 'John Doe', email: 'john@example.com', role: 'student', status: 'active' },
+            { id: 2, name: 'Jane Smith', email: 'jane@example.com', role: 'student', status: 'active' },
+            { id: 3, name: 'Bob Wilson', email: 'bob@example.com', role: 'professor', status: 'active' },
+            { id: 4, name: 'Mike Brown', email: 'mike@example.com', role: 'student', status: 'inactive' },
+            { id: 5, name: 'Alice Johnson', email: 'alice@example.com', role: 'professor', status: 'pending' }
         ];
 
-        var adminCourses = [
-            { id: 1, code: 'CS401', title: 'Software Engineering', teacher: 'Prof. Bob Bobbi', students: 32, status: 'active' },
-            { id: 2, code: 'CS402', title: 'Database Systems', teacher: 'Prof. Alice Wonder', students: 28, status: 'active' },
-            { id: 3, code: 'CS403', title: 'Web Development', teacher: 'Prof. Bob Bobbi', students: 25, status: 'active' },
-            { id: 4, code: 'CS404', title: 'Data Structures', teacher: 'Prof. Alice Wonder', students: 30, status: 'inactive' }
+        let DEMO_COURSES = [
+            { id: 1, code: 'CS401', title: 'Software Engineering', teacher: 'Dr. Smith', students: 32, status: 'active' },
+            { id: 2, code: 'CS402', title: 'Database Systems', teacher: 'Dr. Jones', students: 28, status: 'active' },
+            { id: 3, code: 'CS403', title: 'Web Development', teacher: 'Dr. Lee', students: 25, status: 'active' },
+            { id: 4, code: 'CS404', title: 'Data Structures', teacher: 'Dr. Khan', students: 30, status: 'inactive' }
         ];
 
-        var adminLogs = [
-            { user: 'John Doe', action: 'Login', details: 'User logged in successfully', time: '2024-06-22 10:30:00' },
-            { user: 'Jane Smith', action: 'Submit Peer Review', details: 'Submitted review for Mike Brown', time: '2024-06-22 09:15:00' },
-            { user: 'Prof. Bob Bobbi', action: 'Create Course', details: 'Created course CS403', time: '2024-06-21 16:45:00' },
-            { user: 'Admin', action: 'User Management', details: 'Added new student account', time: '2024-06-21 14:20:00' },
-            { user: 'Mike Brown', action: 'Login', details: 'User logged in from new device', time: '2024-06-21 11:00:00' },
-            { user: 'Jane Smith', action: 'Connect GitHub', details: 'Connected repository project-repo', time: '2024-06-20 18:30:00' }
+        let DEMO_AUDIT_LOGS = [
+            { user: 'John Doe', action: 'login', details: 'User logged in successfully', time: '2024-06-22 10:30:00' },
+            { user: 'Jane Smith', action: 'review', details: 'Submitted review for Mike Brown', time: '2024-06-22 09:15:00' },
+            { user: 'Admin', action: 'course', details: 'Created course CS403', time: '2024-06-21 16:45:00' },
+            { user: 'Admin', action: 'user', details: 'Added new student account', time: '2024-06-21 14:20:00' },
+            { user: 'Bob Wilson', action: 'login', details: 'User logged in from new device', time: '2024-06-21 11:00:00' },
+            { user: 'Mike Brown', action: 'repo', details: 'Connected repository project-repo', time: '2024-06-20 18:30:00' }
         ];
 
         // ============================================
@@ -200,8 +325,8 @@
         // ============================================
         window.toast = new ToastManager();
         window.auth = AuthService;
-        var charts = {};
-        var currentPage = 'dashboard';
+        let currentPage = 'dashboard';
+        let charts = {};
 
         // ============================================
         // HELPERS
@@ -209,6 +334,15 @@
         function getInitials(name) {
             if (!name) return 'AD';
             return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function getStatusBadge(status) {
+            const map = {
+                'active': 'badge-active',
+                'pending': 'badge-pending',
+                'inactive': 'badge-inactive'
+            };
+            return map[status] || 'badge-inactive';
         }
 
         // ============================================
@@ -235,145 +369,210 @@
         }
 
         // ============================================
-        // PAGE RENDERERS
+        // PAGE: DASHBOARD
         // ============================================
+       function renderDashboard() {
+    const container = document.getElementById('page-content');
+    const totalUsers = DEMO_USERS.length;
+    const activeUsers = DEMO_USERS.filter(u => u.status === 'active').length;
+    const pendingUsers = DEMO_USERS.filter(u => u.status === 'pending').length;
+    const inactiveUsers = DEMO_USERS.filter(u => u.status === 'inactive').length;
+    const totalCourses = DEMO_COURSES.length;
 
-        // ----- DASHBOARD -----
-        function renderDashboard() {
-            var container = document.getElementById('page-content');
-            var user = AuthService.getUser();
+    container.innerHTML = `
+        <div class="space-y-6">
+            <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                <h2 class="text-2xl font-bold">Admin Dashboard</h2>
+                <p class="text-white/80 mt-1 text-sm">System overview and management</p>
+            </div>
 
-            var totalUsers = adminUsers.length;
-            var activeUsers = adminUsers.filter(function(u) { return u.status === 'active'; }).length;
-            var totalCourses = adminCourses.length;
-            var activeCourses = adminCourses.filter(function(c) { return c.status === 'active'; }).length;
-
-            container.innerHTML = `
-                <div class="space-y-6 animate-fade-in">
-                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
-                        <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Admin'}! 👋</h2>
-                        <p class="text-white/80 mt-1 text-sm">System Overview & Analytics</p>
+            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                <!-- Total Users -->
+                <div class="stat-card" onclick="navigate('users')">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Users</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalUsers}</p></div>
+                        <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
                     </div>
-
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="stat-card" onclick="navigate('users')">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Users</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalUsers}</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">${activeUsers} active</p>
-                        </div>
-                        <div class="stat-card" onclick="navigate('users')">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Active Users</p><p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${activeUsers}</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-user-check"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">${Math.round(activeUsers/totalUsers*100)}% of total</p>
-                        </div>
-                        <div class="stat-card" onclick="navigate('courses')">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalCourses}</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-book"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">${activeCourses} active</p>
-                        </div>
-                        <div class="stat-card">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">System Status</p><p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">🟢 Online</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-server"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">All systems operational</p>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <div class="card-glass p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">User Distribution</h3>
-                            <canvas id="userChart" height="220"></canvas>
-                        </div>
-                        <div class="card-glass p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Course Status</h3>
-                            <canvas id="courseChart" height="220"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="card-glass p-0 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Activity</h3>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">Last 24 hours</span>
-                        </div>
-                        <div class="divide-y divide-gray-100 dark:divide-gray-800">
-                            ${adminLogs.slice(0, 5).map(function(log) {
-                                var icon = log.action === 'Login' ? '🔐' : 
-                                          log.action === 'Submit Peer Review' ? '⭐' :
-                                          log.action === 'Create Course' ? '📚' :
-                                          log.action === 'User Management' ? '👥' :
-                                          log.action === 'Connect GitHub' ? '🔗' : '📋';
-                                return `<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition"><div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-lg">${icon}</div><div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${log.user}</p><p class="text-xs text-gray-500 dark:text-gray-400">${log.action} - ${log.details}</p></div><div class="text-xs text-gray-400 dark:text-gray-500">${log.time}</div></div>`;
-                            }).join('')}
-                        </div>
-                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Click to manage</p>
                 </div>
-            `;
 
-            // Render charts
-            setTimeout(function() {
-                var ctx1 = document.getElementById('userChart')?.getContext('2d');
-                if (ctx1) {
-                    if (charts.user) charts.user.destroy();
-                    var studentCount = adminUsers.filter(function(u) { return u.role === 'student'; }).length;
-                    var professorCount = adminUsers.filter(function(u) { return u.role === 'professor'; }).length;
-                    charts.user = new Chart(ctx1, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Students', 'Professors'],
-                            datasets: [{ data: [studentCount, professorCount], backgroundColor: ['#3b82f6', '#8b5cf6'], borderWidth: 0 }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
-                    });
+                <!-- Active (Filtered) -->
+                <div class="stat-card" onclick="navigateToUsersWithFilter('active')">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Active</p><p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${activeUsers}</p></div>
+                        <div class="stat-icon teal-bg"><i class="fas fa-check-circle"></i></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Click to view</p>
+                </div>
+
+                <!-- Pending (Filtered) -->
+                <div class="stat-card" onclick="navigateToUsersWithFilter('pending')">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Pending</p><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">${pendingUsers}</p></div>
+                        <div class="stat-icon teal-bg"><i class="fas fa-clock"></i></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Click to view</p>
+                </div>
+
+                <!-- Inactive (Filtered) -->
+                <div class="stat-card" onclick="navigateToUsersWithFilter('inactive')">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Inactive</p><p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">${inactiveUsers}</p></div>
+                        <div class="stat-icon teal-bg"><i class="fas fa-user-slash"></i></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Click to view</p>
+                </div>
+
+                <!-- Courses -->
+                <div class="stat-card" onclick="navigate('courses')">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalCourses}</p></div>
+                        <div class="stat-icon teal-bg"><i class="fas fa-book"></i></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Click to manage</p>
+                </div>
+            </div>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">User Statistics</h3>
+                <canvas id="userChart" height="220"></canvas>
+            </div>
+        </div>
+    `;
+
+    setTimeout(() => {
+        const ctx = document.getElementById('userChart')?.getContext('2d');
+        if (ctx) {
+            if (charts.user) charts.user.destroy();
+            charts.user = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Active', 'Pending', 'Inactive'],
+                    datasets: [{
+                        data: [activeUsers, pendingUsers, inactiveUsers],
+                        backgroundColor: ['#3AAFA9', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
                 }
-                var ctx2 = document.getElementById('courseChart')?.getContext('2d');
-                if (ctx2) {
-                    if (charts.course) charts.course.destroy();
-                    var activeCourses = adminCourses.filter(function(c) { return c.status === 'active'; }).length;
-                    var inactiveCourses = adminCourses.filter(function(c) { return c.status === 'inactive'; }).length;
-                    charts.course = new Chart(ctx2, {
-                        type: 'doughnut',
-                        data: { labels: ['Active', 'Inactive'], datasets: [{ data: [activeCourses, inactiveCourses], backgroundColor: ['#10b981', '#ef4444'], borderWidth: 0 }] },
-                        options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: 'bottom' } } }
-                    });
-                }
-            }, 100);
+            });
         }
+    }, 100);
+}
+// ============================================
+// USER FILTER FUNCTIONS (for dashboard stats)
+// ============================================
 
-        // ----- USERS -----
+function navigateToUsersWithFilter(status) {
+    navigate('users');
+    setTimeout(() => {
+        filterUsersByStatus(status);
+    }, 100);
+}
+
+function filterUsersByStatus(status) {
+    const container = document.getElementById('page-content');
+    const filteredUsers = DEMO_USERS.filter(u => u.status === status);
+    
+    let rows = filteredUsers.map(u => `
+        <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+            <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${u.name}</td>
+            <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${u.email}</td>
+            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">${u.role}</span></td>
+            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getStatusBadge(u.status)}">${u.status}</span></td>
+            <td class="px-4 py-2 flex gap-2">
+                <button onclick="editUser(${u.id})" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                <button onclick="toggleUserStatus(${u.id})" class="text-yellow-600 hover:text-yellow-800 text-sm" title="Toggle Status"><i class="fas fa-sync"></i></button>
+                <button onclick="deleteUser(${u.id})" class="text-red-600 hover:text-red-800 text-sm" title="Delete"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
+
+    const title = status.charAt(0).toUpperCase() + status.slice(1) + ' Users';
+    container.innerHTML = `
+        <div class="space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 ${title}</h2>
+                <div class="flex gap-2">
+                    <button onclick="showAllUsers()" class="btn-teal-outline text-sm">Show All</button>
+                    <button onclick="showAddUserModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> Add User</button>
+                </div>
+            </div>
+            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-center gap-2">
+                <i class="fas fa-filter text-[#3AAFA9]"></i>
+                <span class="text-sm text-gray-700 dark:text-gray-300">Showing <strong>${filteredUsers.length}</strong> ${status} user(s)</span>
+                <button onclick="showAllUsers()" class="ml-auto text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">Clear Filter</button>
+            </div>
+            <div class="card-glass p-0 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No users found.</td></tr>'}</tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function showAllUsers() {
+    navigate('users');
+}
+
+        // ============================================
+        // PAGE: USERS (with Edit & Delete)
+        // ============================================
         function renderUsers() {
-            var container = document.getElementById('page-content');
+            const container = document.getElementById('page-content');
+
+            let rows = DEMO_USERS.map(u => `
+                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${u.name}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${u.email}</td>
+                    <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">${u.role}</span></td>
+                    <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getStatusBadge(u.status)}">${u.status}</span></td>
+                    <td class="px-4 py-2 flex gap-2">
+                        <button onclick="editUser(${u.id})" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button onclick="toggleUserStatus(${u.id})" class="text-yellow-600 hover:text-yellow-800 text-sm" title="Toggle Status"><i class="fas fa-sync"></i></button>
+                        <button onclick="deleteUser(${u.id})" class="text-red-600 hover:text-red-800 text-sm" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
             container.innerHTML = `
-                <div class="space-y-6 animate-fade-in">
+                <div class="space-y-6">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 User Management</h2>
-                        <button onclick="showToast('Add user form coming soon!', 'info')" class="btn-teal"><i class="fas fa-plus mr-2"></i> Add User</button>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 Users</h2>
+                        <button onclick="showAddUserModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> Add User</button>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                        <div class="stat-card text-center"><p class="text-2xl font-bold text-[#3AAFA9]">${adminUsers.length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Users</p></div>
-                        <div class="stat-card text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">${adminUsers.filter(u => u.status === 'active').length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Active</p></div>
-                        <div class="stat-card text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${adminUsers.filter(u => u.status === 'pending').length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Pending</p></div>
-                        <div class="stat-card text-center"><p class="text-2xl font-bold text-red-600 dark:text-red-400">${adminUsers.filter(u => u.status === 'inactive').length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Inactive</p></div>
-                    </div>
+
                     <div class="card-glass p-0 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">All Users</h3></div>
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th></tr>
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
+                                    </tr>
                                 </thead>
-                                <tbody>
-                                    ${adminUsers.map(function(u) {
-                                        var statusClass = u.status === 'active' ? 'status-active' : u.status === 'pending' ? 'status-pending' : 'status-inactive';
-                                        return `<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${u.name}</td><td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${u.email}</td><td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${u.role}</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${statusClass}">${u.status}</span></td><td class="px-4 py-2"><button onclick="showToast('Editing ${u.name}', 'info')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm mr-2">✏️</button><button onclick="showToast('Deleting ${u.name}', 'warning')" class="text-red-600 hover:text-red-800 text-sm">🗑️</button></td></tr>`;
-                                    }).join('')}
-                                </tbody>
+                                <tbody>${rows}</tbody>
                             </table>
                         </div>
                     </div>
@@ -381,50 +580,230 @@
             `;
         }
 
-        // ----- COURSES -----
-        function renderAdminCourses() {
-            var container = document.getElementById('page-content');
+        function showAddUserModal() {
+            const content = `
+                <form id="addUserForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+                        <input type="text" id="userName" class="input-teal mt-1" placeholder="John Doe" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <input type="email" id="userEmail" class="input-teal mt-1" placeholder="john@example.com" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+                        <select id="userRole" class="input-teal mt-1">
+                            <option value="student">Student</option>
+                            <option value="professor">Professor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="userStatus" class="input-teal mt-1">
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-teal w-full">Add User</button>
+                </form>
+            `;
+            showModal('Add New User', content);
+
+            document.getElementById('addUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const name = document.getElementById('userName').value;
+                const email = document.getElementById('userEmail').value;
+                const role = document.getElementById('userRole').value;
+                const status = document.getElementById('userStatus').value;
+                DEMO_USERS.push({ id: Date.now(), name, email, role, status });
+                closeModal();
+                window.toast.success(`User ${name} added successfully!`);
+                renderUsers();
+            });
+        }
+
+        function editUser(id) {
+            const user = DEMO_USERS.find(u => u.id === id);
+            if (!user) { window.toast.error('User not found'); return; }
+
+            const content = `
+                <form id="editUserForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+                        <input type="text" id="editUserName" value="${user.name}" class="input-teal mt-1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <input type="email" id="editUserEmail" value="${user.email}" class="input-teal mt-1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+                        <select id="editUserRole" class="input-teal mt-1">
+                            <option value="student" ${user.role === 'student' ? 'selected' : ''}>Student</option>
+                            <option value="professor" ${user.role === 'professor' ? 'selected' : ''}>Professor</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="editUserStatus" class="input-teal mt-1">
+                            <option value="active" ${user.status === 'active' ? 'selected' : ''}>Active</option>
+                            <option value="pending" ${user.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="inactive" ${user.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-teal w-full">Update User</button>
+                </form>
+            `;
+            showModal('Edit User', content);
+
+            document.getElementById('editUserForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                user.name = document.getElementById('editUserName').value;
+                user.email = document.getElementById('editUserEmail').value;
+                user.role = document.getElementById('editUserRole').value;
+                user.status = document.getElementById('editUserStatus').value;
+                closeModal();
+                window.toast.success(`User ${user.name} updated successfully!`);
+                renderUsers();
+            });
+        }
+
+        function toggleUserStatus(id) {
+            const user = DEMO_USERS.find(u => u.id === id);
+            if (!user) { window.toast.error('User not found'); return; }
+            const statuses = ['active', 'pending', 'inactive'];
+            const currentIndex = statuses.indexOf(user.status);
+            const nextIndex = (currentIndex + 1) % statuses.length;
+            user.status = statuses[nextIndex];
+            window.toast.info(`User ${user.name} status changed to ${user.status}`);
+            renderUsers();
+        }
+
+        function deleteUser(id) {
+            const user = DEMO_USERS.find(u => u.id === id);
+            if (!user) { window.toast.error('User not found'); return; }
+            if (confirm(`Are you sure you want to delete ${user.name}?`)) {
+                DEMO_USERS = DEMO_USERS.filter(u => u.id !== id);
+                window.toast.success(`User ${user.name} deleted successfully!`);
+                renderUsers();
+            }
+        }
+
+        // ============================================
+        // PAGE: COURSES (with New Course)
+        // ============================================
+        function renderCourses() {
+            const container = document.getElementById('page-content');
+
+            let cards = DEMO_COURSES.map(c => `
+                <div class="card-glass p-0 overflow-hidden">
+                    <div class="bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] px-6 py-4">
+                        <h3 class="text-lg font-semibold text-white">${c.code}</h3>
+                        <p class="text-white/80 text-sm">${c.title}</p>
+                    </div>
+                    <div class="p-6">
+                        <div class="space-y-2">
+                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Teacher</span><span class="font-medium text-gray-800 dark:text-gray-100">${c.teacher}</span></div>
+                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">${c.students}</span></div>
+                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Status</span><span class="px-2 py-0.5 rounded-full text-xs ${c.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}">${c.status}</span></div>
+                        </div>
+                        <button onclick="window.toast.info('Viewing ${c.code} details')" class="mt-4 w-full btn-teal text-sm">View Details</button>
+                    </div>
+                </div>
+            `).join('');
+
             container.innerHTML = `
-                <div class="space-y-6 animate-fade-in">
+                <div class="space-y-6">
                     <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📚 Course Management</h2>
-                        <button onclick="showToast('Create course form coming soon!', 'info')" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📚 Courses</h2>
+                        <button onclick="showAddCourseModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${adminCourses.map(function(c) {
-                            var statusColor = c.status === 'active' ? 'status-active' : 'status-inactive';
-                            var gradient = c.status === 'active' ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
-                            return `<div class="card-glass p-0 overflow-hidden"><div class="bg-gradient-to-r ${gradient} px-6 py-4"><h3 class="text-lg font-semibold text-white">${c.code}</h3><p class="text-white/80 text-sm">${c.title}</p></div><div class="p-6"><div class="space-y-2"><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Teacher</span><span class="font-medium text-gray-800 dark:text-gray-100">${c.teacher}</span></div><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">${c.students}</span></div><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Status</span><span class="px-2 py-0.5 rounded-full text-xs ${statusColor}">${c.status}</span></div></div><button onclick="showToast('Viewing ${c.code}', 'info')" class="mt-4 w-full btn-teal text-sm">View Details</button></div></div>`;
-                        }).join('')}
-                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${cards}</div>
                 </div>
             `;
         }
 
-        // ----- LOGS -----
-        function renderLogs() {
-            var container = document.getElementById('page-content');
+        function showAddCourseModal() {
+            const content = `
+                <form id="addCourseForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Code</label>
+                        <input type="text" id="courseCode" class="input-teal mt-1" placeholder="e.g. CS405" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Title</label>
+                        <input type="text" id="courseTitle" class="input-teal mt-1" placeholder="e.g. Machine Learning" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teacher</label>
+                        <input type="text" id="courseTeacher" class="input-teal mt-1" placeholder="e.g. Dr. Smith" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Students Count</label>
+                        <input type="number" id="courseStudents" class="input-teal mt-1" placeholder="30" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="courseStatus" class="input-teal mt-1">
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-teal w-full">Create Course</button>
+                </form>
+            `;
+            showModal('Create New Course', content);
+
+            document.getElementById('addCourseForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const code = document.getElementById('courseCode').value;
+                const title = document.getElementById('courseTitle').value;
+                const teacher = document.getElementById('courseTeacher').value;
+                const students = parseInt(document.getElementById('courseStudents').value) || 0;
+                const status = document.getElementById('courseStatus').value;
+                DEMO_COURSES.push({ id: Date.now(), code, title, teacher, students, status });
+                closeModal();
+                window.toast.success(`Course ${code} created successfully!`);
+                renderCourses();
+            });
+        }
+
+        // ============================================
+        // PAGE: AUDIT LOGS (with Export CSV)
+        // ============================================
+        function renderAudit() {
+            const container = document.getElementById('page-content');
+
+            let rows = DEMO_AUDIT_LOGS.map(log => `
+                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${log.user}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400"><span class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">${log.action}</span></td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${log.details}</td>
+                    <td class="px-4 py-2 text-gray-500 dark:text-gray-400 text-sm">${log.time}</td>
+                </tr>
+            `).join('');
+
             container.innerHTML = `
-                <div class="space-y-6 animate-fade-in">
+                <div class="space-y-6">
                     <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Audit Logs</h2>
-                        <button onclick="showToast('Logs exported!', 'success')" class="btn-teal"><i class="fas fa-download mr-2"></i> Export</button>
+                        <button onclick="exportAuditLogs()" class="btn-teal"><i class="fas fa-download mr-2"></i> Export</button>
                     </div>
+
                     <div class="card-glass p-0 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">System Activity Logs</h3>
-                            <span class="text-xs text-gray-500 dark:text-gray-400">${adminLogs.length} entries</span>
-                        </div>
                         <div class="overflow-x-auto">
                             <table class="w-full">
                                 <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">User</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Details</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Time</th></tr>
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">User</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Details</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Time</th>
+                                    </tr>
                                 </thead>
-                                <tbody>
-                                    ${adminLogs.map(function(log) {
-                                        return `<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${log.user}</td><td class="px-4 py-2"><span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-xs">${log.action}</span></td><td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${log.details}</td><td class="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">${log.time}</td></tr>`;
-                                    }).join('')}
-                                </tbody>
+                                <tbody>${rows}</tbody>
                             </table>
                         </div>
                     </div>
@@ -432,38 +811,113 @@
             `;
         }
 
-        // ----- SETTINGS -----
-        function renderSettings() {
-            var container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6 animate-fade-in">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⚙️ System Settings</h2>
-                    <div class="card-glass p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">General Settings</h3>
-                        <form onsubmit="saveSettings(event)" class="space-y-4">
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Site Name</label><input type="text" id="siteName" value="GroupSync" class="input-teal mt-1" /></div>
-                            <div class="flex items-center"><input type="checkbox" id="emailVerification" checked class="checkbox-teal"><label class="ml-2 text-sm text-gray-700 dark:text-gray-300">Require Email Verification</label></div>
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Session Timeout (minutes)</label><input type="number" id="sessionTimeout" value="30" class="input-teal mt-1" /></div>
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Backup Schedule</label><select id="backupSchedule" class="input-teal mt-1"><option value="Daily">Daily</option><option value="Weekly" selected>Weekly</option><option value="Monthly">Monthly</option></select></div>
-                            <button type="submit" class="btn-teal">Save Settings</button>
-                        </form>
-                    </div>
-                    <div class="card-glass p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">System Status</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"><p class="text-sm text-gray-600 dark:text-gray-400">Database</p><p class="text-lg font-semibold text-green-600 dark:text-green-400">✅ Connected</p></div>
-                            <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800"><p class="text-sm text-gray-600 dark:text-gray-400">API Services</p><p class="text-lg font-semibold text-green-600 dark:text-green-400">✅ Operational</p></div>
-                            <div class="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800"><p class="text-sm text-gray-600 dark:text-gray-400">Last Backup</p><p class="text-lg font-semibold text-yellow-600 dark:text-yellow-400">🕐 2 hours ago</p></div>
-                        </div>
-                    </div>
-                </div>
-            `;
+        function exportAuditLogs() {
+            // Create CSV content
+            let csv = 'User,Action,Details,Time\n';
+            DEMO_AUDIT_LOGS.forEach(log => {
+                csv += `${log.user},${log.action},${log.details},${log.time}\n`;
+            });
+
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'audit_logs.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            window.toast.success('Audit logs exported successfully!');
         }
 
-        function saveSettings(e) {
-            e.preventDefault();
-            showToast('Settings saved successfully! ✅', 'success');
+        // ============================================
+        // PAGE: SETTINGS
+        // ============================================
+     function renderSettings() {
+    const container = document.getElementById('page-content');
+
+    // Load saved settings from localStorage
+    const savedSettings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+    const siteName = savedSettings.siteName || 'GroupSync';
+    const emailVerification = savedSettings.emailVerification !== undefined ? savedSettings.emailVerification : true;
+    const sessionTimeout = savedSettings.sessionTimeout || 30;
+    const backupSchedule = savedSettings.backupSchedule || 'weekly';
+
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⚙️ Settings</h2>
+
+            <div class="card-glass p-6">
+                <form id="settingsForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Site Name</label>
+                        <input type="text" id="siteName" value="${siteName}" class="input-teal mt-1">
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="emailVerification" ${emailVerification ? 'checked' : ''} class="w-4 h-4 text-[#3AAFA9] rounded">
+                        <label for="emailVerification" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Require Email Verification</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Session Timeout (minutes)</label>
+                        <input type="number" id="sessionTimeout" value="${sessionTimeout}" class="input-teal mt-1 w-32">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Backup Schedule</label>
+                        <select id="backupSchedule" class="input-teal mt-1 w-48">
+                            <option value="daily" ${backupSchedule === 'daily' ? 'selected' : ''}>Daily</option>
+                            <option value="weekly" ${backupSchedule === 'weekly' ? 'selected' : ''}>Weekly</option>
+                            <option value="monthly" ${backupSchedule === 'monthly' ? 'selected' : ''}>Monthly</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-teal">Save Settings</button>
+                </form>
+            </div>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">System Status</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Database</p>
+                        <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Connected</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">API Services</p>
+                        <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Operational</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Last Backup</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-semibold">${savedSettings.lastBackup || '2 hours ago'}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Collect form data
+        const settings = {
+            siteName: document.getElementById('siteName').value,
+            emailVerification: document.getElementById('emailVerification').checked,
+            sessionTimeout: parseInt(document.getElementById('sessionTimeout').value) || 30,
+            backupSchedule: document.getElementById('backupSchedule').value,
+            lastBackup: new Date().toLocaleString()
+        };
+
+        // Save to localStorage
+        localStorage.setItem('admin_settings', JSON.stringify(settings));
+
+        // Update the Last Backup display
+        const backupElements = document.querySelectorAll('.bg-gray-50 .text-gray-800');
+        if (backupElements.length >= 3) {
+            backupElements[2].textContent = settings.lastBackup;
         }
+
+        window.toast.success('Settings saved successfully!');
+    });
+}
 
         // ============================================
         // NAVIGATION
@@ -472,17 +926,35 @@
             currentPage = page;
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
-            const titles = { dashboard: 'Overview', users: 'Users', courses: 'Courses', logs: 'Audit Logs', settings: 'Settings' };
+
+            const titles = {
+                dashboard: 'Overview',
+                users: 'Users',
+                courses: 'Courses',
+                audit: 'Audit Logs',
+                settings: 'Settings'
+            };
             document.getElementById('page-title').textContent = titles[page] || 'Overview';
+
             switch (page) {
-                case 'dashboard': renderDashboard(); break;
-                case 'users': renderUsers(); break;
-                case 'courses': renderAdminCourses(); break;
-                case 'logs': renderLogs(); break;
-                case 'settings': renderSettings(); break;
-                default: renderDashboard();
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'users':
+                    renderUsers();
+                    break;
+                case 'courses':
+                    renderCourses();
+                    break;
+                case 'audit':
+                    renderAudit();
+                    break;
+                case 'settings':
+                    renderSettings();
+                    break;
+                default:
+                    renderDashboard();
             }
-            if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
         }
 
         // ============================================
@@ -500,11 +972,15 @@
             }
             toggle.addEventListener('click', function() {
                 const isDark = html.classList.toggle('dark');
-                if (isDark) { icon.classList.remove('fa-sun');
+                if (isDark) {
+                    icon.classList.remove('fa-sun');
                     icon.classList.add('fa-moon');
-                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark'); } else { icon.classList.remove('fa-moon');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
                     icon.classList.add('fa-sun');
-                    localStorage.setItem(STORAGE_KEYS.THEME, 'light'); }
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'light');
+                }
             });
         })();
 
@@ -512,29 +988,40 @@
         // INITIALIZATION
         // ============================================
         function init() {
+            const user = AuthService.getUser();
             if (!AuthService.isAuthenticated()) {
                 window.location.href = '/login.html';
                 return;
             }
-            var user = AuthService.getUser();
-            if (user) {
-                document.getElementById('user-name').textContent = (user.first_name || 'Admin') + ' ' + (user.last_name || '');
-                document.getElementById('user-avatar').textContent = getInitials((user.first_name || 'A') + ' ' + (user.last_name || 'D'));
+            if (user && user.role !== 'admin') {
+                window.location.href = user.role === 'professor' ? '/professor/dashboard.html' : '/student/dashboard.html';
+                return;
             }
-            document.getElementById('menuBtn')?.addEventListener('click', function() {
+
+            if (user) {
+                const name = `${user.first_name || 'Admin'} ${user.last_name || 'User'}`.trim();
+                document.getElementById('user-name').textContent = name || 'Admin User';
+                document.getElementById('user-avatar').textContent = getInitials(name || 'Admin');
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
-            document.querySelectorAll('.nav-link').forEach(function(link) {
-                link.addEventListener('click', function(e) {
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
                     e.preventDefault();
-                    var page = this.dataset.page;
+                    const page = link.dataset.page;
                     if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
                     navigate(page);
                 });
             });
-            document.getElementById('logoutBtn')?.addEventListener('click', function() { AuthService.logout(); });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+
             navigate('dashboard');
         }
+
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
