@@ -67,4 +67,4 @@ Route::middleware('auth:sanctum')->group(function () {
     // ---- Notifications ----
     Route::get('/notifications', [ApiController::class, 'getNotifications']);
     Route::post('/notifications/{id}/read', [ApiController::class, 'markNotificationRead']);
-});
+Route::post('/reports/generate', [ApiController::class, 'generateReport']);});
