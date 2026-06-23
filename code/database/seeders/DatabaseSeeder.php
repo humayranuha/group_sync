@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Assignment;
+use App\Models\ContributionScore;  // 👈 যোগ করুন
 use App\Models\Attendance;
 use App\Models\WorkingHour;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -86,7 +87,7 @@ class DatabaseSeeder extends Seeder
             'github_repo_url' => 'https://github.com/team-alpha/repo',
         ]);
 
-        // 6. Add members
+        // 6. Add members to group
         $group->members()->attach([
             $student1->id => ['joined_at' => now()],
             $student2->id => ['joined_at' => now()],
@@ -110,13 +111,49 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
-        // ===== 🔥 NEW: Add Attendance & Working Hours Demo Data =====
-        $students = [$student1, $student2, $student3];
+        // ==========================================
+        // ===== 8. Contribution Scores (NEW) =====
+        // ==========================================
+
+        $students = User::where('role', 'student')->get();
+        $allAssignments = Assignment::all();  // 👈 আলাদা নাম ব্যবহার করুন
+
+        foreach ($students as $student) {
+            foreach ($allAssignments as $assign) {  // 👈 $assign ব্যবহার করুন
+                $score = rand(30, 90);
+                $status = 'normal';
+                if ($score < 40) $status = 'critical';
+                elseif ($score < 60) $status = 'warning';
+
+                ContributionScore::create([
+                    'student_id' => $student->id,
+                    'assignment_id' => $assign->id,
+                    'group_id' => $group->id,
+                    'score' => $score,
+                    'status' => $status,
+                    'breakdown' => json_encode([
+                        'github_commits' => rand(40, 90),
+                        'attendance' => rand(50, 100),
+                        'peer_reviews' => rand(40, 90),
+                        'working_hours' => rand(30, 80)
+                    ]),
+                    'calculated_at' => now()
+                ]);
+            }
+        }
+
+        $this->command->info('✅ Contribution scores added for all students!');
+
+        // ==========================================
+        // ===== 9. Attendance & Working Hours =====
+        // ==========================================
+
+        $studentsList = [$student1, $student2, $student3];
         $assignmentId = $assignment->id;
         $courseId = $course->id;
 
         // Attendance: 10 random days per student
-        foreach ($students as $student) {
+        foreach ($studentsList as $student) {
             for ($i = 0; $i < 10; $i++) {
                 $date = Carbon::now()->subDays(rand(1, 30));
                 $exists = Attendance::where('student_id', $student->id)
@@ -134,7 +171,7 @@ class DatabaseSeeder extends Seeder
         }
 
         // Working Hours: 5-10 entries per student
-        foreach ($students as $student) {
+        foreach ($studentsList as $student) {
             $numEntries = rand(5, 10);
             for ($i = 0; $i < $numEntries; $i++) {
                 $date = Carbon::now()->subDays(rand(0, 14));
@@ -148,9 +185,13 @@ class DatabaseSeeder extends Seeder
             }
         }
 
+        // ==========================================
+        // ===== 10. Final Message =====
+        // ==========================================
+
         $this->command->info('✅ Demo data seeded successfully!');
         $this->command->info('👨‍🏫 Professor: prof@demo.com / 123456');
         $this->command->info('👩‍🎓 Students: alice@demo.com, bob@demo.com, charlie@demo.com / 123456');
-        $this->command->info('📊 Attendance & Working Hours added for each student.');
+        $this->command->info('📊 Contribution Scores, Attendance & Working Hours added for each student.');
     }
 }

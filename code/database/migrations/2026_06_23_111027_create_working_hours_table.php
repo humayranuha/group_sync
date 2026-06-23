@@ -11,24 +11,23 @@ return new class extends Migration
      */
     public function up(): void
 {
-    Schema::create('attendance', function (Blueprint $table) {
+    Schema::create('working_hours', function (Blueprint $table) {
         $table->id();
 
         $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
-        $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
+        $table->foreignId('assignment_id')->constrained('assignments')->onDelete('cascade');
 
         $table->date('date');
-        $table->boolean('present')->default(false);
+        $table->decimal('hours', 5, 2);
 
         $table->timestamps();
     });
 }
-
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('attendance');
+        Schema::dropIfExists('working_hours');
     }
 };
