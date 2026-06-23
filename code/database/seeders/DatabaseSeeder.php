@@ -6,20 +6,20 @@ use App\Models\User;
 use App\Models\Course;
 use App\Models\Group;
 use App\Models\Assignment;
+use App\Models\Attendance;
+use App\Models\WorkingHour;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
-    public function run(): void
+    public function run()
     {
-        // 1. Create a professor
+        // 1. Create professor
         $professor = User::create([
             'first_name' => 'John',
             'last_name' => 'Doe',
@@ -57,7 +57,7 @@ class DatabaseSeeder extends Seeder
             'department' => 'Computer Science',
         ]);
 
-        // 3. Create a course
+        // 3. Create course
         $course = Course::create([
             'code' => 'CS401',
             'title' => 'Software Engineering',
@@ -68,14 +68,14 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // 4. Enroll students in the course
+        // 4. Enroll students
         $course->students()->attach([
             $student1->id => ['enrolled_at' => now()],
             $student2->id => ['enrolled_at' => now()],
             $student3->id => ['enrolled_at' => now()],
         ]);
 
-        // 5. Create a group
+        // 5. Create group
         $group = Group::create([
             'name' => 'Team Alpha',
             'course_id' => $course->id,
@@ -86,15 +86,15 @@ class DatabaseSeeder extends Seeder
             'github_repo_url' => 'https://github.com/team-alpha/repo',
         ]);
 
-        // 6. Add members to the group
+        // 6. Add members
         $group->members()->attach([
             $student1->id => ['joined_at' => now()],
             $student2->id => ['joined_at' => now()],
             $student3->id => ['joined_at' => now()],
         ]);
 
-        // 7. Create an assignment
-        Assignment::create([
+        // 7. Create assignment
+        $assignment = Assignment::create([
             'course_id' => $course->id,
             'title' => 'Project 1: Requirement Analysis',
             'description' => 'Submit a detailed requirement analysis document.',
@@ -110,8 +110,47 @@ class DatabaseSeeder extends Seeder
             'status' => 'active',
         ]);
 
+        // ===== 🔥 NEW: Add Attendance & Working Hours Demo Data =====
+        $students = [$student1, $student2, $student3];
+        $assignmentId = $assignment->id;
+        $courseId = $course->id;
+
+        // Attendance: 10 random days per student
+        foreach ($students as $student) {
+            for ($i = 0; $i < 10; $i++) {
+                $date = Carbon::now()->subDays(rand(1, 30));
+                $exists = Attendance::where('student_id', $student->id)
+                    ->where('date', $date)
+                    ->exists();
+                if (!$exists) {
+                    Attendance::create([
+                        'student_id' => $student->id,
+                        'course_id' => $courseId,
+                        'date' => $date,
+                        'present' => rand(0, 1) ? true : false,
+                    ]);
+                }
+            }
+        }
+
+        // Working Hours: 5-10 entries per student
+        foreach ($students as $student) {
+            $numEntries = rand(5, 10);
+            for ($i = 0; $i < $numEntries; $i++) {
+                $date = Carbon::now()->subDays(rand(0, 14));
+                $hours = rand(1, 4) + round(rand(0, 10) / 10, 1);
+                WorkingHour::create([
+                    'student_id' => $student->id,
+                    'assignment_id' => $assignmentId,
+                    'date' => $date,
+                    'hours' => $hours,
+                ]);
+            }
+        }
+
         $this->command->info('✅ Demo data seeded successfully!');
         $this->command->info('👨‍🏫 Professor: prof@demo.com / 123456');
         $this->command->info('👩‍🎓 Students: alice@demo.com, bob@demo.com, charlie@demo.com / 123456');
+        $this->command->info('📊 Attendance & Working Hours added for each student.');
     }
 }
