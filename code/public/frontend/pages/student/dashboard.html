@@ -1,5 +1,6 @@
+<!-- D:\wamp64\www\gorupSync\group_sync\frontend\pages\student\dashboard.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,49 +10,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <style>
-        /* ----- Global Reset & Transitions ----- */
         * { font-family: 'Inter', system-ui, sans-serif; }
         body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
         .dark body { background: #0b1717; color: #e8edf0; }
         html { scroll-behavior: smooth; }
 
-        /* ----- Dark mode overrides (Teal theme) ----- */
         .dark .bg-white { background-color: #132424 !important; }
         .dark .bg-gray-50 { background-color: #0b1717 !important; }
         .dark .bg-gray-100 { background-color: #1a2d2d !important; }
         .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
         .dark .text-gray-500 { color: #94a3b8 !important; }
-        .dark .text-gray-400 { color: #81999b !important; }
         .dark .border-gray-200 { border-color: #1e3a3a !important; }
-        .dark .border-gray-100 { border-color: #1e3a3a !important; }
         .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
         .dark .shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important; }
-        .dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; }
         .dark .divide-gray-200>* { border-color: #1e3a3a !important; }
-        .dark .bg-blue-50 { background-color: rgba(58,175,169,0.08) !important; }
-        .dark .bg-indigo-50 { background-color: rgba(43,122,120,0.08) !important; }
-        .dark .bg-green-100 { background-color: rgba(58,175,169,0.12) !important; }
-        .dark .bg-yellow-100 { background-color: rgba(58,175,169,0.10) !important; }
-        .dark .bg-purple-100 { background-color: rgba(43,122,120,0.10) !important; }
-        .dark .bg-red-100 { background-color: rgba(58,175,169,0.10) !important; }
-        .dark .text-green-800 { color: #7ccfca !important; }
-        .dark .text-yellow-800 { color: #7ccfca !important; }
-        .dark .text-purple-800 { color: #7ccfca !important; }
-        .dark .text-red-800 { color: #7ccfca !important; }
 
-        /* ----- Sidebar (Teal) ----- */
         .sidebar-teal {
             background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
             border-right: 1px solid rgba(58,175,169,0.08);
-            transition: background 0.4s, border-color 0.4s;
         }
         .dark .sidebar-teal { background: linear-gradient(180deg, #071010 0%, #0f2624 100%); }
-        .sidebar-teal .brand {
-            background: linear-gradient(135deg, #3AAFA9, #2B7A78);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
 
         .nav-link {
             transition: all 0.3s ease;
@@ -63,32 +41,22 @@
             gap: 0.75rem;
             font-weight: 500;
             font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
         }
         .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
-        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.05); }
+        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
         .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
-        .dark .nav-link.active { background: rgba(58,175,169,0.12); }
-
-        .header-teal {
-            background: rgba(43,122,120,0.88);
-            backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            border-bottom: 1px solid rgba(58,175,169,0.12);
-            transition: background 0.4s, border-color 0.4s;
-        }
-        .dark .header-teal { background: rgba(11,23,23,0.92); border-bottom-color: rgba(58,175,169,0.06); }
 
         .card-glass {
             background: rgba(255,255,255,0.80);
             backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
             border: 1px solid rgba(58,175,169,0.06);
             border-radius: 20px;
             transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
         }
         .card-glass:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 20px 40px -12px rgba(58,175,169,0.12); }
         .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
-        .dark .card-glass:hover { box-shadow: 0 20px 40px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
 
         .stat-card {
             transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
@@ -101,57 +69,40 @@
         }
         .stat-card:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 16px 32px -12px rgba(58,175,169,0.12); }
         .dark .stat-card { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
-        .dark .stat-card:hover { box-shadow: 0 16px 32px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
 
         .stat-icon {
             display: inline-flex; align-items: center; justify-content: center;
             width: 48px; height: 48px; border-radius: 14px; font-size: 1.3rem;
-            transition: background 0.3s;
         }
         .stat-icon.teal-bg { background: rgba(58,175,169,0.10); color: #3AAFA9; }
-        .dark .stat-icon.teal-bg { background: rgba(58,175,169,0.08); }
-        .stat-card:hover .stat-icon.teal-bg { background: rgba(58,175,169,0.18); }
-
-        .badge-active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
-        .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
-        .badge-passive { background: rgba(58,175,169,0.08); color: #94a3b8; }
-        .badge-free-rider { background: rgba(58,175,169,0.06); color: #64748b; }
-        .dark .badge-active { background: rgba(58,175,169,0.15); color: #5ccbc5; }
-        .dark .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
-        .dark .badge-passive { background: rgba(58,175,169,0.06); color: #94a3b8; }
-        .dark .badge-free-rider { background: rgba(58,175,169,0.04); color: #64748b; }
 
         .btn-teal {
             background: #3AAFA9; color: #fff; transition: all 0.3s ease;
             box-shadow: 0 4px 14px rgba(58,175,169,0.25);
             padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
         }
-        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58,175,169,0.30); }
-        .btn-teal-outline {
-            background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9;
-            transition: all 0.3s ease; padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer;
-        }
-        .btn-teal-outline:hover { background: #3AAFA9; color: #fff; transform: translateY(-2px); }
-        .dark .btn-teal { background: #2B7A78; box-shadow: 0 4px 14px rgba(43,122,120,0.20); }
-        .dark .btn-teal:hover { background: #3AAFA9; box-shadow: 0 8px 24px rgba(58,175,169,0.20); }
+        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); }
+        .dark .btn-teal { background: #2B7A78; }
 
-        .progress-teal { background: rgba(58,175,169,0.10); border-radius: 999px; overflow: hidden; height: 8px; }
-        .progress-teal .bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2B7A78, #3AAFA9); transition: width 0.6s ease; }
+        .badge-active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
+        .badge-passive { background: rgba(58,175,169,0.08); color: #94a3b8; }
+        .badge-free-rider { background: rgba(58,175,169,0.06); color: #64748b; }
+        .badge-not-started { background: rgba(148,163,184,0.15); color: #94a3b8; }
 
         .theme-toggle {
-            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
             width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
             border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer;
             color: rgba(255,255,255,0.70); font-size: 17px;
         }
-        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); color: #fff; }
+        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); }
 
         .menu-btn {
             background: rgba(58,175,169,0.90); backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.08);
         }
         .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
-        .dark .menu-btn { background: rgba(43,122,120,0.80); }
 
         .logout-btn {
             transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent;
@@ -159,46 +110,8 @@
         }
         .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
 
-        .input-teal {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
-            width: 100%; font-size: 0.95rem;
-        }
-        .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
-        .input-teal::placeholder { color: rgba(255,255,255,0.25); }
-        .dark .input-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
-        .dark .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
-
-        .textarea-teal {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
-            width: 100%; font-size: 0.95rem; resize: vertical; min-height: 80px;
-        }
-        .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
-        .textarea-teal::placeholder { color: rgba(255,255,255,0.25); }
-        .dark .textarea-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
-        .dark .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
-
-        .file-input-label {
-            cursor: pointer; transition: all 0.3s ease;
-            background: rgba(58,175,169,0.08); border: 2px dashed rgba(58,175,169,0.3);
-            border-radius: 12px; padding: 0.5rem 1rem; display: inline-flex; align-items: center; gap: 0.5rem;
-            color: rgba(255,255,255,0.70);
-        }
-        .file-input-label:hover { background: rgba(58,175,169,0.15); border-color: #3AAFA9; }
-
-        .profile-pic-preview {
-            width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
-            border: 4px solid #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.20);
-            transition: all 0.3s ease;
-        }
-        .profile-pic-preview:hover { transform: scale(1.04); border-color: #2B7A78; }
-        .dark .profile-pic-preview { border-color: #5ccbc5; }
-
-        .brand-gradient { background: linear-gradient(135deg, #3AAFA9, #2B7A78); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-        .border-teal-soft { border-color: rgba(58,175,169,0.08); }
-        .bg-teal-soft { background: rgba(58,175,169,0.06); }
-        .dark .bg-teal-soft { background: rgba(58,175,169,0.04); }
+        .progress-teal { background: rgba(58,175,169,0.10); border-radius: 999px; overflow: hidden; height: 8px; }
+        .progress-teal .bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2B7A78, #3AAFA9); transition: width 0.6s ease; }
 
         @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
@@ -207,10 +120,8 @@
 
         .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
         .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
 
-        /* ----- Modal Styles ----- */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             display: flex; align-items: center; justify-content: center;
@@ -239,23 +150,23 @@
     <!-- ===== SIDEBAR ===== -->
     <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
         <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
-            <a href="/" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm hover:opacity-80 transition">
+            <a href="#" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
                 Group<span class="text-[#c6f0ee]">Sync</span>
             </a>
             <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Student</span>
         </div>
         <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
-            <a href="#" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
-            <a href="#" data-page="group" class="nav-link"><span class="icon">👥</span> My Group</a>
-            <a href="#" data-page="repository" class="nav-link"><span class="icon">🔗</span> GitHub Connection</a>
-            <a href="#" data-page="analytics" class="nav-link"><span class="icon">📈</span> Analytics</a>
-            <a href="#" data-page="peer-review" class="nav-link"><span class="icon">⭐</span> Peer Reviews</a>
-            <a href="#" data-page="ai-feedback" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
-            <a href="#" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
+            <a href="dashboard.html" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
+            <a href="group-details.html" data-page="group" class="nav-link"><span class="icon">👥</span> My Group</a>
+            <a href="repository-connection.html" data-page="repository" class="nav-link"><span class="icon">🔗</span> GitHub Connection</a>
+            <a href="contribution-analytics.html" data-page="analytics" class="nav-link"><span class="icon">📈</span> Analytics</a>
+            <a href="peer-review.html" data-page="peer-review" class="nav-link"><span class="icon">⭐</span> Peer Reviews</a>
+            <a href="ai-feedback.html" data-page="ai-feedback" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
+            <a href="#" data-page="profile" class="nav-link" onclick="showProfileModal()"><span class="icon">👤</span> Profile</a>
         </nav>
         <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
             <div class="flex items-center gap-3">
-                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20 cursor-pointer hover:scale-105 transition">ST</div>
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20">ST</div>
                 <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Student</p><p class="text-xs text-white/40 truncate">Student</p></div>
                 <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
             </div>
@@ -266,7 +177,7 @@
     <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
 
     <!-- ===== HEADER ===== -->
-    <header class="header-teal fixed top-0 right-0 left-0 md:left-64 z-30 transition-colors">
+    <header class="fixed top-0 right-0 left-0 md:left-64 z-30 bg-[rgba(43,122,120,0.88)] backdrop-blur-[14px] border-b border-[rgba(58,175,169,0.12)] transition-colors">
         <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
                 <span class="text-sm font-medium text-white/70 hidden sm:block">Student Dashboard</span>
@@ -282,117 +193,66 @@
     <!-- ===== MAIN CONTENT ===== -->
     <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
         <div id="page-content" class="animate-fade-in">
-            <!-- content dynamically loaded -->
+            <!-- Content loaded dynamically -->
         </div>
     </main>
 
-    <!-- ===== SCRIPTS ===== -->
     <script>
+        // ============================================
+        // COMPLETE RESET - NO DEMO DATA EVER!
+        // ============================================
+        
+        // Clear everything on page load
+        (function resetAllData() {
+            // Clear session storage
+            sessionStorage.clear();
+            
+            // Remove any demo data flags
+            localStorage.removeItem('demo_data_loaded');
+            localStorage.removeItem('dashboard_demo_data');
+            
+            console.log('🧹 All demo data cleared!');
+        })();
+
         // ============================================
         // CONFIGURATION
         // ============================================
-        const API_BASE = '/api';
+        const API_BASE = 'http://127.0.0.1:8000/api';
         const STORAGE_KEYS = {
             TOKEN: 'groupsync_auth_token',
             USER: 'groupsync_user_data',
-            THEME: 'theme',
-            PROFILE_PIC: 'groupsync_profile_pic',
-            PROFILE_EXTRA: 'groupsync_profile_extra'
-        };
-
-        // ============================================
-        // DEMO DATA (used as fallback)
-        // ============================================
-        const DEMO_DATA = {
-            dashboard: {
-                total_commits: 127,
-                total_prs: 23,
-                activity_consistency_score: 85,
-                team_rank: 3,
-                weekly_data: [
-                    { week: 1, commits: 12 },
-                    { week: 2, commits: 19 },
-                    { week: 3, commits: 15 },
-                    { week: 4, commits: 27 }
-                ],
-                daily_activity: [5, 8, 12, 7, 9, 3, 2],
-                peer_breakdown: [
-                    { reviewer: 'Alice Johnson', rating: 4.5, comment: 'Great collaboration!' },
-                    { reviewer: 'Bob Smith', rating: 4.0, comment: 'Reliable team member' },
-                    { reviewer: 'Charlie Brown', rating: 3.5, comment: 'Good, but could be more active' }
-                ],
-                team_ranking: [
-                    { team: 'Team Alpha', rank: 1, score: 92 },
-                    { team: 'Team Beta', rank: 2, score: 85 },
-                    { team: 'Team Gamma', rank: 3, score: 78 },
-                    { team: 'Team Delta', rank: 4, score: 70 }
-                ],
-                score_breakdown: {
-                    github: 85,
-                    attendance: 80,
-                    peer_reviews: 78,
-                    working_hours: 72
-                }
-            },
-            group: {
-                id: 1,
-                name: 'Team Alpha',
-                course_name: 'Software Engineering (CS401)',
-                member_count: 4,
-                total_commits: 98,
-                avg_activity: 78,
-                members: [
-                    { id: 1, name: 'Arisha Ridha (You)', role: 'Student', commits: 45, contribution_percentage: 35, classification: 'Active' },
-                    { id: 2, name: 'John Doe', role: 'Student', commits: 32, contribution_percentage: 28, classification: 'Active' },
-                    { id: 3, name: 'Jane Smith', role: 'Student', commits: 18, contribution_percentage: 22, classification: 'Moderate' },
-                    { id: 4, name: 'Mike Brown', role: 'Student', commits: 8, contribution_percentage: 15, classification: 'Passive' }
-                ]
-            },
-            ai: {
-                classification: 'Active',
-                participation_score: 85,
-                quality_score: 78,
-                consistency_score: 92,
-                overall_score: 85,
-                feedback: 'Excellent contribution quality and consistency!',
-                suggestions: ['Increase code review participation', 'Help mentor passive group members', 'Document your code more thoroughly']
-            }
+            THEME: 'theme'
         };
 
         // ============================================
         // TOAST SYSTEM
         // ============================================
-        class ToastManager {
-            constructor() { this.container = null;
-                this.init(); }
-            init() {
-                this.container = document.createElement('div');
-                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
-                document.body.appendChild(this.container);
-            }
-            show(message, type = 'info', duration = 5000) {
-                const toast = document.createElement('div');
-                const colors = {
-                    success: 'bg-[#3AAFA9]/10 border-[#3AAFA9] text-[#2B7A78]',
-                    error: 'bg-red-50 border-red-400 text-red-800',
-                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
-                    info: 'bg-blue-50 border-blue-400 text-blue-800'
-                };
-                const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className =
-                    `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
-                toast.innerHTML =
-                    `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
-                this.container.appendChild(toast);
-                requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
-                toast.querySelector('button').onclick = () => toast.remove();
-                setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
-                return toast;
-            }
-            success(m) { this.show(m, 'success'); }
-            error(m) { this.show(m, 'error'); }
-            warning(m) { this.show(m, 'warning'); }
-            info(m) { this.show(m, 'info'); }
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toast-container') || (() => {
+                const c = document.createElement('div');
+                c.id = 'toast-container';
+                c.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
+                document.body.appendChild(c);
+                return c;
+            })();
+
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-50 border-green-400 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+                error: 'bg-red-50 border-red-400 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
+                info: 'bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+            };
+            const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+            
+            toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]}`;
+            toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
+            container.appendChild(toast);
+            
+            requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
+            toast.querySelector('button').onclick = () => toast.remove();
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
+            return toast;
         }
 
         // ============================================
@@ -405,7 +265,8 @@
             logout() {
                 localStorage.removeItem(STORAGE_KEYS.TOKEN);
                 localStorage.removeItem(STORAGE_KEYS.USER);
-                window.location.href = '/login.html';
+                sessionStorage.clear();
+                window.location.href = '/frontend/pages/public/login.html';
             },
             updateUser(userData) {
                 localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
@@ -413,90 +274,71 @@
         };
 
         // ============================================
-        // PROFILE EXTRA DATA
-        // ============================================
-        const ProfileExtra = {
-            get() {
-                try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_EXTRA) || '{}'); } catch { return {}; }
-            },
-            set(data) { localStorage.setItem(STORAGE_KEYS.PROFILE_EXTRA, JSON.stringify(data)); },
-            getPic() { return localStorage.getItem(STORAGE_KEYS.PROFILE_PIC) || null; },
-            setPic(base64) { if (base64) localStorage.setItem(STORAGE_KEYS.PROFILE_PIC, base64);
-                else localStorage.removeItem(STORAGE_KEYS.PROFILE_PIC); }
-        };
-
-        // ============================================
-        // API SERVICE (with fallback)
+        // API SERVICE - RETURNS NULL ON ERROR (NO DEMO DATA)
         // ============================================
         const ApiService = {
             async request(endpoint, options = {}) {
                 const token = AuthService.getToken();
                 const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers };
                 if (token) headers['Authorization'] = `Bearer ${token}`;
+                
                 try {
                     const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-                    const data = await response.json();
+                    
+                    // If response is not ok, return null (no demo data)
                     if (!response.ok) {
-                        if (response.status === 401) AuthService.logout();
-                        throw new Error(data.message || 'Request failed');
+                        console.warn(`API Error: ${response.status} - ${response.statusText}`);
+                        return null;
                     }
+                    
+                    const data = await response.json();
                     return data;
                 } catch (error) {
-                    console.warn('API failed, using demo data');
-                    if (endpoint.includes('/analytics/student')) return { success: true, ...DEMO_DATA.dashboard };
-                    if (endpoint.includes('/ai/evaluate/student')) return { success: true, ...DEMO_DATA.ai };
-                    throw error;
+                    console.error('API Request failed:', error);
+                    return null; // NEVER return demo data!
                 }
             },
             get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
+            put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); }
         };
 
         // ============================================
         // GLOBALS
         // ============================================
-        window.toast = new ToastManager();
-        window.api = ApiService;
-        window.auth = AuthService;
-        let currentPage = 'dashboard';
         let charts = {};
         let currentStudentData = null;
 
-        // ============================================
-        // HELPERS
-        // ============================================
         function getInitials(name) {
             if (!name) return 'ST';
             return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
         }
 
         function getClassificationClass(classification) {
-            const map = { 'Active': 'badge-active', 'Moderate': 'badge-moderate', 'Passive': 'badge-passive',
-                'Free Rider': 'badge-free-rider' };
-            return map[classification] || 'badge-moderate';
+            const map = { 
+                'Active': 'badge-active', 
+                'Moderate': 'badge-moderate', 
+                'Passive': 'badge-passive', 
+                'Free Rider': 'badge-free-rider',
+                'Not Started': 'badge-not-started'
+            };
+            return map[classification] || 'badge-not-started';
         }
 
-        function getUserAvatar(user) {
-            const pic = ProfileExtra.getPic();
-            if (pic) return pic;
-            const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Student';
-            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3AAFA9&color=fff&size=120&font-size=0.5&bold=true`;
-        }
-
-        function updateSidebarAvatar() {
-            const user = AuthService.getUser();
-            const pic = ProfileExtra.getPic();
-            const avatarEl = document.getElementById('user-avatar');
-            if (pic) {
-                avatarEl.style.backgroundImage = `url(${pic})`;
-                avatarEl.style.backgroundSize = 'cover';
-                avatarEl.textContent = '';
-            } else {
-                avatarEl.style.backgroundImage = '';
-                const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Student';
-                avatarEl.textContent = getInitials(name);
-            }
-        }
+        // ============================================
+        // EMPTY DATA OBJECT (ALWAYS ZERO)
+        // ============================================
+        const EMPTY_DATA = {
+            total_commits: 0,
+            total_prs: 0,
+            activity_consistency_score: 0,
+            team_rank: 0,
+            weekly_data: [],
+            daily_activity: [0, 0, 0, 0, 0, 0, 0],
+            peer_breakdown: [],
+            team_ranking: [],
+            score_breakdown: { github: 0, attendance: 0, peer_reviews: 0, working_hours: 0 }
+        };
 
         // ============================================
         // MODAL SYSTEM
@@ -504,6 +346,7 @@
         function showModal(title, contentHtml) {
             const oldModal = document.getElementById('dynamicModal');
             if (oldModal) oldModal.remove();
+            
             const modalHtml = `
                 <div id="dynamicModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
                     <div class="modal-box">
@@ -522,351 +365,408 @@
         }
 
         // ============================================
-        // DETAIL FUNCTIONS (called on stat click)
+        // PROFILE MODAL
         // ============================================
-        function showCommitDetails() {
-            const data = currentStudentData || DEMO_DATA.dashboard;
-            if (!data.weekly_data) {
-                showModal('Commit Details', '<p class="text-gray-500">No commit data available.</p>');
+        function showProfileModal() {
+            const user = AuthService.getUser();
+            if (!user) {
+                showToast('Please login first', 'error');
                 return;
             }
+            
+            showModal('👤 My Profile', `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-r from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white text-2xl font-bold">
+                            ${getInitials((user.first_name || 'S') + ' ' + (user.last_name || 'T'))}
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">${user.first_name || 'Student'} ${user.last_name || ''}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${user.email || ''}</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">${user.role || 'Student'}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
+                            <p class="font-medium text-gray-800 dark:text-gray-100">${user.department || 'N/A'}</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Joined</p>
+                            <p class="font-medium text-gray-800 dark:text-gray-100">${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                    </div>
+                    <hr class="border-gray-200 dark:border-gray-700">
+                    <div class="space-y-3">
+                        <button onclick="closeModal(); showChangePassword()" class="btn-teal w-full">Change Password</button>
+                        <button onclick="closeModal()" class="btn-teal-outline w-full">Close</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function showChangePassword() {
+            showModal('🔑 Change Password', `
+                <form id="passwordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+                        <input type="password" id="currentPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Enter current password" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                        <input type="password" id="newPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Enter new password (min 6 chars)" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Confirm new password" required>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="btn-teal flex-1">Update Password</button>
+                        <button type="button" onclick="closeModal()" class="btn-teal-outline flex-1">Cancel</button>
+                    </div>
+                </form>
+            `);
+
+            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const current = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmPassword').value;
+
+                if (!current || !newPass || !confirm) {
+                    showToast('All fields are required', 'error');
+                    return;
+                }
+                if (newPass.length < 6) {
+                    showToast('New password must be at least 6 characters', 'error');
+                    return;
+                }
+                if (newPass !== confirm) {
+                    showToast('Passwords do not match', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await ApiService.post('/auth/change-password', {
+                        current_password: current,
+                        new_password: newPass,
+                        new_password_confirmation: confirm
+                    });
+                    if (response && response.success) {
+                        showToast('✅ Password changed successfully!', 'success');
+                        closeModal();
+                    } else {
+                        showToast('❌ ' + (response?.message || 'Failed to change password'), 'error');
+                    }
+                } catch (error) {
+                    showToast('❌ Error: ' + error.message, 'error');
+                }
+            });
+        }
+
+        // ============================================
+        // DETAIL FUNCTIONS (stat card clicks)
+        // ============================================
+        function showCommitDetails() {
+            const data = currentStudentData || EMPTY_DATA;
+            if (!data.weekly_data || data.weekly_data.length === 0) {
+                showModal('📊 Commit Details', `
+                    <div class="text-center py-8">
+                        <i class="fas fa-inbox text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No commit data available yet.</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Start contributing to see your commit history.</p>
+                    </div>
+                `);
+                return;
+            }
+            
             let rows = data.weekly_data.map(w => `
                 <tr class="border-t border-gray-100 dark:border-gray-800">
                     <td class="px-4 py-2">Week ${w.week}</td>
                     <td class="px-4 py-2 text-center">${w.commits}</td>
-                    <td class="px-4 py-2">
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
-                            <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${(w.commits / 30) * 100}%"></div>
-                        </div>
-                    </td>
+                    <td class="px-4 py-2"><div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${Math.min((w.commits / 30) * 100, 100)}%"></div></div></td>
                 </tr>
             `).join('');
-
             const total = data.weekly_data.reduce((sum, w) => sum + w.commits, 0);
-            const content = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Week</th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Distribution</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                        <tfoot class="bg-gray-50 dark:bg-gray-800 font-bold">
-                            <tr>
-                                <td class="px-4 py-2">Total</td>
-                                <td class="px-4 py-2 text-center text-[#3AAFA9]">${total}</td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
+            
+            showModal('📊 Commit Breakdown', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Week</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Distribution</th></tr></thead><tbody>${rows}</tbody><tfoot class="bg-gray-50 dark:bg-gray-800 font-bold"><tr><td class="px-4 py-2">Total</td><td class="px-4 py-2 text-center text-[#3AAFA9]">${total}</td><td></td></tr></tfoot></table></div>
                 <p class="text-xs text-gray-400 mt-2">Showing last ${data.weekly_data.length} weeks.</p>
-            `;
-            showModal('📊 Commit Breakdown', content);
+            `);
         }
 
         function showPeerReviewDetails() {
-            const reviews = DEMO_DATA.dashboard.peer_breakdown || [];
+            const reviews = currentStudentData?.peer_breakdown || [];
             if (reviews.length === 0) {
-                showModal('Peer Reviews', '<p class="text-gray-500">No peer reviews yet.</p>');
+                showModal('⭐ Peer Reviews', `
+                    <div class="text-center py-8">
+                        <i class="fas fa-star text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No peer reviews yet.</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Complete peer reviews for your team members to see feedback here.</p>
+                    </div>
+                `);
                 return;
             }
+            
             let rows = reviews.map(r => `
                 <tr class="border-t border-gray-100 dark:border-gray-800">
                     <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${r.reviewer}</td>
-                    <td class="px-4 py-2 text-center">
-                        <span class="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">${r.rating} ⭐</span>
-                    </td>
+                    <td class="px-4 py-2 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">${r.rating} ⭐</span></td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400 italic">${r.comment || 'No comment'}</td>
                 </tr>
             `).join('');
-
-            const content = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Reviewer</th>
-                                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rating</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Comment</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
+            
+            showModal('⭐ Peer Reviews', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Reviewer</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rating</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Comment</th></tr></thead><tbody>${rows}</tbody></table></div>
                 <p class="text-xs text-gray-400 mt-2">Reviews received from team members.</p>
-            `;
-            showModal('⭐ Peer Reviews', content);
+            `);
         }
 
         function showActivityDetails() {
-            const data = currentStudentData || DEMO_DATA.dashboard;
-            const breakdown = data.score_breakdown || {
-                github: 85,
-                attendance: 80,
-                peer_reviews: 78,
-                working_hours: 72
-            };
-            const total = data.activity_consistency_score || 85;
-
+            const data = currentStudentData || EMPTY_DATA;
+            const breakdown = data.score_breakdown || { github: 0, attendance: 0, peer_reviews: 0, working_hours: 0 };
+            const total = data.activity_consistency_score || 0;
+            
             const items = [
-                { label: 'GitHub Activity', value: breakdown.github, color: '#3AAFA9' },
-                { label: 'Attendance', value: breakdown.attendance, color: '#2B7A78' },
-                { label: 'Peer Reviews', value: breakdown.peer_reviews, color: '#5ccbc5' },
-                { label: 'Working Hours', value: breakdown.working_hours, color: '#a0d6d3' }
+                { label: 'GitHub Activity', value: breakdown.github || 0, color: '#3AAFA9' },
+                { label: 'Attendance', value: breakdown.attendance || 0, color: '#2B7A78' },
+                { label: 'Peer Reviews', value: breakdown.peer_reviews || 0, color: '#5ccbc5' },
+                { label: 'Working Hours', value: breakdown.working_hours || 0, color: '#a0d6d3' }
             ];
-
+            
             let rows = items.map(item => `
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-sm text-gray-600 dark:text-gray-400">${item.label}</span>
-                    <div class="flex items-center gap-2">
-                        <div class="w-32 bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
-                            <div class="h-2 rounded-full" style="width: ${item.value}%; background: ${item.color};"></div>
-                        </div>
-                        <span class="text-sm font-medium text-gray-800 dark:text-gray-100">${item.value}%</span>
-                    </div>
+                    <div class="flex items-center gap-2"><div class="w-32 bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="h-2 rounded-full" style="width: ${item.value}%; background: ${item.color};"></div></div><span class="text-sm font-medium text-gray-800 dark:text-gray-100">${item.value}%</span></div>
                 </div>
             `).join('');
-
-            const content = `
-                <div class="space-y-2">
-                    ${rows}
-                    <div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex justify-between">
-                        <span class="font-semibold text-gray-800 dark:text-gray-100">Overall Activity Score</span>
-                        <span class="font-bold text-[#3AAFA9] text-xl">${total}%</span>
-                    </div>
-                </div>
-            `;
-            showModal('📈 Activity Score Breakdown', content);
+            
+            showModal('📈 Activity Score Breakdown', `
+                <div class="space-y-2">${rows}<div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex justify-between"><span class="font-semibold text-gray-800 dark:text-gray-100">Overall Activity Score</span><span class="font-bold text-[#3AAFA9] text-xl">${total}%</span></div></div>
+            `);
         }
 
         function showTeamRankDetails() {
-            const data = currentStudentData || DEMO_DATA.dashboard;
-            const rankings = data.team_ranking || [
-                { team: 'Team Alpha', rank: 1, score: 92 },
-                { team: 'Team Beta', rank: 2, score: 85 },
-                { team: 'Team Gamma', rank: 3, score: 78 },
-                { team: 'Team Delta', rank: 4, score: 70 }
-            ];
-            const userTeam = 'Team Gamma';
-
-            let rows = rankings.map(r => {
-                const isUser = r.team === userTeam;
-                return `
-                    <tr class="border-t border-gray-100 dark:border-gray-800 ${isUser ? 'bg-[#3AAFA9]/10 dark:bg-[#3AAFA9]/20' : ''}">
-                        <td class="px-4 py-2 font-medium ${isUser ? 'text-[#3AAFA9] dark:text-[#5ccbc5]' : 'text-gray-900 dark:text-gray-100'}">#${r.rank}</td>
-                        <td class="px-4 py-2 ${isUser ? 'font-semibold' : ''}">${r.team} ${isUser ? '👈 (You)' : ''}</td>
-                        <td class="px-4 py-2 text-right">${r.score}%</td>
-                    </tr>
-                `;
+            const data = currentStudentData || EMPTY_DATA;
+            const rankings = data.team_ranking || [];
+            
+            if (rankings.length === 0) {
+                showModal('🏆 Team Rankings', `
+                    <div class="text-center py-8">
+                        <i class="fas fa-trophy text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No team rankings available yet.</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Join a group to see team rankings.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            let rows = rankings.map((r, index) => {
+                const isUser = r.isUser || index === 0;
+                return `<tr class="border-t border-gray-100 dark:border-gray-800 ${isUser ? 'bg-[#3AAFA9]/10 dark:bg-[#3AAFA9]/20' : ''}"><td class="px-4 py-2 font-medium ${isUser ? 'text-[#3AAFA9] dark:text-[#5ccbc5]' : 'text-gray-900 dark:text-gray-100'}">#${r.rank || index + 1}</td><td class="px-4 py-2 ${isUser ? 'font-semibold' : ''}">${r.team || 'Team ' + (index + 1)} ${isUser ? '👈 (You)' : ''}</td><td class="px-4 py-2 text-right">${r.score || 0}%</td></tr>`;
             }).join('');
-
-            const content = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rank</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Team</th>
-                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
+            
+            showModal('🏆 Team Rankings', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rank</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Team</th><th class="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Score</th></tr></thead><tbody>${rows}</tbody></table></div>
                 <p class="text-xs text-gray-400 mt-2">Your team is highlighted.</p>
-            `;
-            showModal('🏆 Team Rankings', content);
+            `);
         }
 
         // ============================================
-        // GROUP FUNCTIONS
+        // RENDER DASHBOARD
         // ============================================
-        async function loadGroupData() {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(DEMO_DATA.group || null);
-                }, 300);
-            });
-        }
-
-        function renderGroupChart(members) {
-            const ctx = document.getElementById('groupContributionChart')?.getContext('2d');
-            if (!ctx) return;
-            if (charts.group) charts.group.destroy();
-
-            const labels = members.map(m => m.name);
-            const data = members.map(m => m.contribution_percentage);
-            const colors = ['#3AAFA9', '#5ccbc5', '#7ccfca', '#a0d6d3', '#c6f0ee'];
-
-            charts.group = new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors.slice(0, data.length),
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    return context.label + ': ' + context.parsed + '%';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ============================================
-        // PAGE: DASHBOARD
-        // ============================================
-        function renderDashboard() {
+        async function renderDashboard() {
             const user = AuthService.getUser();
             const container = document.getElementById('page-content');
+            
+            // Show loading state
+            container.innerHTML = `
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading your data...</p>
+                    </div>
+                </div>
+            `;
 
-            loadStudentData().then(() => {
-                const data = currentStudentData || DEMO_DATA.dashboard;
+            // Load data from API ONLY - NO DEMO DATA
+            await loadStudentData();
+            
+            // Render UI with data (all zeros if API failed)
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                        <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Student'}! 👋</h2>
+                        <p class="text-white/80 mt-1 text-sm">Here's your academic performance overview</p>
+                    </div>
 
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
-                            <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Student'}! 👋</h2>
-                            <p class="text-white/80 mt-1 text-sm">Here's your academic performance overview</p>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="stat-card" onclick="showCommitDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="total-commits">${currentStudentData?.total_commits ?? 0}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-code"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for details</p>
                         </div>
-
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <div class="stat-card" onclick="showCommitDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="total-commits">${data.total_commits}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-code"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for details</p>
+                        <div class="stat-card" onclick="showPeerReviewDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Peer Reviews</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="peer-reviews">${currentStudentData?.total_prs ?? 0}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-star"></i></div>
                             </div>
-                            <div class="stat-card" onclick="showPeerReviewDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Peer Reviews</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="peer-reviews">${data.total_prs}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-star"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for details</p>
-                            </div>
-                            <div class="stat-card" onclick="showActivityDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="activity-score">${data.activity_consistency_score}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-chart-line"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for breakdown</p>
-                            </div>
-                            <div class="stat-card" onclick="showTeamRankDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Team Rank</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="team-rank">#${data.team_rank}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-trophy"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for rankings</p>
-                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for details</p>
                         </div>
-
-                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                            <div class="card-glass p-6">
-                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Commit Trends</h3>
-                                <canvas id="commitTrendChart" height="220"></canvas>
+                        <div class="stat-card" onclick="showActivityDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="activity-score">${currentStudentData?.activity_consistency_score ?? 0}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-chart-line"></i></div>
                             </div>
-                            <div class="card-glass p-6">
-                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Weekly Activity</h3>
-                                <canvas id="weeklyActivityChart" height="220"></canvas>
-                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for breakdown</p>
                         </div>
-
-                        <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
-                            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-                                <div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">AI Performance Classification</h3><p class="text-sm text-gray-500 dark:text-gray-400">Powered by machine learning</p></div>
-                                <span id="classification-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold badge-moderate">Loading...</span>
+                        <div class="stat-card" onclick="showTeamRankDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Team Rank</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="team-rank">${currentStudentData?.team_rank ? '#' + currentStudentData.team_rank : '#0'}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-trophy"></i></div>
                             </div>
-                            <div class="progress-teal mb-3"><div id="performance-bar" class="bar" style="width:0%"></div></div>
-                            <p id="ai-feedback-text" class="text-gray-600 dark:text-gray-300 text-sm">Loading AI evaluation...</p>
-                        </div>
-
-                        <div class="card-glass p-0 overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Activity</h3></div>
-                            <div id="recent-activity" class="divide-y divide-gray-100 dark:divide-gray-800"><div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div></div>
+                            <p class="text-xs text-gray-400 mt-1">Click for rankings</p>
                         </div>
                     </div>
-                `;
 
-                renderCharts(data);
-                loadAIEvaluation();
-                renderActivity(data.weekly_data || []);
-            });
+                    <!-- GitHub Connection Card -->
+                    <div class="card-glass p-6 hover:shadow-xl transition-all cursor-pointer" onclick="window.location.href='repository-connection.html'">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">GitHub</p>
+                                <p class="text-lg font-bold text-gray-800 dark:text-gray-100 mt-1">Connect Repository</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-[#3AAFA9]/10 flex items-center justify-center text-[#3AAFA9]">
+                                <i class="fab fa-github text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Commit Trends</h3><canvas id="commitTrendChart" height="220"></canvas></div>
+                        <div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Weekly Activity</h3><canvas id="weeklyActivityChart" height="220"></canvas></div>
+                    </div>
+
+                    <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                            <div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">AI Performance Classification</h3><p class="text-sm text-gray-500 dark:text-gray-400">Powered by machine learning</p></div>
+                            <span id="classification-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold badge-not-started">Not Started</span>
+                        </div>
+                        <div class="progress-teal mb-3"><div id="performance-bar" class="bar" style="width:0%"></div></div>
+                        <p id="ai-feedback-text" class="text-gray-600 dark:text-gray-300 text-sm">Start contributing to get AI-powered feedback on your performance.</p>
+                    </div>
+
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Activity</h3></div>
+                        <div id="recent-activity" class="divide-y divide-gray-100 dark:divide-gray-800"><div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div></div>
+                    </div>
+                </div>
+            `;
+
+            // Render charts
+            renderCharts(currentStudentData);
+            await loadAIEvaluation();
         }
 
+        // ============================================
+        // LOAD STUDENT DATA - API ONLY, NO DEMO!
+        // ============================================
         async function loadStudentData() {
             try {
                 const user = AuthService.getUser();
-                if (!user) return;
-                const response = await ApiService.get(`/analytics/student/${user.id}`);
-                if (response.success) {
-                    currentStudentData = response;
-                    DEMO_DATA.dashboard = { ...DEMO_DATA.dashboard, ...currentStudentData };
+                if (!user) {
+                    currentStudentData = { ...EMPTY_DATA };
+                    return;
                 }
-            } catch (e) {
-                console.warn('Using demo data for student');
-                currentStudentData = DEMO_DATA.dashboard;
+                
+                const response = await ApiService.get(`/analytics/student/${user.id}`);
+                
+                // If API returned valid data, use it
+                if (response && response.success && response.data) {
+                    currentStudentData = response.data;
+                    console.log('✅ Data loaded from API:', currentStudentData);
+                } else {
+                    // API failed or returned no data - use EMPTY_DATA (all zeros)
+                    console.warn('⚠️ No data from API, using empty data');
+                    currentStudentData = { ...EMPTY_DATA };
+                }
+            } catch (error) {
+                console.error('❌ Error loading student data:', error);
+                currentStudentData = { ...EMPTY_DATA };
             }
         }
 
+        // ============================================
+        // RENDER CHARTS - WITH EMPTY DATA HANDLING
+        // ============================================
         function renderCharts(data) {
+            const hasCommitData = data?.weekly_data && data.weekly_data.length > 0 && data.weekly_data.some(w => w.commits > 0);
+            
+            // Commit Trends Chart
             const commitCtx = document.getElementById('commitTrendChart')?.getContext('2d');
-            if (commitCtx && data.weekly_data) {
+            if (commitCtx) {
                 if (charts.commit) charts.commit.destroy();
+                
+                const labels = hasCommitData ? data.weekly_data.map(w => `W${w.week}`) : ['No Data'];
+                const values = hasCommitData ? data.weekly_data.map(w => w.commits) : [0];
+                
                 charts.commit = new Chart(commitCtx, {
                     type: 'line',
                     data: {
-                        labels: data.weekly_data.map(w => `W${w.week}`),
+                        labels: labels,
                         datasets: [{
                             label: 'Commits',
-                            data: data.weekly_data.map(w => w.commits),
-                            borderColor: '#3AAFA9',
-                            backgroundColor: 'rgba(58,175,169,0.08)',
+                            data: values,
+                            borderColor: hasCommitData ? '#3AAFA9' : '#94a3b8',
+                            backgroundColor: hasCommitData ? 'rgba(58,175,169,0.08)' : 'rgba(148,163,184,0.08)',
                             tension: 0.4,
                             fill: true,
-                            pointBackgroundColor: '#3AAFA9',
+                            pointBackgroundColor: hasCommitData ? '#3AAFA9' : '#94a3b8',
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2,
-                            pointRadius: 4
+                            pointRadius: hasCommitData ? 4 : 2
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
-                        x: { grid: { display: false } } }
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' commits';
+                                    }
+                                }
+                            }
+                        },
+                        scales: { 
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, 
+                            x: { grid: { display: false } } 
+                        }
                     }
                 });
             }
+
+            // Weekly Activity Chart
             const activityCtx = document.getElementById('weeklyActivityChart')?.getContext('2d');
-            if (activityCtx && data.daily_activity) {
+            if (activityCtx) {
                 if (charts.activity) charts.activity.destroy();
+                
+                const hasActivityData = data?.daily_activity && data.daily_activity.some(v => v > 0);
+                const values = data?.daily_activity || [0, 0, 0, 0, 0, 0, 0];
+                
                 charts.activity = new Chart(activityCtx, {
                     type: 'bar',
                     data: {
                         labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
                         datasets: [{
                             label: 'Contributions',
-                            data: data.daily_activity || [0, 0, 0, 0, 0, 0, 0],
-                            backgroundColor: 'rgba(58,175,169,0.50)',
-                            borderColor: '#3AAFA9',
+                            data: values,
+                            backgroundColor: hasActivityData ? 'rgba(58,175,169,0.50)' : 'rgba(148,163,184,0.30)',
+                            borderColor: hasActivityData ? '#3AAFA9' : '#94a3b8',
                             borderWidth: 2,
                             borderRadius: 6
                         }]
@@ -874,25 +774,57 @@
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
-                        x: { grid: { display: false } } }
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' contributions';
+                                    }
+                                }
+                            }
+                        },
+                        scales: { 
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, 
+                            x: { grid: { display: false } } 
+                        }
                     }
                 });
             }
         }
 
+        // ============================================
+        // LOAD AI EVALUATION
+        // ============================================
         async function loadAIEvaluation() {
             try {
                 const user = AuthService.getUser();
-                if (!user) return;
-                const response = await ApiService.get(`/ai/evaluate/student/${user.id}`);
-                if (response.success) {
-                    updateAICard(response);
+                if (!user) {
+                    updateAICard({
+                        classification: 'Not Started',
+                        overall_score: 0,
+                        feedback: 'Start contributing to get AI-powered feedback on your performance.'
+                    });
+                    return;
                 }
-            } catch (e) {
-                console.warn('Using demo AI data');
-                updateAICard(DEMO_DATA.ai);
+                
+                const response = await ApiService.get(`/ai/evaluate/student/${user.id}`);
+                if (response && response.success && response.data) {
+                    updateAICard(response.data);
+                } else {
+                    updateAICard({
+                        classification: 'Not Started',
+                        overall_score: 0,
+                        feedback: 'Start contributing to get AI-powered feedback on your performance.'
+                    });
+                }
+            } catch (error) {
+                console.warn('No AI data available');
+                updateAICard({
+                    classification: 'Not Started',
+                    overall_score: 0,
+                    feedback: 'Start contributing to get AI-powered feedback on your performance.'
+                });
             }
         }
 
@@ -900,410 +832,14 @@
             const badge = document.getElementById('classification-badge');
             const bar = document.getElementById('performance-bar');
             const feedback = document.getElementById('ai-feedback-text');
-            const cls = aiEval.classification || 'Moderate';
+            
+            if (!badge || !bar || !feedback) return;
+            
+            const cls = aiEval.classification || 'Not Started';
             badge.textContent = cls;
             badge.className = `px-4 py-1.5 rounded-full text-sm font-semibold ${getClassificationClass(cls)}`;
-            bar.style.width = `${Math.min(aiEval.overall_score || 75, 100)}%`;
-            feedback.textContent = aiEval.feedback || 'Your performance is on track. Keep contributing!';
-        }
-
-        function renderActivity(weeklyData) {
-            const container = document.getElementById('recent-activity');
-            if (!weeklyData || weeklyData.length === 0) {
-                container.innerHTML =
-                '<div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div>';
-                return;
-            }
-            container.innerHTML = weeklyData.map(w =>
-                `<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-lg">📝</div>
-                    <div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${w.commits} commits in Week ${w.week}</p><p class="text-xs text-gray-500 dark:text-gray-400">Repository activity</p></div>
-                </div>`
-            ).join('');
-        }
-
-        // ============================================
-        // PAGE: MY GROUP (NEW & IMPROVED)
-        // ============================================
-        function renderGroup() {
-            const container = document.getElementById('page-content');
-            
-            container.innerHTML = `
-                <div class="flex items-center justify-center h-64">
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
-                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading group details...</p>
-                    </div>
-                </div>
-            `;
-
-            loadGroupData().then(groupData => {
-                if (!groupData) {
-                    container.innerHTML = `
-                        <div class="space-y-6">
-                            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 My Group</h2>
-                            <div class="card-glass p-8 text-center">
-                                <div class="text-6xl mb-4">👥</div>
-                                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Group Assigned</h3>
-                                <p class="text-gray-500 dark:text-gray-400 mt-2">You haven't been assigned to any group yet.</p>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const { name, course_name, member_count, total_commits, avg_activity, members } = groupData;
-
-                const memberRows = members.map(m => {
-                    const badgeClass = getClassificationClass(m.classification);
-                    return `
-                        <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                            <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${m.name}</td>
-                            <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${m.role}</td>
-                            <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${m.commits}</td>
-                            <td class="px-4 py-2">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
-                                        <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${m.contribution_percentage}%"></div>
-                                    </div>
-                                    <span class="text-sm text-gray-600 dark:text-gray-400">${m.contribution_percentage}%</span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${badgeClass}">${m.classification}</span></td>
-                        </tr>
-                    `;
-                }).join('');
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 My Group</h2>
-
-                        <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="text-2xl font-bold">${name}</h3>
-                                    <p class="text-white/80 text-sm mt-1">${course_name}</p>
-                                </div>
-                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">${member_count} Members</span>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                            <div class="stat-card text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${member_count}</p>
-                            </div>
-                            <div class="stat-card text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${total_commits}</p>
-                            </div>
-                            <div class="stat-card text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${avg_activity}%</p>
-                            </div>
-                        </div>
-
-                        <div class="card-glass p-0 overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Team Members</h3>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-gray-50 dark:bg-gray-800">
-                                        <tr>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Member</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contribution</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${memberRows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="card-glass p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contribution Distribution</h3>
-                            <canvas id="groupContributionChart" height="250"></canvas>
-                        </div>
-                    </div>
-                `;
-
-                renderGroupChart(members);
-            });
-        }
-
-        // ============================================
-        // OTHER PAGE RENDERERS
-        // ============================================
-        function renderRepository() {
-            const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🔗 GitHub Connection</h2>
-                    <div class="card-glass p-6 bg-gradient-to-r from-[#0b1717] to-[#1a3a38] border-none shadow-xl">
-                        <div class="flex flex-wrap items-center justify-between gap-4 text-white">
-                            <div class="flex items-center gap-4">
-                                <div class="text-4xl">🐙</div>
-                                <div><h3 class="text-xl font-semibold">Connect GitHub Repository</h3><p class="text-white/60 text-sm">Connect your repository to start tracking contributions</p></div>
-                            </div>
-                            <button id="githubConnectBtn" class="btn-teal bg-white text-[#2B7A78] hover:bg-gray-100 shadow-lg"><i class="fab fa-github mr-2"></i> Connect GitHub</button>
-                        </div>
-                    </div>
-                    <div class="card-glass p-6">
-                        <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Connected Repositories</h3>
-                        <div class="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">No repositories connected</div>
-                    </div>
-                </div>
-            `;
-            document.getElementById('githubConnectBtn')?.addEventListener('click', () => { window.toast.info('GitHub OAuth would redirect here'); });
-        }
-
-        function renderAnalytics() {
-            const container = document.getElementById('page-content');
-            const data = currentStudentData || DEMO_DATA.dashboard;
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📈 Contribution Analytics</h2>
-                    <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-commits">${data.total_commits}</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Lines Added</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-lines">2,450</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-score">${data.activity_consistency_score}</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Consistency</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-consistency">${data.activity_consistency_score}%</p></div>
-                    </div>
-                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Activity Trend</h3><canvas id="analyticsChart" height="220"></canvas></div>
-                </div>
-            `;
-            setTimeout(() => {
-                const ctx = document.getElementById('analyticsChart')?.getContext('2d');
-                if (ctx && data.weekly_data) {
-                    if (charts.analytics) charts.analytics.destroy();
-                    charts.analytics = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.weekly_data.map(w => `W${w.week}`),
-                            datasets: [{
-                                label: 'Commits',
-                                data: data.weekly_data.map(w => w.commits),
-                                borderColor: '#3AAFA9',
-                                backgroundColor: 'rgba(58,175,169,0.06)',
-                                fill: true,
-                                tension: 0.4,
-                                pointBackgroundColor: '#3AAFA9'
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
-                        }
-                    });
-                }
-            }, 100);
-        }
-
-        function renderPeerReview() {
-            const container = document.getElementById('page-content');
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⭐ Peer Reviews</h2>
-                    <div class="card-glass p-6">
-                        <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Submit Peer Review</h3>
-                        <p class="text-gray-500 dark:text-gray-400 text-sm">Review your team members anonymously</p>
-                        <div class="mt-6 text-center py-8 text-gray-500 dark:text-gray-400 text-sm">No team members to review</div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderAIFeedback() {
-            const container = document.getElementById('page-content');
-            const ai = DEMO_DATA.ai;
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🤖 AI Evaluation Feedback</h2>
-                    <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
-                        <div class="flex flex-wrap items-center justify-between gap-4">
-                            <div><h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Your Performance Classification</h3><p class="text-gray-500 dark:text-gray-400 text-sm mt-1">AI-powered evaluation</p></div>
-                            <span id="ai-classification" class="px-4 py-2 rounded-full text-sm font-semibold ${getClassificationClass(ai.classification)}">${ai.classification}</span>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="stat-card text-center"><div class="text-2xl mb-2">📊</div><p class="text-sm text-gray-500 dark:text-gray-400">Participation</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-participation">${ai.participation_score}</p></div>
-                        <div class="stat-card text-center"><div class="text-2xl mb-2">⭐</div><p class="text-sm text-gray-500 dark:text-gray-400">Quality</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-quality">${ai.quality_score}</p></div>
-                        <div class="stat-card text-center"><div class="text-2xl mb-2">📈</div><p class="text-sm text-gray-500 dark:text-gray-400">Consistency</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-consistency">${ai.consistency_score}</p></div>
-                    </div>
-                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">AI Feedback</h3><p class="text-gray-600 dark:text-gray-300 text-sm">${ai.feedback}</p></div>
-                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-3">Improvement Suggestions</h3><ul class="space-y-2">${ai.suggestions.map(s => `<li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"><span class="text-[#3AAFA9] mt-0.5">•</span><span>${s}</span></li>`).join('')}</ul></div>
-                </div>
-            `;
-        }
-
-        function renderProfile() {
-            const user = AuthService.getUser();
-            const container = document.getElementById('page-content');
-            if (!user) {
-                container.innerHTML = '<div class="text-center py-12 text-gray-500">Please log in again.</div>';
-                return;
-            }
-            const extra = ProfileExtra.get();
-            const pic = ProfileExtra.getPic();
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👤 My Profile</h2>
-                    <div class="card-glass p-6">
-                        <div class="flex flex-col md:flex-row gap-8 items-start">
-                            <div class="flex flex-col items-center gap-3 flex-shrink-0">
-                                <img id="profilePicPreview" src="${pic || getUserAvatar(user)}" alt="Profile" class="profile-pic-preview" />
-                                <label class="file-input-label text-sm"><i class="fas fa-camera"></i> Upload Photo<input type="file" id="profilePicInput" accept="image/*" class="hidden" /></label>
-                                <button id="removePicBtn" class="text-xs text-red-400 hover:text-red-300 transition ${pic ? '' : 'hidden'}">Remove Photo</button>
-                            </div>
-                            <div class="flex-1 w-full space-y-4">
-                                <form id="profileForm" class="space-y-4">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label><input type="text" id="profileFirstName" value="${user.first_name || ''}" class="input-teal mt-1" /></div>
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label><input type="text" id="profileLastName" value="${user.last_name || ''}" class="input-teal mt-1" /></div>
-                                    </div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" value="${user.email || ''}" disabled class="input-teal mt-1 bg-gray-100 dark:bg-gray-800 cursor-not-allowed" /><p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed</p></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label><input type="text" id="profileDepartment" value="${user.department || ''}" class="input-teal mt-1" /></div>
-                                    <hr class="border-gray-200 dark:border-gray-700" />
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label><textarea id="profileBio" class="textarea-teal mt-1" placeholder="Tell us about yourself...">${extra.bio || ''}</textarea></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="${extra.skills || ''}" class="input-teal mt-1" placeholder="e.g. JavaScript, Python" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Education</label><input type="text" id="profileEducation" value="${extra.education || ''}" class="input-teal mt-1" placeholder="e.g. B.Sc. in CSE" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label><input type="text" id="profileExperience" value="${extra.experience || ''}" class="input-teal mt-1" placeholder="e.g. Intern at XYZ" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub</label><input type="url" id="profileGithub" value="${extra.github || ''}" class="input-teal mt-1" placeholder="https://github.com/yourusername" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label><input type="url" id="profileLinkedin" value="${extra.linkedin || ''}" class="input-teal mt-1" placeholder="https://linkedin.com/in/yourprofile" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label><input type="url" id="profileWebsite" value="${extra.website || ''}" class="input-teal mt-1" placeholder="https://yourwebsite.com" /></div>
-                                    <div class="flex gap-3 flex-wrap"><button type="submit" class="btn-teal">Update Profile</button><button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button></div>
-                                </form>
-                                <div id="passwordFormContainer" class="mt-6 hidden border-t border-gray-200 dark:border-gray-700 pt-6">
-                                    <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Change Password</h4>
-                                    <form id="passwordForm" class="space-y-4">
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label><input type="password" id="currentPassword" class="input-teal mt-1" placeholder="Enter current password" /></div>
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label><input type="password" id="newPassword" class="input-teal mt-1" placeholder="Enter new password (min 6 chars)" /></div>
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label><input type="password" id="confirmPassword" class="input-teal mt-1" placeholder="Confirm new password" /></div>
-                                        <div class="flex gap-3"><button type="submit" class="btn-teal">Update Password</button><button type="button" id="hidePasswordForm" class="btn-teal-outline">Cancel</button></div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            // Profile pic upload & form submit handlers...
-            const fileInput = document.getElementById('profilePicInput');
-            const preview = document.getElementById('profilePicPreview');
-            const removeBtn = document.getElementById('removePicBtn');
-            fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
-                if (file) { const reader = new FileReader();
-                    reader.onload = function(ev) { const base64 = ev.target.result;
-                        preview.src = base64;
-                        ProfileExtra.setPic(base64);
-                        updateSidebarAvatar();
-                        removeBtn.classList.remove('hidden');
-                        window.toast.success('Profile picture updated!'); };
-                    reader.readAsDataURL(file); }
-            });
-            removeBtn.addEventListener('click', function() { ProfileExtra.setPic(null);
-                preview.src = getUserAvatar(user);
-                removeBtn.classList.add('hidden');
-                updateSidebarAvatar();
-                window.toast.info('Profile picture removed.'); });
-            document.getElementById('profileForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const firstName = document.getElementById('profileFirstName').value.trim();
-                const lastName = document.getElementById('profileLastName').value.trim();
-                const department = document.getElementById('profileDepartment').value.trim();
-                if (!firstName || !lastName) { window.toast.error('First and last name are required.'); return; }
-                const extraData = { bio: document.getElementById('profileBio').value.trim(), skills: document
-                        .getElementById('profileSkills').value.trim(), education: document.getElementById(
-                        'profileEducation').value.trim(), experience: document.getElementById('profileExperience')
-                        .value.trim(), github: document.getElementById('profileGithub').value.trim(),
-                    linkedin: document.getElementById('profileLinkedin').value.trim(), website: document
-                        .getElementById('profileWebsite').value.trim() };
-                ProfileExtra.set(extraData);
-                const payload = { first_name: firstName, last_name: lastName, department };
-                const btn = this.querySelector('button[type="submit"]');
-                const original = btn.textContent;
-                btn.textContent = 'Saving...';
-                btn.disabled = true;
-                try {
-                    const response = await ApiService.put('/auth/profile', payload);
-                    if (response.success) {
-                        const user = AuthService.getUser();
-                        user.first_name = firstName;
-                        user.last_name = lastName;
-                        user.department = department;
-                        AuthService.updateUser(user);
-                        document.getElementById('user-name').textContent = `${firstName} ${lastName}`.trim();
-                        updateSidebarAvatar();
-                        window.toast.success('Profile updated successfully!');
-                    } else { window.toast.error(response.message || 'Update failed.'); }
-                } catch (err) { window.toast.error('Error updating profile. Please try again.'); } finally { btn
-                        .textContent = original;
-                    btn.disabled = false; }
-            });
-            document.getElementById('showPasswordForm').addEventListener('click', function() { document
-                    .getElementById('passwordFormContainer').classList.remove('hidden'); });
-            document.getElementById('hidePasswordForm').addEventListener('click', function() { document
-                    .getElementById('passwordFormContainer').classList.add('hidden');
-                document.getElementById('passwordForm').reset(); });
-            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const current = document.getElementById('currentPassword').value;
-                const newPass = document.getElementById('newPassword').value;
-                const confirm = document.getElementById('confirmPassword').value;
-                if (!current || !newPass || !confirm) { window.toast.error('All password fields are required.');
-                    return; }
-                if (newPass.length < 6) { window.toast.error('New password must be at least 6 characters.');
-                    return; }
-                if (newPass !== confirm) { window.toast.error('Passwords do not match.'); return; }
-                const btn = this.querySelector('button[type="submit"]');
-                const original = btn.textContent;
-                btn.textContent = 'Updating...';
-                btn.disabled = true;
-                try {
-                    const response = await ApiService.post('/auth/change-password', { current_password: current,
-                        new_password: newPass, new_password_confirmation: confirm });
-                    if (response.success) { window.toast.success('Password changed successfully!');
-                        document.getElementById('passwordFormContainer').classList.add('hidden');
-                        document.getElementById('passwordForm').reset(); } else { window.toast.error(response
-                            .message || 'Password change failed.'); }
-                } catch (err) { window.toast.error('Error changing password. Please try again.'); } finally { btn
-                        .textContent = original;
-                    btn.disabled = false; }
-            });
-        }
-
-        // ============================================
-        // NAVIGATION
-        // ============================================
-        function navigate(page) {
-            currentPage = page;
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
-            const titles = {
-                dashboard: 'Overview',
-                group: 'My Group',
-                repository: 'GitHub Connection',
-                analytics: 'Analytics',
-                'peer-review': 'Peer Reviews',
-                'ai-feedback': 'AI Feedback',
-                profile: 'My Profile'
-            };
-            document.getElementById('page-title').textContent = titles[page] || 'Overview';
-            switch (page) {
-                case 'dashboard': renderDashboard(); break;
-                case 'group': renderGroup(); break;
-                case 'repository': renderRepository(); break;
-                case 'analytics': renderAnalytics(); break;
-                case 'peer-review': renderPeerReview(); break;
-                case 'ai-feedback': renderAIFeedback(); break;
-                case 'profile': renderProfile(); break;
-                default: renderDashboard();
-            }
+            bar.style.width = `${Math.min(aiEval.overall_score || 0, 100)}%`;
+            feedback.textContent = aiEval.feedback || 'Start contributing to get AI-powered feedback on your performance.';
         }
 
         // ============================================
@@ -1314,11 +850,13 @@
             const icon = document.getElementById('themeIcon');
             const html = document.documentElement;
             const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+            
             if (saved === 'dark') {
                 html.classList.add('dark');
                 icon.classList.remove('fa-sun');
                 icon.classList.add('fa-moon');
             }
+            
             toggle.addEventListener('click', function() {
                 const isDark = html.classList.toggle('dark');
                 if (isDark) {
@@ -1338,38 +876,26 @@
         // ============================================
         function init() {
             if (!AuthService.isAuthenticated()) {
-                window.location.href = '/login.html';
+                window.location.href = '/frontend/pages/public/login.html';
                 return;
             }
+
             const user = AuthService.getUser();
             if (user) {
                 const name = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
                 document.getElementById('user-name').textContent = name;
-                const pic = ProfileExtra.getPic();
-                const avatarEl = document.getElementById('user-avatar');
-                if (pic) {
-                    avatarEl.style.backgroundImage = `url(${pic})`;
-                    avatarEl.style.backgroundSize = 'cover';
-                    avatarEl.textContent = '';
-                } else {
-                    avatarEl.textContent = getInitials(name);
-                }
-                avatarEl.addEventListener('click', function() { navigate('profile'); });
+                document.getElementById('user-avatar').textContent = getInitials(name);
             }
+
             document.getElementById('menuBtn')?.addEventListener('click', () => {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const page = link.dataset.page;
-                    if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
-                    navigate(page);
-                });
-            });
+
             document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
-            navigate('dashboard');
+
+            renderDashboard();
         }
+
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>

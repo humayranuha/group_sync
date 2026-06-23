@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Group;
@@ -16,7 +17,6 @@ use App\Models\Notification;
 use App\Models\AuditLog;
 use App\Models\Attendance;
 use App\Models\WorkingHour;
-use GuzzleHttp\Client;
 
 class ApiController extends Controller
 {
@@ -197,7 +197,6 @@ class ApiController extends Controller
     public function getCourses()
     {
         $courses = Course::with('teacher')->get();
-
         return response()->json([
             'success' => true,
             'courses' => $courses
@@ -207,7 +206,7 @@ class ApiController extends Controller
     public function getProfessorCourses($id)
     {
         $courses = Course::where('teacher_id', $id)
-            ->withCount(['students', 'groups'])
+            ->withCount(['students', 'groups', 'assignments'])
             ->get();
 
         return response()->json([
@@ -377,6 +376,82 @@ class ApiController extends Controller
 
     /**
      * ============================================
+     * ASSIGNMENT MANAGEMENT SECTION
+     * ============================================
+     */
+
+    public function createAssignment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'course_id' => 'required|exists:courses,id',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'weightage' => 'required|array',
+            'weightage.commits' => 'required|numeric|min:0|max:100',
+            'weightage.attendance' => 'required|numeric|min:0|max:100',
+            'weightage.peer_reviews' => 'required|numeric|min:0|max:100',
+            'weightage.working_hours' => 'required|numeric|min:0|max:100',
+            'deadline' => 'required|date|after:now',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $total = $request->weightage['commits'] + 
+                 $request->weightage['attendance'] + 
+                 $request->weightage['peer_reviews'] + 
+                 $request->weightage['working_hours'];
+
+        if ($total != 100) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Total weightage must equal 100%. Current total: ' . $total . '%'
+            ], 400);
+        }
+
+        $course = Course::find($request->course_id);
+        if ($course->teacher_id !== $request->user()->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized to create assignments for this course'
+            ], 403);
+        }
+
+        $assignment = Assignment::create([
+            'course_id' => $request->course_id,
+            'title' => $request->title,
+            'description' => $request->description ?? null,
+            'weightage' => json_encode($request->weightage),
+            'deadline' => $request->deadline,
+            'created_by' => $request->user()->id,
+            'status' => 'active'
+        ]);
+
+        $this->logActivity('create_assignment', $request->user()->id,
+            'Created assignment: ' . $assignment->title);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Assignment created successfully',
+            'assignment' => $assignment
+        ], 201);
+    }
+
+    public function getAssignments($courseId)
+    {
+        $assignments = Assignment::where('course_id', $courseId)->get();
+        return response()->json([
+            'success' => true,
+            'assignments' => $assignments
+        ]);
+    }
+
+    /**
+     * ============================================
      * GROUP MANAGEMENT SECTION
      * ============================================
      */
@@ -384,7 +459,6 @@ class ApiController extends Controller
     public function getGroups()
     {
         $groups = Group::with(['course', 'members'])->get();
-
         return response()->json([
             'success' => true,
             'groups' => $groups
@@ -394,7 +468,6 @@ class ApiController extends Controller
     public function getGroup($id)
     {
         $group = Group::with(['course', 'members', 'assignments'])->findOrFail($id);
-
         return response()->json([
             'success' => true,
             'group' => $group
@@ -405,7 +478,6 @@ class ApiController extends Controller
     {
         $group = Group::findOrFail($id);
         $members = $group->members()->with('contributionScores')->get();
-
         return response()->json([
             'success' => true,
             'members' => $members
@@ -415,7 +487,6 @@ class ApiController extends Controller
     public function getUserGroups(Request $request)
     {
         $groups = $request->user()->groups()->with(['course', 'members'])->get();
-
         return response()->json([
             'success' => true,
             'groups' => $groups
@@ -899,8 +970,16 @@ class ApiController extends Controller
     {
         $scores = ContributionScore::where('student_id', $id)->get();
         $avgScore = $scores->avg('score') ?? 75;
-        $classification = $this->getClassification($avgScore);
-        $feedback = $this->getFeedback($classification);
+        
+        $isFreeRider = $avgScore < 30;
+        $classification = $isFreeRider ? 'Free Rider' : $this->getClassification($avgScore);
+        $feedback = $isFreeRider 
+            ? '⚠️ Warning: Your contribution is significantly low. Please communicate with your team and increase your involvement in the project.' 
+            : $this->getFeedback($classification);
+        
+        $suggestions = $isFreeRider 
+            ? ['Schedule a meeting with your team', 'Start contributing to the repository', 'Communicate challenges to your professor']
+            : $this->getSuggestions($classification);
 
         return response()->json([
             'success' => true,
@@ -909,8 +988,9 @@ class ApiController extends Controller
             'quality_score' => round($avgScore * 0.9, 2),
             'consistency_score' => round($avgScore * 1.1, 2),
             'overall_score' => round($avgScore, 2),
+            'is_free_rider' => $isFreeRider,
             'feedback' => $feedback,
-            'suggestions' => $this->getSuggestions($classification),
+            'suggestions' => $suggestions,
             'weekly_labels' => ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
             'weekly_scores' => [
                 rand(60, 80), rand(60, 80), rand(60, 80), rand(60, 80),
@@ -934,8 +1014,7 @@ class ApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'notifications' => $notifications
-        ]);
+            'notifications' => $notifications        ]);
     }
 
     public function markNotificationRead(Request $request, $id)
@@ -1096,40 +1175,53 @@ class ApiController extends Controller
      */
 
     private function getGitHubMetrics($studentId, $assignmentId, $groupId)
-{
-    $user = User::find($studentId);
-    if (!$user || !$user->github_token) return 0;
+    {
+        $user = User::find($studentId);
+        if (!$user || !$user->github_token) return 0;
 
-    $group = Group::find($groupId);
-    if (!$group || !$group->github_repo_url) return 0;
+        $group = Group::find($groupId);
+        if (!$group || !$group->github_repo_url) return 0;
 
-    // Extract owner/repo from URL
-    $path = parse_url($group->github_repo_url, PHP_URL_PATH);
-    if (!$path) return 0;
-    $parts = explode('/', trim($path, '/'));
-    if (count($parts) < 2) return 0;
-    $owner = $parts[0];
-    $repo = $parts[1];
+        $path = parse_url($group->github_repo_url, PHP_URL_PATH);
+        if (!$path) return 0;
+        $parts = explode('/', trim($path, '/'));
+        if (count($parts) < 2) return 0;
+        $owner = $parts[0];
+        $repo = $parts[1];
 
-    try {
-        // Laravel's built-in HTTP Client (no Guzzle installation needed!)
-        $response = Http::withToken($user->github_token)
-            ->get("https://api.github.com/repos/{$owner}/{$repo}/commits", [
-                'per_page' => 100,
-                'since' => now()->subDays(30)->toIso8601String()
-            ]);
+        try {
+            $response = Http::withToken($user->github_token)
+                ->get("https://api.github.com/repos/{$owner}/{$repo}/commits", [
+                    'per_page' => 100,
+                    'since' => now()->subDays(30)->toIso8601String()
+                ]);
 
-        if ($response->successful()) {
-            $commits = $response->json();
-            $commitCount = count($commits);
-            // Max 50 commits = 100% score
-            return min(100, ($commitCount / 50) * 100);
+            if ($response->successful()) {
+                $commits = $response->json();
+                
+                $authorCommits = [];
+                foreach ($commits as $commit) {
+                    $author = $commit['commit']['author']['name'] ?? 'unknown';
+                    if (!isset($authorCommits[$author])) {
+                        $authorCommits[$author] = 0;
+                    }
+                    $authorCommits[$author]++;
+                }
+
+                $totalCommits = array_sum($authorCommits);
+                if ($totalCommits === 0) return 0;
+                
+                $studentCommits = $authorCommits[$user->github_username] ?? 0;
+                $percentage = round(($studentCommits / $totalCommits) * 100, 2);
+                
+                return $percentage;
+            }
+            return 0;
+        } catch (\Exception $e) {
+            return 0;
         }
-        return 0;
-    } catch (\Exception $e) {
-        return 0;
     }
-}
+
     private function getAttendance($studentId, $assignmentId)
     {
         $assignment = Assignment::find($assignmentId);
@@ -1172,7 +1264,6 @@ class ApiController extends Controller
             ->where('assignment_id', $assignmentId)
             ->sum('hours');
 
-        // Assume 40 hours = 100% score
         return min(100, round(($totalHours / 40) * 100));
     }
 

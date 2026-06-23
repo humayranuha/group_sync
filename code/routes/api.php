@@ -38,6 +38,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/courses/enroll-via-code', [ApiController::class, 'enrollViaCode']);
     Route::get('/courses/{id}/students', [ApiController::class, 'getCourseStudents']);
 
+    // ---- Assignments (NEW) ----
+    Route::post('/assignments/create', [ApiController::class, 'createAssignment']);
+    Route::get('/assignments/{courseId}', [ApiController::class, 'getAssignments']);
+
     // ---- Groups ----
     Route::get('/groups', [ApiController::class, 'getGroups']);
     Route::get('/groups/{id}', [ApiController::class, 'getGroup']);
