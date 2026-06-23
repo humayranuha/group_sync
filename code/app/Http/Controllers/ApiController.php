@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;  // 👈 এই লাইন যোগ করুন
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Group;
@@ -16,15 +17,12 @@ use App\Models\Notification;
 use App\Models\AuditLog;
 use App\Models\Attendance;
 use App\Models\WorkingHour;
-use GuzzleHttp\Client;
 
 class ApiController extends Controller
 {
-    /**
-     * ============================================
-     * AUTHENTICATION SECTION
-     * ============================================
-     */
+    // ============================================
+    // AUTHENTICATION SECTION
+    // ============================================
 
     public function login(Request $request)
     {
@@ -188,43 +186,27 @@ class ApiController extends Controller
         ]);
     }
 
-    /**
-     * ============================================
-     * COURSE MANAGEMENT SECTION
-     * ============================================
-     */
+    // ============================================
+    // COURSE MANAGEMENT SECTION
+    // ============================================
 
     public function getCourses()
     {
         $courses = Course::with('teacher')->get();
-
-        return response()->json([
-            'success' => true,
-            'courses' => $courses
-        ]);
+        return response()->json(['success' => true, 'courses' => $courses]);
     }
 
     public function getProfessorCourses($id)
     {
-        $courses = Course::where('teacher_id', $id)
-            ->withCount(['students', 'groups'])
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'courses' => $courses
-        ]);
+        $courses = Course::where('teacher_id', $id)->withCount(['students', 'groups'])->get();
+        return response()->json(['success' => true, 'courses' => $courses]);
     }
 
     public function getStudentCourses($id)
     {
         $user = User::findOrFail($id);
         $courses = $user->courses()->with('teacher')->get();
-
-        return response()->json([
-            'success' => true,
-            'courses' => $courses
-        ]);
+        return response()->json(['success' => true, 'courses' => $courses]);
     }
 
     public function createCourse(Request $request)
@@ -238,10 +220,7 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $course = Course::create([
@@ -267,10 +246,7 @@ class ApiController extends Controller
         $course = Course::findOrFail($id);
 
         if ($course->teacher_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized to update this course'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -280,10 +256,7 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $course->update($request->only(['title', 'semester', 'description']));
@@ -302,10 +275,7 @@ class ApiController extends Controller
         $course = Course::findOrFail($courseId);
 
         if ($course->teacher_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $validator = Validator::make($request->all(), [
@@ -314,10 +284,7 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $course->students()->syncWithoutDetaching($request->student_ids);
@@ -338,25 +305,18 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $course = Course::where('enrollment_code', $request->enrollment_code)->first();
 
         if ($course->students()->where('user_id', $request->user()->id)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are already enrolled in this course'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Already enrolled'], 400);
         }
 
         $course->students()->attach($request->user()->id);
 
-        $this->logActivity('self_enroll', $request->user()->id,
-            'Self-enrolled in course: ' . $course->code);
+        $this->logActivity('self_enroll', $request->user()->id, 'Self-enrolled in course: ' . $course->code);
 
         return response()->json([
             'success' => true,
@@ -368,58 +328,36 @@ class ApiController extends Controller
     public function getCourseStudents($id)
     {
         $course = Course::with('students')->findOrFail($id);
-
-        return response()->json([
-            'success' => true,
-            'students' => $course->students
-        ]);
+        return response()->json(['success' => true, 'students' => $course->students]);
     }
 
-    /**
-     * ============================================
-     * GROUP MANAGEMENT SECTION
-     * ============================================
-     */
+    // ============================================
+    // GROUP MANAGEMENT SECTION
+    // ============================================
 
     public function getGroups()
     {
         $groups = Group::with(['course', 'members'])->get();
-
-        return response()->json([
-            'success' => true,
-            'groups' => $groups
-        ]);
+        return response()->json(['success' => true, 'groups' => $groups]);
     }
 
     public function getGroup($id)
     {
         $group = Group::with(['course', 'members', 'assignments'])->findOrFail($id);
-
-        return response()->json([
-            'success' => true,
-            'group' => $group
-        ]);
+        return response()->json(['success' => true, 'group' => $group]);
     }
 
     public function getGroupMembers($id)
     {
         $group = Group::findOrFail($id);
         $members = $group->members()->with('contributionScores')->get();
-
-        return response()->json([
-            'success' => true,
-            'members' => $members
-        ]);
+        return response()->json(['success' => true, 'members' => $members]);
     }
 
     public function getUserGroups(Request $request)
     {
         $groups = $request->user()->groups()->with(['course', 'members'])->get();
-
-        return response()->json([
-            'success' => true,
-            'groups' => $groups
-        ]);
+        return response()->json(['success' => true, 'groups' => $groups]);
     }
 
     public function createGroup(Request $request)
@@ -431,10 +369,7 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $existingGroup = Group::where('course_id', $request->course_id)
@@ -443,10 +378,7 @@ class ApiController extends Controller
             })->exists();
 
         if ($existingGroup) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are already in a group for this course'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Already in a group'], 400);
         }
 
         $group = Group::create([
@@ -479,10 +411,7 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $group = Group::where('invitation_code', $request->invitation_code)
@@ -490,24 +419,15 @@ class ApiController extends Controller
             ->first();
 
         if (!$group) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Invalid invitation code'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Invalid invitation code'], 404);
         }
 
         if ($group->members()->count() >= $group->max_members) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Group is full'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Group is full'], 400);
         }
 
         if ($group->status !== 'active') {
-            return response()->json([
-                'success' => false,
-                'message' => 'This group is no longer active'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Group is not active'], 400);
         }
 
         $existingGroup = Group::where('course_id', $request->course_id)
@@ -516,16 +436,12 @@ class ApiController extends Controller
             })->exists();
 
         if ($existingGroup) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are already in a group for this course'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Already in a group'], 400);
         }
 
         $group->members()->attach($request->user()->id, ['joined_at' => now()]);
 
-        $this->logActivity('join_group', $request->user()->id,
-            'Joined group: ' . $group->name);
+        $this->logActivity('join_group', $request->user()->id, 'Joined group: ' . $group->name);
 
         return response()->json([
             'success' => true,
@@ -539,23 +455,16 @@ class ApiController extends Controller
         $group = Group::findOrFail($id);
 
         if (!$group->members()->where('user_id', $request->user()->id)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are not a member of this group'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Not a member'], 400);
         }
 
         if ($group->created_by == $request->user()->id && $group->members()->count() <= 1) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Cannot leave group. You are the only member and creator.'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Cannot leave, you are the only member'], 400);
         }
 
         $group->members()->detach($request->user()->id);
 
-        $this->logActivity('leave_group', $request->user()->id,
-            'Left group: ' . $group->name);
+        $this->logActivity('leave_group', $request->user()->id, 'Left group: ' . $group->name);
 
         if ($group->created_by == $request->user()->id) {
             $newCreator = $group->members()->first();
@@ -565,10 +474,7 @@ class ApiController extends Controller
             }
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Left group successfully'
-        ]);
+        return response()->json(['success' => true, 'message' => 'Left group successfully']);
     }
 
     public function deleteGroup(Request $request, $id)
@@ -576,29 +482,20 @@ class ApiController extends Controller
         $group = Group::findOrFail($id);
 
         if ($group->created_by !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Only the group creator can delete this group'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Only creator can delete'], 403);
         }
 
         $group->members()->detach();
         $group->delete();
 
-        $this->logActivity('delete_group', $request->user()->id,
-            'Deleted group: ' . $group->name);
+        $this->logActivity('delete_group', $request->user()->id, 'Deleted group: ' . $group->name);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Group deleted successfully'
-        ]);
+        return response()->json(['success' => true, 'message' => 'Group deleted']);
     }
 
-    /**
-     * ============================================
-     * PEER REVIEW SECTION
-     * ============================================
-     */
+    // ============================================
+    // PEER REVIEW SECTION
+    // ============================================
 
     public function submitPeerReview(Request $request)
     {
@@ -613,34 +510,22 @@ class ApiController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
         $reviewer = $request->user();
         $group = Group::find($request->group_id);
 
         if (!$group->members()->where('user_id', $reviewer->id)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are not a member of this group'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Not a member'], 403);
         }
 
         if (!$group->members()->where('user_id', $request->reviewee_id)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Reviewee is not a member of this group'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Reviewee not in group'], 400);
         }
 
         if ($reviewer->id == $request->reviewee_id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You cannot review yourself'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Cannot review yourself'], 400);
         }
 
         $existingReview = PeerReview::where('reviewer_id', $reviewer->id)
@@ -649,10 +534,7 @@ class ApiController extends Controller
             ->exists();
 
         if ($existingReview) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You have already reviewed this team member'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Already reviewed this member'], 400);
         }
 
         $peerReview = PeerReview::create([
@@ -683,10 +565,7 @@ class ApiController extends Controller
         $user = $request->user();
 
         if (!$group->members()->where('user_id', $user->id)->exists()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'You are not a member of this group'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Not a member'], 403);
         }
 
         $members = $group->members()->get();
@@ -742,11 +621,9 @@ class ApiController extends Controller
         ]);
     }
 
-    /**
-     * ============================================
-     * CONTRIBUTION SCORE SECTION
-     * ============================================
-     */
+    // ============================================
+    // CONTRIBUTION SCORE SECTION
+    // ============================================
 
     public function calculateContributionScore(Request $request, $studentId, $assignmentId)
     {
@@ -759,21 +636,18 @@ class ApiController extends Controller
             })->first();
 
         if (!$group) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Student is not in a group for this course'
-            ], 400);
+            return response()->json(['success' => false, 'message' => 'Student is not in a group'], 400);
         }
 
         $weightage = json_decode($assignment->weightage, true);
 
         $gitHubMetrics = $this->getGitHubMetrics($studentId, $assignmentId, $group->id);
-        $attendance = $this->getAttendance($studentId, $assignmentId);
+        $attendanceScore = $this->getAttendanceScore($studentId, $assignmentId);
         $peerReviews = $this->getPeerReviewScore($studentId, $assignmentId);
         $workingHours = $this->getWorkingHours($studentId, $assignmentId);
 
         $score = ($gitHubMetrics * $weightage['commits'] / 100) +
-                 ($attendance * $weightage['attendance'] / 100) +
+                 ($attendanceScore * $weightage['attendance'] / 100) +
                  ($peerReviews * $weightage['peer_reviews'] / 100) +
                  ($workingHours * $weightage['working_hours'] / 100);
 
@@ -796,7 +670,7 @@ class ApiController extends Controller
                 'status' => $status,
                 'breakdown' => json_encode([
                     'github_commits' => $gitHubMetrics,
-                    'attendance' => $attendance,
+                    'attendance' => $attendanceScore,
                     'peer_reviews' => $peerReviews,
                     'working_hours' => $workingHours,
                     'weightage_used' => $weightage
@@ -820,23 +694,15 @@ class ApiController extends Controller
             ->first();
 
         if (!$score) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Score not found. Please calculate the score first.'
-            ], 404);
+            return response()->json(['success' => false, 'message' => 'Score not found'], 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'score' => $score
-        ]);
+        return response()->json(['success' => true, 'score' => $score]);
     }
 
-    /**
-     * ============================================
-     * ANALYTICS SECTION
-     * ============================================
-     */
+    // ============================================
+    // ANALYTICS SECTION
+    // ============================================
 
     public function getStudentAnalytics($id)
     {
@@ -919,11 +785,9 @@ class ApiController extends Controller
         ]);
     }
 
-    /**
-     * ============================================
-     * NOTIFICATIONS SECTION
-     * ============================================
-     */
+    // ============================================
+    // NOTIFICATIONS SECTION
+    // ============================================
 
     public function getNotifications(Request $request)
     {
@@ -943,10 +807,7 @@ class ApiController extends Controller
         $notification = Notification::findOrFail($id);
 
         if ($notification->user_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized'
-            ], 403);
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
         $notification->update([
@@ -954,17 +815,12 @@ class ApiController extends Controller
             'read_at' => now()
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Notification marked as read'
-        ]);
+        return response()->json(['success' => true, 'message' => 'Notification marked as read']);
     }
 
-    /**
-     * ============================================
-     * GITHUB OAUTH SECTION
-     * ============================================
-     */
+    // ============================================
+    // GITHUB OAUTH SECTION
+    // ============================================
 
     public function githubRedirect()
     {
@@ -1018,11 +874,9 @@ class ApiController extends Controller
         return redirect('/student/dashboard.html');
     }
 
-    /**
-     * ============================================
-     * PRIVATE HELPER METHODS
-     * ============================================
-     */
+    // ============================================
+    // PRIVATE HELPER METHODS
+    // ============================================
 
     private function getRedirectUrl($role)
     {
@@ -1055,7 +909,7 @@ class ApiController extends Controller
                 'data' => json_encode(request()->all())
             ]);
         } catch (\Exception $e) {
-            // Silent fail for logging
+            // Silent fail
         }
     }
 
@@ -1070,10 +924,10 @@ class ApiController extends Controller
     private function getFeedback($classification)
     {
         $feedback = [
-            'Active' => 'Excellent contribution quality and consistency! You\'re demonstrating strong collaboration skills and delivering high-quality work.',
-            'Moderate' => 'Good performance overall. Consider increasing participation in team discussions and code reviews.',
-            'Passive' => 'Your contribution is below average. Try to engage more with your team and increase your activity.',
-            'Free Rider' => 'Your contribution is significantly low. Please communicate with your team and increase your involvement in the project.'
+            'Active' => 'Excellent contribution quality and consistency!',
+            'Moderate' => 'Good performance overall. Consider increasing participation.',
+            'Passive' => 'Your contribution is below average. Try to engage more.',
+            'Free Rider' => 'Your contribution is significantly low. Please increase involvement.'
         ];
         return $feedback[$classification] ?? 'Performance evaluation in progress.';
     }
@@ -1081,56 +935,53 @@ class ApiController extends Controller
     private function getSuggestions($classification)
     {
         $suggestions = [
-            'Active' => ['Continue your excellent work', 'Help mentor passive group members', 'Document your code more thoroughly'],
-            'Moderate' => ['Increase code review participation', 'Attend more team meetings', 'Improve documentation quality'],
-            'Passive' => ['Communicate more with your team', 'Increase commit frequency', 'Participate in code reviews'],
-            'Free Rider' => ['Schedule a meeting with your team', 'Start contributing to the repository', 'Communicate challenges to your professor']
+            'Active' => ['Continue your excellent work', 'Help mentor passive group members'],
+            'Moderate' => ['Increase code review participation', 'Attend more team meetings'],
+            'Passive' => ['Communicate more with your team', 'Increase commit frequency'],
+            'Free Rider' => ['Schedule a meeting with your team', 'Start contributing to the repository']
         ];
         return $suggestions[$classification] ?? ['Stay engaged with your team'];
     }
 
-    /**
-     * ============================================
-     * METRICS FETCHING (REAL IMPLEMENTATION)
-     * ============================================
-     */
+    // ============================================
+    // METRICS FETCHING
+    // ============================================
 
     private function getGitHubMetrics($studentId, $assignmentId, $groupId)
-{
-    $user = User::find($studentId);
-    if (!$user || !$user->github_token) return 0;
+    {
+        $user = User::find($studentId);
+        if (!$user || !$user->github_token) return 0;
 
-    $group = Group::find($groupId);
-    if (!$group || !$group->github_repo_url) return 0;
+        $group = Group::find($groupId);
+        if (!$group || !$group->github_repo_url) return 0;
 
-    // Extract owner/repo from URL
-    $path = parse_url($group->github_repo_url, PHP_URL_PATH);
-    if (!$path) return 0;
-    $parts = explode('/', trim($path, '/'));
-    if (count($parts) < 2) return 0;
-    $owner = $parts[0];
-    $repo = $parts[1];
+        $path = parse_url($group->github_repo_url, PHP_URL_PATH);
+        if (!$path) return 0;
+        $parts = explode('/', trim($path, '/'));
+        if (count($parts) < 2) return 0;
+        $owner = $parts[0];
+        $repo = $parts[1];
 
-    try {
-        // Laravel's built-in HTTP Client (no Guzzle installation needed!)
-        $response = Http::withToken($user->github_token)
-            ->get("https://api.github.com/repos/{$owner}/{$repo}/commits", [
-                'per_page' => 100,
-                'since' => now()->subDays(30)->toIso8601String()
-            ]);
+        try {
+            $response = Http::withToken($user->github_token)
+                ->get("https://api.github.com/repos/{$owner}/{$repo}/commits", [
+                    'per_page' => 100,
+                    'since' => now()->subDays(30)->toIso8601String()
+                ]);
 
-        if ($response->successful()) {
-            $commits = $response->json();
-            $commitCount = count($commits);
-            // Max 50 commits = 100% score
-            return min(100, ($commitCount / 50) * 100);
+            if ($response->successful()) {
+                $commits = $response->json();
+                $commitCount = count($commits);
+                return min(100, ($commitCount / 50) * 100);
+            }
+            return 0;
+        } catch (\Exception $e) {
+            return 0;
         }
-        return 0;
-    } catch (\Exception $e) {
-        return 0;
     }
-}
-    private function getAttendance($studentId, $assignmentId)
+
+    // 👇 নাম পরিবর্তন করা হয়েছে (পুরনো getAttendance থেকে getAttendanceScore)
+    private function getAttendanceScore($studentId, $assignmentId)
     {
         $assignment = Assignment::find($assignmentId);
         if (!$assignment) return 0;
@@ -1172,7 +1023,6 @@ class ApiController extends Controller
             ->where('assignment_id', $assignmentId)
             ->sum('hours');
 
-        // Assume 40 hours = 100% score
         return min(100, round(($totalHours / 40) * 100));
     }
 
@@ -1196,8 +1046,9 @@ class ApiController extends Controller
             // Silent fail
         }
     }
-        // ============================================
-    // REPORT GENERATION (No External Packages)
+
+    // ============================================
+    // REPORT GENERATION
     // ============================================
 
     public function generateReport(Request $request)
@@ -1230,7 +1081,7 @@ class ApiController extends Controller
 
     private function generateStudentReport($studentId, $format = 'html')
     {
-        $student = User::with(['contributionScores', 'peerReviewsReceived'])->findOrFail($studentId);
+        $student = User::with(['contributionScores', 'receivedPeerReviews'])->findOrFail($studentId);
         $scores = $student->contributionScores;
         $avgScore = $scores->avg('score') ?? 0;
         $classification = $this->getClassification($avgScore);
@@ -1247,11 +1098,9 @@ class ApiController extends Controller
         if ($format === 'csv') {
             return $this->generateStudentCSV($data);
         }
-
         if ($format === 'txt') {
             return $this->generateStudentTXT($data);
         }
-
         return $this->generateStudentHTML($data);
     }
 
@@ -1272,11 +1121,6 @@ class ApiController extends Controller
 body { font-family: Arial; padding: 40px; }
 .header { text-align: center; border-bottom: 2px solid #3AAFA9; padding-bottom: 20px; }
 .score { font-size: 24px; color: #3AAFA9; font-weight: bold; }
-.classification { display: inline-block; padding: 5px 15px; border-radius: 20px; }
-.active { background: #dcfce7; color: #166534; }
-.moderate { background: #fef9c3; color: #854d0e; }
-.passive { background: #ffedd5; color: #9a3412; }
-.freerider { background: #fee2e2; color: #991b1b; }
 table { width: 100%; border-collapse: collapse; margin: 20px 0; }
 th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
 th { background: #f2f2f2; }
@@ -1292,9 +1136,9 @@ th { background: #f2f2f2; }
 <hr>
 <h3>Performance Summary</h3>
 <p><strong>Average Score:</strong> <span class="score">{$avgScore}%</span></p>
-<p><strong>Classification:</strong> <span class="classification">{$classification}</span></p>
+<p><strong>Classification:</strong> {$classification}</p>
 <p><strong>Total Commits:</strong> {$totalCommits}</p>
-<p><strong>Peer Reviews:</strong> {$student->peerReviewsReceived->count()}</p>
+<p><strong>Peer Reviews:</strong> {$student->receivedPeerReviews->count()}</p>
 HTML;
 
         if ($scores->count() > 0) {
@@ -1558,5 +1402,115 @@ HTML;
         $txt .= "Generated by GroupSync\n";
         return response($txt)->header('Content-Type', 'text/plain')
             ->header('Content-Disposition', "attachment; filename=course_report_{$course->id}.txt");
+    }
+
+    // ============================================
+    // ATTENDANCE MANAGEMENT
+    // ============================================
+
+    public function markAttendance(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:users,id,role,student',
+            'course_id' => 'required|exists:courses,id',
+            'date' => 'required|date',
+            'present' => 'required|boolean'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $attendance = Attendance::updateOrCreate(
+            [
+                'student_id' => $request->student_id,
+                'course_id' => $request->course_id,
+                'date' => $request->date
+            ],
+            [
+                'present' => $request->present
+            ]
+        );
+
+        $this->logActivity('mark_attendance', $request->user()->id,
+            "Marked attendance for student {$request->student_id} on {$request->date}");
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance marked successfully',
+            'attendance' => $attendance
+        ]);
+    }
+
+    public function getStudentAttendance(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:users,id',
+            'course_id' => 'required|exists:courses,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $query = Attendance::where('student_id', $request->student_id)
+            ->where('course_id', $request->course_id);
+
+        if ($request->start_date) {
+            $query->where('date', '>=', $request->start_date);
+        }
+        if ($request->end_date) {
+            $query->where('date', '<=', $request->end_date);
+        }
+
+        $attendance = $query->orderBy('date', 'desc')->get();
+
+        $totalDays = $attendance->count();
+        $presentDays = $attendance->where('present', true)->count();
+        $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 2) : 0;
+
+        return response()->json([
+            'success' => true,
+            'attendance' => $attendance,
+            'summary' => [
+                'total_days' => $totalDays,
+                'present_days' => $presentDays,
+                'absent_days' => $totalDays - $presentDays,
+                'attendance_rate' => $attendanceRate
+            ]
+        ]);
+    }
+
+    public function getCourseAttendance($courseId)
+    {
+        $students = User::where('role', 'student')->get();
+        $attendanceData = [];
+
+        foreach ($students as $student) {
+            $attendance = Attendance::where('student_id', $student->id)
+                ->where('course_id', $courseId)
+                ->get();
+
+            $total = $attendance->count();
+            $present = $attendance->where('present', true)->count();
+            $rate = $total > 0 ? round(($present / $total) * 100, 2) : 0;
+
+            $attendanceData[] = [
+                'student_id' => $student->id,
+                'student_name' => $student->first_name . ' ' . $student->last_name,
+                'total_days' => $total,
+                'present_days' => $present,
+                'absent_days' => $total - $present,
+                'attendance_rate' => $rate
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'course_id' => $courseId,
+            'attendance' => $attendanceData
+        ]);
     }
 }
