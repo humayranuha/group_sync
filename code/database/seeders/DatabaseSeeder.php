@@ -57,6 +57,15 @@ class DatabaseSeeder extends Seeder
             'role' => 'student',
             'department' => 'Computer Science',
         ]);
+        // ===== ADD ADMIN USER =====
+$admin = User::create([
+    'first_name' => 'Admin',
+    'last_name' => 'User',
+    'email' => 'admin@demo.com',
+    'password' => Hash::make('123456'),
+    'role' => 'admin',
+    'department' => 'Administration',
+]);
 
         // 3. Create course
         $course = Course::create([
