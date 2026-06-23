@@ -1022,40 +1022,162 @@ function showTotalStudentsBreakdown() {
         // ============================================
         // PAGE: REPORTS (unchanged)
         // ============================================
-        function renderReports() {
-            const container = document.getElementById('page-content');
-            const data = loadProfessorData();
+        
+                       function renderReports() {
+    const container = document.getElementById('page-content');
+    const data = loadProfessorData();
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 PDF Reports</h2>
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 Generate Reports</h2>
 
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">👨‍🎓</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
-                            <div class="mt-4"><select id="studentReportSelect" class="input-teal"><option value="">Select Student</option>${data.students.map(function(s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('student')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">👥</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
-                            <div class="mt-4"><select id="groupReportSelect" class="input-teal"><option value="">Select Group</option>${data.groups.map(function(g) { return '<option value="' + g.id + '">' + g.name + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('group')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">📚</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
-                            <div class="mt-4"><select id="courseReportSelect" class="input-teal"><option value="">Select Course</option>${data.courses.map(function(c) { return '<option value="' + c.id + '">' + c.code + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('course')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Student Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">👨‍🎓</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
+                    <div class="mt-4">
+                        <select id="studentReportSelect" class="input-teal">
+                            <option value="">Select Student</option>
+                            ${data.students.map(function(s) {
+                                return '<option value="' + s.id + '">' + s.name + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateStudentReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateStudentReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateStudentReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
                     </div>
                 </div>
-            `;
+
+                <!-- Group Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">👥</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
+                    <div class="mt-4">
+                        <select id="groupReportSelect" class="input-teal">
+                            <option value="">Select Group</option>
+                            ${data.groups.map(function(g) {
+                                return '<option value="' + g.id + '">' + g.name + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateGroupReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateGroupReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateGroupReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+                    </div>
+                </div>
+
+                <!-- Course Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">📚</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
+                    <div class="mt-4">
+                        <select id="courseReportSelect" class="input-teal">
+                            <option value="">Select Course</option>
+                            ${data.courses.map(function(c) {
+                                return '<option value="' + c.id + '">' + c.code + ' - ' + c.title + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateCourseReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateCourseReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateCourseReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+// ============================================
+// REPORT GENERATION FUNCTIONS (Frontend)
+// ============================================
+
+async function generateStudentReport(format) {
+    const select = document.getElementById('studentReportSelect');
+    const studentId = select.value;
+    if (!studentId) {
+        window.toast.warning('Please select a student first');
+        return;
+    }
+    await generateReport('student', studentId, format);
+}
+
+async function generateGroupReport(format) {
+    const select = document.getElementById('groupReportSelect');
+    const groupId = select.value;
+    if (!groupId) {
+        window.toast.warning('Please select a group first');
+        return;
+    }
+    await generateReport('group', groupId, format);
+}
+
+async function generateCourseReport(format) {
+    const select = document.getElementById('courseReportSelect');
+    const courseId = select.value;
+    if (!courseId) {
+        window.toast.warning('Please select a course first');
+        return;
+    }
+    await generateReport('course', courseId, format);
+}
+
+async function generateReport(type, id, format) {
+    const token = AuthService.getToken();
+    if (!token) {
+        window.toast.error('Please login again');
+        return;
+    }
+
+    window.toast.info('Generating report...');
+
+    try {
+        const response = await fetch('/api/reports/generate', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ type, id, format })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to generate report');
         }
+
+        if (format === 'html') {
+            // HTML report - open in new tab
+            const html = await response.text();
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.document.close();
+            window.toast.success('Report opened in new tab!');
+        } else {
+            // CSV or TXT - download as file
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_report_${id}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            window.toast.success('Report downloaded successfully!');
+        }
+    } catch (error) {
+        console.error('Report error:', error);
+        window.toast.error(error.message || 'Failed to generate report');
+    }
+}
 
         function generateReport(type) {
             window.toast.info('Generating ' + type + ' report...');
