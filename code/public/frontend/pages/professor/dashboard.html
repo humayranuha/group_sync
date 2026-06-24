@@ -9,13 +9,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <style>
-        /* ----- Global Reset & Transitions ----- */
         * { font-family: 'Inter', system-ui, sans-serif; }
         body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
         .dark body { background: #0b1717; color: #e8edf0; }
         html { scroll-behavior: smooth; }
 
-        /* ----- Dark mode overrides (Teal theme) ----- */
         .dark .bg-white { background-color: #132424 !important; }
         .dark .bg-gray-50 { background-color: #0b1717 !important; }
         .dark .bg-gray-100 { background-color: #1a2d2d !important; }
@@ -39,7 +37,6 @@
         .dark .text-purple-800 { color: #7ccfca !important; }
         .dark .text-red-800 { color: #7ccfca !important; }
 
-        /* ----- Sidebar (Teal) ----- */
         .sidebar-teal {
             background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
             border-right: 1px solid rgba(58,175,169,0.08);
@@ -160,24 +157,60 @@
         .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
 
         .input-teal {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
-            width: 100%; font-size: 0.95rem;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            transition: all 0.3s ease;
+            color: #111827 !important;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 0.95rem;
         }
-        .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
-        .input-teal::placeholder { color: rgba(255,255,255,0.25); }
-        .dark .input-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
-        .dark .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+        .input-teal:focus {
+            border-color: #3AAFA9;
+            box-shadow: 0 0 0 3px rgba(58,175,169,0.20);
+            outline: none;
+        }
+        .input-teal::placeholder {
+            color: #9ca3af;
+        }
+        .dark .input-teal {
+            background: #1e293b;
+            border-color: rgba(255,255,255,0.08);
+            color: #e2e8f0 !important;
+        }
+        .dark .input-teal::placeholder {
+            color: #94a3b8;
+        }
 
         .textarea-teal {
-            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
-            width: 100%; font-size: 0.95rem; resize: vertical; min-height: 80px;
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            transition: all 0.3s ease;
+            color: #111827 !important;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 0.95rem;
+            resize: vertical;
+            min-height: 80px;
         }
-        .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
-        .textarea-teal::placeholder { color: rgba(255,255,255,0.25); }
-        .dark .textarea-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
-        .dark .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+        .textarea-teal:focus {
+            border-color: #3AAFA9;
+            box-shadow: 0 0 0 3px rgba(58,175,169,0.20);
+            outline: none;
+        }
+        .textarea-teal::placeholder {
+            color: #9ca3af;
+        }
+        .dark .textarea-teal {
+            background: #1e293b;
+            border-color: rgba(255,255,255,0.08);
+            color: #e2e8f0 !important;
+        }
+        .dark .textarea-teal::placeholder {
+            color: #94a3b8;
+        }
 
         .file-input-label {
             cursor: pointer; transition: all 0.3s ease;
@@ -210,7 +243,6 @@
         .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
         .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
 
-        /* ----- Modal Styles ----- */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             display: flex; align-items: center; justify-content: center;
@@ -230,71 +262,13 @@
         .modal-close:hover { color: #333; }
         .dark .modal-close { color: #666; }
         .dark .modal-close:hover { color: #ccc; }
-        .input-teal {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    transition: all 0.3s ease;
-    color: #111827 !important;  /* Black text */
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    width: 100%;
-    font-size: 0.95rem;
-}
-.input-teal:focus {
-    border-color: #3AAFA9;
-    box-shadow: 0 0 0 3px rgba(58,175,169,0.20);
-    outline: none;
-}
-.input-teal::placeholder {
-    color: #9ca3af;
-}
-
-.textarea-teal {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    transition: all 0.3s ease;
-    color: #111827 !important;  /* Black text */
-    padding: 0.75rem 1rem;
-    border-radius: 12px;
-    width: 100%;
-    font-size: 0.95rem;
-    resize: vertical;
-    min-height: 80px;
-}
-.textarea-teal:focus {
-    border-color: #3AAFA9;
-    box-shadow: 0 0 0 3px rgba(58,175,169,0.20);
-    background: rgba(255,255,255,0.06);
-    outline: none;
-}
-.textarea-teal::placeholder {
-    color: #9ca3af;
-}
-
-/* Dark mode override */
-.dark .input-teal {
-    background: #1e293b;
-    border-color: rgba(255,255,255,0.08);
-    color: #e2e8f0 !important;  /* White text in dark mode */
-}
-.dark .input-teal::placeholder {
-    color: #94a3b8;
-}
-.dark .textarea-teal {
-    background: #1e293b;
-    border-color: rgba(255,255,255,0.08);
-    color: #e2e8f0 !important;
-}
-.dark .textarea-teal::placeholder {
-    color: #94a3b8;
-}
 
         @media (max-width:768px) { .stat-card { padding:1rem; } .stat-icon { width:40px; height:40px; font-size:1.1rem; } }
     </style>
 </head>
 <body>
 
-    <!-- ===== SIDEBAR (Teal) ===== -->
+    <!-- SIDEBAR -->
     <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
         <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
             <a href="/" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm hover:opacity-80 transition">
@@ -305,6 +279,7 @@
         <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
             <a href="#" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
             <a href="#" data-page="courses" class="nav-link"><span class="icon">📚</span> Course Management</a>
+            <a href="#" data-page="Project" class="nav-link"><span class="icon">📋</span> Project</a>
             <a href="#" data-page="analytics" class="nav-link"><span class="icon">📈</span> Group Analytics</a>
             <a href="#" data-page="evaluation" class="nav-link"><span class="icon">🎓</span> Student Evaluation</a>
             <a href="#" data-page="reports" class="nav-link"><span class="icon">📄</span> PDF Reports</a>
@@ -319,10 +294,10 @@
         </div>
     </aside>
 
-    <!-- ===== MOBILE MENU ===== -->
+    <!-- MOBILE MENU -->
     <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
 
-    <!-- ===== HEADER ===== -->
+    <!-- HEADER -->
     <header class="header-teal fixed top-0 right-0 left-0 md:left-64 z-30 transition-colors">
         <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -336,7 +311,7 @@
         </div>
     </header>
 
-    <!-- ===== MAIN CONTENT ===== -->
+    <!-- MAIN CONTENT -->
     <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
         <div id="page-content" class="animate-fade-in">
             <div class="flex items-center justify-center h-64">
@@ -387,6 +362,11 @@
             alerts: [
                 { student_name: 'Mike Brown', severity: 'Medium', message: 'Low contribution for 2 weeks' },
                 { student_name: 'Lisa Wong', severity: 'High', message: 'Minimal commits in last 3 weeks' }
+            ],
+            Project: [
+                { id: 1, title: 'Project 1: Requirement Analysis', course_id: 1, type: 'project', deadline: '2026-07-15T23:59', description: 'Submit a detailed requirement analysis document.', weightage: { commits: 40, attendance: 20, peer_reviews: 20, working_hours: 20 }, status: 'active' },
+                { id: 2, title: 'Midterm Exam', course_id: 1, type: 'exam', deadline: '2026-07-20T23:59', description: 'Online MCQ and CQ exam.', weightage: { commits: 30, attendance: 30, peer_reviews: 20, working_hours: 20 }, status: 'active' },
+                { id: 3, title: 'Final Project', course_id: 2, type: 'project', deadline: '2026-08-10T23:59', description: 'Complete full-stack project.', weightage: { commits: 50, attendance: 10, peer_reviews: 20, working_hours: 20 }, status: 'pending' }
             ]
         };
 
@@ -394,30 +374,29 @@
         // TOAST SYSTEM
         // ============================================
         class ToastManager {
-            constructor() { this.container = null;
-                this.init(); }
+            constructor() { this.container = null; this.init(); }
             init() {
                 this.container = document.createElement('div');
                 this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
                 document.body.appendChild(this.container);
             }
-            show(message, type = 'info', duration = 5000) {
-                const toast = document.createElement('div');
-                const colors = {
+            show(message, type, duration) {
+                type = type || 'info';
+                duration = duration || 5000;
+                var colors = {
                     success: 'bg-[#3AAFA9]/10 border-[#3AAFA9] text-[#2B7A78]',
                     error: 'bg-red-50 border-red-400 text-red-800',
                     warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
                     info: 'bg-blue-50 border-blue-400 text-blue-800'
                 };
-                const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className =
-                    `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
-                toast.innerHTML =
-                    `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
+                var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                var toast = document.createElement('div');
+                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ' + colors[type] + ' dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]';
+                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm font-medium">' + message + '</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>';
                 this.container.appendChild(toast);
-                requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
-                toast.querySelector('button').onclick = () => toast.remove();
-                setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
+                requestAnimationFrame(function() { toast.classList.remove('translate-x-full', 'opacity-0'); });
+                toast.querySelector('button').onclick = function() { toast.remove(); };
+                setTimeout(function() { if (toast.parentNode) toast.remove(); }, duration);
                 return toast;
             }
             success(m) { this.show(m, 'success'); }
@@ -429,16 +408,16 @@
         // ============================================
         // AUTH SERVICE
         // ============================================
-        const AuthService = {
-            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
-            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
-            isAuthenticated() { return !!this.getToken(); },
-            logout() {
+        var AuthService = {
+            getToken: function() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser: function() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated: function() { return !!this.getToken(); },
+            logout: function() {
                 localStorage.removeItem(STORAGE_KEYS.TOKEN);
                 localStorage.removeItem(STORAGE_KEYS.USER);
                 window.location.href = '/login.html';
             },
-            updateUser(userData) {
+            updateUser: function(userData) {
                 localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
             }
         };
@@ -446,51 +425,49 @@
         // ============================================
         // PROFILE EXTRA DATA
         // ============================================
-        const ProfileExtra = {
-            get() {
-                try {
-                    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_EXTRA) || '{}');
-                } catch { return {}; }
+        var ProfileExtra = {
+            get: function() {
+                try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_EXTRA) || '{}'); } catch (e) { return {}; }
             },
-            set(data) {
-                localStorage.setItem(STORAGE_KEYS.PROFILE_EXTRA, JSON.stringify(data));
-            },
-            getPic() {
-                return localStorage.getItem(STORAGE_KEYS.PROFILE_PIC) || null;
-            },
-            setPic(base64) {
-                if (base64) localStorage.setItem(STORAGE_KEYS.PROFILE_PIC, base64);
-                else localStorage.removeItem(STORAGE_KEYS.PROFILE_PIC);
-            }
+            set: function(data) { localStorage.setItem(STORAGE_KEYS.PROFILE_EXTRA, JSON.stringify(data)); },
+            getPic: function() { return localStorage.getItem(STORAGE_KEYS.PROFILE_PIC) || null; },
+            setPic: function(base64) { if (base64) localStorage.setItem(STORAGE_KEYS.PROFILE_PIC, base64); else localStorage.removeItem(STORAGE_KEYS.PROFILE_PIC); }
         };
 
         // ============================================
         // API SERVICE (with fallback)
         // ============================================
-        const ApiService = {
-            async request(endpoint, options = {}) {
-                const token = AuthService.getToken();
-                const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-                try {
-                    const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-                    const data = await response.json();
-                    if (!response.ok) {
-                        if (response.status === 401) AuthService.logout();
-                        throw new Error(data.message || 'Request failed');
-                    }
-                    return data;
-                } catch (error) {
-                    console.warn('API failed, using demo data');
-                    if (endpoint.includes('/courses/professor')) return { success: true, courses: DEMO_PROFESSOR_DATA
-                            .courses };
-                    if (endpoint.includes('/analytics/group')) return { success: true, ...DEMO_PROFESSOR_DATA };
-                    throw error;
+        var ApiService = {
+            request: function(endpoint, options) {
+                options = options || {};
+                var token = AuthService.getToken();
+                var headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+                if (options.headers) {
+                    for (var key in options.headers) { headers[key] = options.headers[key]; }
                 }
+                if (token) headers['Authorization'] = 'Bearer ' + token;
+                return fetch(API_BASE + endpoint, {
+                    method: options.method || 'GET',
+                    headers: headers,
+                    body: options.body || null
+                }).then(function(response) {
+                    return response.json().then(function(data) {
+                        if (!response.ok) {
+                            if (response.status === 401) AuthService.logout();
+                            throw new Error(data.message || 'Request failed');
+                        }
+                        return data;
+                    });
+                }).catch(function(error) {
+                    console.warn('API failed, using demo data');
+                    if (endpoint.includes('/courses/professor')) return { success: true, courses: DEMO_PROFESSOR_DATA.courses };
+                    if (endpoint.includes('/analytics/group')) return { success: true, groups: DEMO_PROFESSOR_DATA.groups };
+                    throw error;
+                });
             },
-            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
-            put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); }
+            get: function(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+            post: function(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
+            put: function(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); }
         };
 
         // ============================================
@@ -499,41 +476,41 @@
         window.toast = new ToastManager();
         window.api = ApiService;
         window.auth = AuthService;
-        let currentPage = 'dashboard';
-        let charts = {};
+        var currentPage = 'dashboard';
+        var charts = {};
 
         // ============================================
         // HELPERS
         // ============================================
         function getInitials(name) {
             if (!name) return 'PR';
-            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            var parts = name.split(' ');
+            return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
         }
 
         function getClassificationClass(classification) {
-            const map = { 'Active': 'badge-active', 'Moderate': 'badge-moderate', 'Passive': 'badge-passive',
-                'Free Rider': 'badge-free-rider' };
+            var map = { 'Active': 'badge-active', 'Moderate': 'badge-moderate', 'Passive': 'badge-passive', 'Free Rider': 'badge-free-rider' };
             return map[classification] || 'badge-moderate';
         }
 
         function getUserAvatar(user) {
-            const pic = ProfileExtra.getPic();
+            var pic = ProfileExtra.getPic();
             if (pic) return pic;
-            const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Professor';
-            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3AAFA9&color=fff&size=120&font-size=0.5&bold=true`;
+            var name = user ? (user.first_name || '') + ' ' + (user.last_name || '') : 'Professor';
+            return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name) + '&background=3AAFA9&color=fff&size=120&font-size=0.5&bold=true';
         }
 
         function updateSidebarAvatar() {
-            const user = AuthService.getUser();
-            const pic = ProfileExtra.getPic();
-            const avatarEl = document.getElementById('user-avatar');
+            var user = AuthService.getUser();
+            var pic = ProfileExtra.getPic();
+            var avatarEl = document.getElementById('user-avatar');
             if (pic) {
-                avatarEl.style.backgroundImage = `url(${pic})`;
+                avatarEl.style.backgroundImage = 'url(' + pic + ')';
                 avatarEl.style.backgroundSize = 'cover';
                 avatarEl.textContent = '';
             } else {
                 avatarEl.style.backgroundImage = '';
-                const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Professor';
+                var name = user ? (user.first_name || '') + ' ' + (user.last_name || '') : 'Professor';
                 avatarEl.textContent = getInitials(name);
             }
         }
@@ -542,15 +519,15 @@
         // PROFESSOR DATA (localStorage with demo fallback)
         // ============================================
         function loadProfessorData() {
-            const key = STORAGE_KEYS.PROFESSOR_DATA;
-            const stored = localStorage.getItem(key);
+            var key = STORAGE_KEYS.PROFESSOR_DATA;
+            var stored = localStorage.getItem(key);
             if (stored) {
                 try {
-                    const parsed = JSON.parse(stored);
-                    return { ...DEMO_PROFESSOR_DATA, ...parsed };
-                } catch (e) { return { ...DEMO_PROFESSOR_DATA }; }
+                    var parsed = JSON.parse(stored);
+                    return { courses: parsed.courses || DEMO_PROFESSOR_DATA.courses, students: parsed.students || DEMO_PROFESSOR_DATA.students, groups: parsed.groups || DEMO_PROFESSOR_DATA.groups, alerts: parsed.alerts || DEMO_PROFESSOR_DATA.alerts, Project: parsed.Project || DEMO_PROFESSOR_DATA.Project };
+                } catch (e) { return DEMO_PROFESSOR_DATA; }
             }
-            return { ...DEMO_PROFESSOR_DATA };
+            return DEMO_PROFESSOR_DATA;
         }
 
         function saveProfessorData(data) {
@@ -561,23 +538,15 @@
         // MODAL FUNCTIONS
         // ============================================
         function showModal(title, contentHtml) {
-            const oldModal = document.getElementById('dynamicModal');
+            var oldModal = document.getElementById('dynamicModal');
             if (oldModal) oldModal.remove();
 
-            const modalHtml = `
-                <div id="dynamicModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
-                    <div class="modal-box">
-                        <span class="modal-close" onclick="closeModal()">&times;</span>
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">${title}</h2>
-                        ${contentHtml}
-                    </div>
-                </div>
-            `;
+            var modalHtml = '<div id="dynamicModal" class="modal-overlay" onclick="if(event.target===this) closeModal()"><div class="modal-box"><span class="modal-close" onclick="closeModal()">&times;</span><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">' + title + '</h2>' + contentHtml + '</div></div>';
             document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
         function closeModal() {
-            const modal = document.getElementById('dynamicModal');
+            var modal = document.getElementById('dynamicModal');
             if (modal) modal.remove();
         }
 
@@ -585,88 +554,42 @@
         // CREATE COURSE FUNCTIONS
         // ============================================
         function showCreateCourseModal() {
-    const oldModal = document.getElementById('createCourseModal');
-    if (oldModal) oldModal.remove();
+            var oldModal = document.getElementById('createCourseModal');
+            if (oldModal) oldModal.remove();
 
-    const modalHtml = `
-        <div id="createCourseModal" class="modal-overlay" onclick="if(event.target===this) closeCreateCourseModal()">
-            <div class="modal-box" onclick="event.stopPropagation()">
-                <span class="modal-close" onclick="closeCreateCourseModal()">&times;</span>
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">📚 Create New Course</h2>
-                <form id="createCourseForm" onsubmit="createCourse(event)">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Code</label>
-                            <input type="text" id="courseCode" placeholder="e.g., CS501" class="input-teal mt-1" required style="color: #111827 !important; background: #ffffff;">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Title</label>
-                            <input type="text" id="courseTitle" placeholder="e.g., Advanced Programming" class="input-teal mt-1" required style="color: #111827 !important; background: #ffffff;">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Semester</label>
-                            <select id="courseSemester" class="input-teal mt-1" style="appearance: auto; -webkit-appearance: auto; background: #ffffff; color: #111827 !important; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #d1d5db; width: 100%; font-size: 0.95rem;">
-                                <option value="Spring 2024">Spring 2024</option>
-                                <option value="Summer 2024">Summer 2024</option>
-                                <option value="Fall 2024">Fall 2024</option>
-                                <option value="Spring 2025">Spring 2025</option>
-                                <option value="Summer 2025">Summer 2025</option>
-                                <option value="Fall 2025" selected>Fall 2025</option>
-                                <option value="Spring 2026">Spring 2026</option>
-                                <option value="Summer 2026">Summer 2026</option>
-                                <option value="Fall 2026">Fall 2026</option>
-                                <option value="Spring 2027">Spring 2027</option>
-                                <option value="Summer 2027">Summer 2027</option>
-                                <option value="Fall 2027">Fall 2027</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                            <textarea id="courseDescription" rows="3" placeholder="Course description..." class="textarea-teal mt-1" style="color: #111827 !important; background: #ffffff;"></textarea>
-                        </div>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="courseActive" checked class="checkbox-teal mr-2">
-                            <label class="text-sm text-gray-700 dark:text-gray-300">Course is active</label>
-                        </div>
-                    </div>
-                    <div class="mt-6 flex gap-3">
-                        <button type="submit" class="btn-teal flex-1">Create Course</button>
-                        <button type="button" onclick="closeCreateCourseModal()" class="btn-teal-outline flex-1">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
+            var modalHtml = '<div id="createCourseModal" class="modal-overlay" onclick="if(event.target===this) closeCreateCourseModal()"><div class="modal-box" onclick="event.stopPropagation()"><span class="modal-close" onclick="closeCreateCourseModal()">&times;</span><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">📚 Create New Course</h2><form id="createCourseForm" onsubmit="createCourse(event)"><div class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Code</label><input type="text" id="courseCode" placeholder="e.g., CS501" class="input-teal mt-1" required></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Title</label><input type="text" id="courseTitle" placeholder="e.g., Advanced Programming" class="input-teal mt-1" required></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Semester</label><select id="courseSemester" class="input-teal mt-1"><option value="Spring 2024">Spring 2024</option><option value="Summer 2024">Summer 2024</option><option value="Fall 2024">Fall 2024</option><option value="Spring 2025">Spring 2025</option><option value="Summer 2025">Summer 2025</option><option value="Fall 2025" selected>Fall 2025</option><option value="Spring 2026">Spring 2026</option><option value="Summer 2026">Summer 2026</option><option value="Fall 2026">Fall 2026</option><option value="Spring 2027">Spring 2027</option><option value="Summer 2027">Summer 2027</option><option value="Fall 2027">Fall 2027</option></select></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label><textarea id="courseDescription" rows="3" placeholder="Course description..." class="textarea-teal mt-1"></textarea></div><div class="flex items-center"><input type="checkbox" id="courseActive" checked class="checkbox-teal mr-2"><label class="text-sm text-gray-700 dark:text-gray-300">Course is active</label></div></div><div class="mt-6 flex gap-3"><button type="submit" class="btn-teal flex-1">Create Course</button><button type="button" onclick="closeCreateCourseModal()" class="btn-teal-outline flex-1">Cancel</button></div></form></div></div>';
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
 
         function closeCreateCourseModal() {
-            const modal = document.getElementById('createCourseModal');
+            var modal = document.getElementById('createCourseModal');
             if (modal) modal.remove();
         }
 
-        async function createCourse(e) {
+        function createCourse(e) {
             e.preventDefault();
-            
-            const code = document.getElementById('courseCode').value.trim();
-            const title = document.getElementById('courseTitle').value.trim();
-            const semester = document.getElementById('courseSemester').value;
-            const description = document.getElementById('courseDescription').value.trim();
-            const is_active = document.getElementById('courseActive').checked;
+            var code = document.getElementById('courseCode').value.trim();
+            var title = document.getElementById('courseTitle').value.trim();
+            var semester = document.getElementById('courseSemester').value;
+            var description = document.getElementById('courseDescription').value.trim();
+            var is_active = document.getElementById('courseActive').checked;
 
             if (!code || !title) {
                 window.toast.warning('Please fill in all required fields');
                 return;
             }
 
-            const data = loadProfessorData();
-            const exists = data.courses.some(c => c.code === code);
+            var data = loadProfessorData();
+            var exists = false;
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].code === code) { exists = true; break; }
+            }
             if (exists) {
                 window.toast.error('Course code "' + code + '" already exists!');
                 return;
             }
 
-            const newCourse = {
+            var newCourse = {
                 id: Date.now(),
                 code: code,
                 title: title,
@@ -686,316 +609,260 @@
         }
 
         // ============================================
+        // CREATE ASSIGNMENT FUNCTIONS
+        // ============================================
+        function showCreateAssignmentModal() {
+            var oldModal = document.getElementById('createAssignmentModal');
+            if (oldModal) oldModal.remove();
+
+            var data = loadProfessorData();
+            var courses = data.courses || [];
+
+            var courseOptions = '<option value="">Select Course</option>';
+            for (var i = 0; i < courses.length; i++) {
+                courseOptions += '<option value="' + courses[i].id + '">' + courses[i].code + ' - ' + courses[i].title + '</option>';
+            }
+
+            var modalHtml = '<div id="createAssignmentModal" class="modal-overlay" onclick="if(event.target===this) closeCreateAssignmentModal()"><div class="modal-box" onclick="event.stopPropagation()" style="max-width: 700px;"><span class="modal-close" onclick="closeCreateAssignmentModal()">&times;</span><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">📋 Create New Project</h2><form id="createAssignmentForm" onsubmit="createAssignment(event)"><div class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label><select id="assignmentCourse" class="input-teal mt-1" required>' + courseOptions + '</select></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label><input type="text" id="assignmentTitle" placeholder="e.g., Midterm Exam, Project 2" class="input-teal mt-1" required></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label><select id="assignmentType" class="input-teal mt-1"><option value="project">📁 Project</option><option value="assignment">📝 Assignment</option><option value="task">✅ Task</option><option value="exam">📊 Exam</option><option value="mcq">🔘 Online MCQ</option><option value="cq">📖 CQ Exam</option></select></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Deadline</label><input type="datetime-local" id="assignmentDeadline" class="input-teal mt-1"></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label><textarea id="assignmentDescription" rows="2" placeholder="Description..." class="textarea-teal mt-1"></textarea></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Weightage (Total must be 100%)</label><div class="grid grid-cols-2 gap-3"><div><label class="text-xs text-gray-500 dark:text-gray-400">Commits</label><input type="number" id="weightCommits" value="40" min="0" max="100" class="input-teal mt-1"></div><div><label class="text-xs text-gray-500 dark:text-gray-400">Attendance</label><input type="number" id="weightAttendance" value="20" min="0" max="100" class="input-teal mt-1"></div><div><label class="text-xs text-gray-500 dark:text-gray-400">Peer Reviews</label><input type="number" id="weightPeerReviews" value="20" min="0" max="100" class="input-teal mt-1"></div><div><label class="text-xs text-gray-500 dark:text-gray-400">Working Hours</label><input type="number" id="weightWorkingHours" value="20" min="0" max="100" class="input-teal mt-1"></div></div></div><div class="flex items-center"><input type="checkbox" id="assignmentActive" checked class="checkbox-teal mr-2"><label class="text-sm text-gray-700 dark:text-gray-300">Active</label></div></div><div class="mt-6 flex gap-3"><button type="submit" class="btn-teal flex-1">Create Assignment</button><button type="button" onclick="closeCreateAssignmentModal()" class="btn-teal-outline flex-1">Cancel</button></div></form></div></div>';
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeCreateAssignmentModal() {
+            var modal = document.getElementById('createAssignmentModal');
+            if (modal) modal.remove();
+        }
+
+        function createAssignment(e) {
+            e.preventDefault();
+
+            var courseId = parseInt(document.getElementById('assignmentCourse').value);
+            var title = document.getElementById('assignmentTitle').value.trim();
+            var type = document.getElementById('assignmentType').value;
+            var deadline = document.getElementById('assignmentDeadline').value;
+            var description = document.getElementById('assignmentDescription').value.trim();
+            var status = document.getElementById('assignmentActive').checked ? 'active' : 'closed';
+
+            var weightage = {
+                commits: parseInt(document.getElementById('weightCommits').value) || 0,
+                attendance: parseInt(document.getElementById('weightAttendance').value) || 0,
+                peer_reviews: parseInt(document.getElementById('weightPeerReviews').value) || 0,
+                working_hours: parseInt(document.getElementById('weightWorkingHours').value) || 0
+            };
+
+            var total = weightage.commits + weightage.attendance + weightage.peer_reviews + weightage.working_hours;
+            if (total !== 100) {
+                window.toast.error('Total weightage must equal 100%. Current: ' + total + '%');
+                return;
+            }
+
+            if (!courseId || !title) {
+                window.toast.warning('Please fill in all required fields');
+                return;
+            }
+
+            var data = loadProfessorData();
+            if (!data.Project) data.Project = [];
+
+            var newAssignment = {
+                id: Date.now(),
+                course_id: courseId,
+                title: title,
+                type: type,
+                deadline: deadline || null,
+                description: description || 'No description provided.',
+                weightage: weightage,
+                status: status,
+                created_at: new Date().toISOString()
+            };
+
+            data.Project.push(newAssignment);
+            saveProfessorData(data);
+            closeCreateAssignmentModal();
+
+            window.toast.success('Assignment "' + title + '" created successfully! ✅');
+            renderProject();
+        }
+
+        function deleteAssignment(id) {
+            if (!confirm('Are you sure you want to delete this assignment?')) return;
+            var data = loadProfessorData();
+            var newProject = [];
+            for (var i = 0; i < data.Project.length; i++) {
+                if (data.Project[i].id !== id) newProject.push(data.Project[i]);
+            }
+            data.Project = newProject;
+            saveProfessorData(data);
+            window.toast.success('Assignment deleted!');
+            renderProject();
+        }
+
+        // ============================================
         // DETAILS FUNCTIONS
         // ============================================
         function showCoursesList() {
-            const data = loadProfessorData();
-            const activeCourses = data.courses.filter(c => c.is_active);
+            var data = loadProfessorData();
+            var activeCourses = [];
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].is_active) activeCourses.push(data.courses[i]);
+            }
             if (activeCourses.length === 0) {
                 showModal('Active Courses', '<p class="text-gray-500">No active courses found.</p>');
                 return;
             }
-            let rows = activeCourses.map(c => `
-                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="closeModal(); showCourseDetails(${c.id})">
-                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">
-                        <span class="px-2 py-0.5 rounded-full text-xs ${c.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}">${c.is_active ? 'Active' : 'Inactive'}</span>
-                    </td>
-                </tr>
-            `).join('');
+            var rows = '';
+            for (var i = 0; i < activeCourses.length; i++) {
+                var c = activeCourses[i];
+                var statusColor = c.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="closeModal(); showCourseDetails(' + c.id + ')"><td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">' + c.code + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + c.title + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + c.students_count + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + c.groups_count + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400"><span class="px-2 py-0.5 rounded-full text-xs ' + statusColor + '">' + (c.is_active ? 'Active' : 'Inactive') + '</span></td></tr>';
+            }
 
-            const content = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Code</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-                <p class="text-xs text-gray-400 mt-2">Click on a course to view details.</p>
-            `;
+            var content = '<div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Code</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="text-xs text-gray-400 mt-2">Click on a course to view details.</p>';
             showModal('Active Courses', content);
         }
 
         function showGroupsList() {
-            const data = loadProfessorData();
+            var data = loadProfessorData();
             if (data.groups.length === 0) {
                 showModal('Groups', '<p class="text-gray-500">No groups found.</p>');
                 return;
             }
-            let rows = data.groups.map(g => `
-                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${g.name}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.course_name || 'N/A'}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.members_count}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.contribution_percentage}%</td>
-                </tr>
-            `).join('');
+            var rows = '';
+            for (var i = 0; i < data.groups.length; i++) {
+                var g = data.groups[i];
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">' + g.name + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + (g.course_name || 'N/A') + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + g.members_count + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + g.contribution_percentage + '%</td></tr>';
+            }
 
-            const content = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-            `;
+            var content = '<div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
             showModal('All Groups', content);
         }
 
         function showFreeRidersList() {
-            const data = loadProfessorData();
-            const freeRiders = data.students.filter(s => s.classification === 'Free Rider');
+            var data = loadProfessorData();
+            var freeRiders = [];
+            for (var i = 0; i < data.students.length; i++) {
+                if (data.students[i].classification === 'Free Rider') freeRiders.push(data.students[i]);
+            }
             if (freeRiders.length === 0) {
                 showModal('Free Riders', '<p class="text-gray-500">No free riders detected.</p>');
                 return;
             }
-            let rows = freeRiders.map(s => `
-                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${s.name}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${s.email}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">
-                        <span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Free Rider</span>
-                    </td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${s.activity_score}%</td>
-                </tr>
-            `).join('');
+            var rows = '';
+            for (var i = 0; i < freeRiders.length; i++) {
+                var s = freeRiders[i];
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">' + s.name + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + s.email + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400"><span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Free Rider</span></td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + s.activity_score + '%</td></tr>';
+            }
 
-            const content = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                    </table>
-                </div>
-                <p class="text-xs text-red-400 mt-2">⚠️ These students need immediate attention.</p>
-            `;
+            var content = '<div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th></tr></thead><tbody>' + rows + '</tbody></table></div><p class="text-xs text-red-400 mt-2">⚠️ These students need immediate attention.</p>';
             showModal('Free Riders', content);
         }
 
         function showTotalStudentsBreakdown() {
-            const data = loadProfessorData();
+            var data = loadProfessorData();
             if (data.courses.length === 0) {
                 showModal('Total Students', '<p class="text-gray-500">No courses available.</p>');
                 return;
             }
-            let total = 0;
-            let rows = data.courses.map(c => {
+            var total = 0;
+            var rows = '';
+            for (var i = 0; i < data.courses.length; i++) {
+                var c = data.courses[i];
                 total += c.students_count || 0;
-                return `
-                    <tr class="border-t border-gray-100 dark:border-gray-800">
-                        <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td>
-                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td>
-                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td>
-                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td>
-                    </tr>
-                `;
-            }).join('');
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800"><td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">' + c.code + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + c.title + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + c.students_count + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + c.groups_count + '</td></tr>';
+            }
 
-            const content = `
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
-                        <tfoot class="bg-gray-50 dark:bg-gray-800 font-bold">
-                            <tr>
-                                <td colspan="2" class="px-4 py-2 text-right">Total:</td>
-                                <td class="px-4 py-2 text-blue-600 dark:text-blue-400">${total}</td>
-                                <td class="px-4 py-2">${data.courses.reduce((sum, c) => sum + (c.groups_count || 0), 0)}</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            `;
+            var content = '<div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th></tr></thead><tbody>' + rows + '</tbody><tfoot class="bg-gray-50 dark:bg-gray-800 font-bold"><tr><td colspan="2" class="px-4 py-2 text-right">Total:</td><td class="px-4 py-2 text-blue-600 dark:text-blue-400">' + total + '</td><td class="px-4 py-2">' + data.courses.reduce(function(sum, c) { return sum + (c.groups_count || 0); }, 0) + '</td></tr></tfoot></table></div>';
             showModal('Total Students per Course', content);
         }
 
         function showCourseDetails(courseId) {
-            const data = loadProfessorData();
-            const course = data.courses.find(c => c.id === courseId);
+            var data = loadProfessorData();
+            var course = null;
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].id === courseId) { course = data.courses[i]; break; }
+            }
             if (!course) {
                 window.toast.error('Course not found');
                 return;
             }
-            let studentsHtml = data.students.slice(0, course.students_count).map(s => `
-                <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
-                    <span class="text-sm">${s.name}</span>
-                    <span class="px-2 py-0.5 rounded-full text-xs ${getClassificationClass(s.classification)}">${s.classification}</span>
-                </div>
-            `).join('') || '<p class="text-gray-500 text-sm">No students enrolled yet.</p>';
 
-            let content = `
-                <div class="space-y-4">
-                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <p class="text-gray-700 dark:text-gray-300">${course.description || 'No description available.'}</p>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${course.semester}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Semester</p>
-                        </div>
-                        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-green-600 dark:text-green-400">${course.students_count}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Students</p>
-                        </div>
-                        <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">${course.groups_count}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Groups</p>
-                        </div>
-                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${Math.round(course.students_count / (course.groups_count || 1))}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Avg Group Size</p>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">Students Enrolled</h4>
-                        <div class="max-h-40 overflow-y-auto">${studentsHtml}</div>
-                    </div>
-                </div>
-            `;
-            showModal(`${course.code} - ${course.title}`, content);
+            var studentsHtml = '';
+            var count = Math.min(course.students_count, data.students.length);
+            for (var i = 0; i < count; i++) {
+                var s = data.students[i];
+                studentsHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm">' + s.name + '</span><span class="px-2 py-0.5 rounded-full text-xs ' + getClassificationClass(s.classification) + '">' + s.classification + '</span></div>';
+            }
+            if (!studentsHtml) studentsHtml = '<p class="text-gray-500 text-sm">No students enrolled yet.</p>';
+
+            var content = '<div class="space-y-4"><div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg"><p class="text-gray-700 dark:text-gray-300">' + (course.description || 'No description available.') + '</p></div><div class="grid grid-cols-2 gap-4"><div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-blue-600 dark:text-blue-400">' + course.semester + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Semester</p></div><div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">' + course.students_count + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Students</p></div><div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-purple-600 dark:text-purple-400">' + course.groups_count + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Groups</p></div><div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">' + Math.round(course.students_count / (course.groups_count || 1)) + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Avg Group Size</p></div></div><div><h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">Students Enrolled</h4><div class="max-h-40 overflow-y-auto">' + studentsHtml + '</div></div></div>';
+            showModal(course.code + ' - ' + course.title, content);
         }
 
         // ============================================
         // PAGE: DASHBOARD
         // ============================================
         function renderDashboard() {
-            const user = AuthService.getUser();
-            const container = document.getElementById('page-content');
-            const data = loadProfessorData();
+            var user = AuthService.getUser();
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
 
-            const totalStudents = data.students.length;
-            const totalGroups = data.groups.length;
-            const activeCourses = data.courses.filter(c => c.is_active).length;
-            const freeRiders = data.students.filter(s => s.classification === 'Free Rider').length;
+            var totalStudents = data.students.length;
+            var totalGroups = data.groups.length;
+            var activeCourses = 0;
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].is_active) activeCourses++;
+            }
+            var freeRiders = 0;
+            for (var i = 0; i < data.students.length; i++) {
+                if (data.students[i].classification === 'Free Rider') freeRiders++;
+            }
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
-                        <h2 class="text-2xl font-bold">Welcome back, Prof. ${user?.first_name || 'Professor'}! 👋</h2>
-                        <p class="text-white/80 mt-1 text-sm">Here's your academic overview</p>
-                    </div>
+            var coursesHtml = '';
+            var activeCourseList = [];
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].is_active) activeCourseList.push(data.courses[i]);
+            }
+            for (var i = 0; i < activeCourseList.length; i++) {
+                var c = activeCourseList[i];
+                var gradient = c.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
+                coursesHtml += '<div class="card-glass p-0 overflow-hidden"><div class="bg-gradient-to-r ' + gradient + ' px-6 py-4"><h3 class="text-lg font-semibold text-white">' + c.code + '</h3><p class="text-white/80 text-sm">' + c.title + '</p></div><div class="p-6"><div class="space-y-2"><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Semester</span><span class="font-medium text-gray-800 dark:text-gray-100">' + c.semester + '</span></div><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">' + c.students_count + '</span></div><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Groups</span><span class="font-medium text-gray-800 dark:text-gray-100">' + c.groups_count + '</span></div></div><button onclick="showCourseDetails(' + c.id + ')" class="mt-4 w-full btn-teal text-sm">📋 View Details</button></div></div>';
+            }
+            if (!coursesHtml) coursesHtml = '<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">📖</div><h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Active Courses</h3><p class="text-gray-500 dark:text-gray-400 mt-2">Create a course to get started.</p></div>';
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <div class="stat-card" onclick="showCoursesList()">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Active Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${activeCourses}</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-book"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">Click to view all</p>
-                        </div>
-                        <div class="stat-card" onclick="showGroupsList()">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Groups</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalGroups}</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-layer-group"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">Click to view all</p>
-                        </div>
-                        <div class="stat-card" onclick="showFreeRidersList()">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Free Riders</p><p class="text-2xl font-bold ${freeRiders > 0 ? 'text-red-600' : 'text-green-600'} mt-1">${freeRiders}</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-exclamation-triangle"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">Click to view all</p>
-                        </div>
-                        <div class="stat-card" onclick="showTotalStudentsBreakdown()">
-                            <div class="flex items-center justify-between">
-                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalStudents}</p></div>
-                                <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
-                            </div>
-                            <p class="text-xs text-gray-400 mt-1">Click to view breakdown</p>
-                        </div>
-                    </div>
+            var alertsHtml = '';
+            if (data.alerts.length > 0) {
+                for (var i = 0; i < data.alerts.length; i++) {
+                    var alert = data.alerts[i];
+                    var color = alert.severity === 'High' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+                    var icon = alert.severity === 'High' ? '⚠️' : '⚡';
+                    var bg = alert.severity === 'High' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20';
+                    alertsHtml += '<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer" onclick="window.toast.info(\'' + alert.message + '\')"><div class="flex-shrink-0"><div class="w-10 h-10 rounded-full ' + bg + ' flex items-center justify-center"><span class="text-lg">' + icon + '</span></div></div><div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">' + alert.student_name + '</p><p class="text-xs text-gray-500 dark:text-gray-400">' + alert.message + '</p></div><div><span class="px-2 py-1 text-xs rounded-full ' + color + '">' + alert.severity + '</span></div></div>';
+                }
+            } else {
+                alertsHtml = '<div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No alerts</div>';
+            }
 
-                    <div class="card-glass p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Risk Indicators by Course</h3>
-                        <canvas id="riskChart" height="220"></canvas>
-                    </div>
-
-                    <div class="card-glass p-0 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Alerts</h3>
-                        </div>
-                        <div id="alerts-list" class="divide-y divide-gray-100 dark:divide-gray-800">
-                            ${data.alerts.length > 0 ? data.alerts.map(function(alert) {
-                                var color = alert.severity === 'High' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
-                                var icon = alert.severity === 'High' ? '⚠️' : '⚡';
-                                var bg = alert.severity === 'High' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20';
-                                return `<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer" onclick="window.toast.info('${alert.message}')">
-                                    <div class="flex-shrink-0"><div class="w-10 h-10 rounded-full ${bg} flex items-center justify-center"><span class="text-lg">${icon}</span></div></div>
-                                    <div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${alert.student_name}</p><p class="text-xs text-gray-500 dark:text-gray-400">${alert.message}</p></div>
-                                    <div><span class="px-2 py-1 text-xs rounded-full ${color}">${alert.severity}</span></div>
-                                </div>`;
-                            }).join('') : '<div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No alerts</div>'}
-                        </div>
-                    </div>
-
-                    <!-- Courses Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${data.courses.filter(c => c.is_active).map(function(course) {
-                            var gradient = course.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
-                            return `
-                                <div class="card-glass p-0 overflow-hidden">
-                                    <div class="bg-gradient-to-r ${gradient} px-6 py-4">
-                                        <h3 class="text-lg font-semibold text-white">${course.code}</h3>
-                                        <p class="text-white/80 text-sm">${course.title}</p>
-                                    </div>
-                                    <div class="p-6">
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Semester</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.semester}</span></div>
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.students_count}</span></div>
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Groups</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.groups_count}</span></div>
-                                        </div>
-                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">📋 View Details</button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '<div class="space-y-6"><div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl"><h2 class="text-2xl font-bold">Welcome back, Prof. ' + (user?.first_name || 'Professor') + '! 👋</h2><p class="text-white/80 mt-1 text-sm">Here\'s your academic overview</p></div><div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"><div class="stat-card" onclick="showCoursesList()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Active Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">' + activeCourses + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-book"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view all</p></div><div class="stat-card" onclick="showGroupsList()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Groups</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">' + totalGroups + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-layer-group"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view all</p></div><div class="stat-card" onclick="showFreeRidersList()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Free Riders</p><p class="text-2xl font-bold ' + (freeRiders > 0 ? 'text-red-600' : 'text-green-600') + ' mt-1">' + freeRiders + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-exclamation-triangle"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view all</p></div><div class="stat-card" onclick="showTotalStudentsBreakdown()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">' + totalStudents + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-users"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view breakdown</p></div></div><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Risk Indicators by Course</h3><canvas id="riskChart" height="220"></canvas></div><div class="card-glass p-0 overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Alerts</h3></div><div id="alerts-list" class="divide-y divide-gray-100 dark:divide-gray-800">' + alertsHtml + '</div></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">' + coursesHtml + '</div></div>';
 
             // Render risk chart
-            setTimeout(() => {
-                const ctx = document.getElementById('riskChart')?.getContext('2d');
+            setTimeout(function() {
+                var ctx = document.getElementById('riskChart')?.getContext('2d');
                 if (ctx && data.courses.length > 0) {
                     if (charts.risk) charts.risk.destroy();
-                    const activeCoursesList = data.courses.filter(c => c.is_active);
-                    const labels = activeCoursesList.map(c => c.code);
-                    const highRisk = activeCoursesList.map(() => Math.floor(Math.random() * 2));
-                    const mediumRisk = activeCoursesList.map(() => Math.floor(Math.random() * 3));
-                    const lowRisk = activeCoursesList.map(c => (c.students_count || 0) - 3);
+                    var activeCoursesList = [];
+                    for (var i = 0; i < data.courses.length; i++) {
+                        if (data.courses[i].is_active) activeCoursesList.push(data.courses[i]);
+                    }
+                    var labels = [];
+                    var highRisk = [];
+                    var mediumRisk = [];
+                    var lowRisk = [];
+                    for (var i = 0; i < activeCoursesList.length; i++) {
+                        var c = activeCoursesList[i];
+                        labels.push(c.code);
+                        highRisk.push(Math.floor(Math.random() * 2));
+                        mediumRisk.push(Math.floor(Math.random() * 3));
+                        lowRisk.push((c.students_count || 0) - 3);
+                    }
 
                     charts.risk = new Chart(ctx, {
                         type: 'bar',
@@ -1025,204 +892,138 @@
         // PAGE: COURSES
         // ============================================
         function renderCourses() {
-            const container = document.getElementById('page-content');
-            const data = loadProfessorData();
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📚 Course Management</h2>
-                        <button onclick="showCreateCourseModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
-                    </div>
+            var coursesHtml = '';
+            if (data.courses.length === 0) {
+                coursesHtml = '<div class="col-span-full text-center py-12"><div class="text-6xl mb-4">📖</div><h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Courses Created</h3><p class="text-gray-500 dark:text-gray-400 mt-2">Click "New Course" to create your first course.</p></div>';
+            } else {
+                for (var i = 0; i < data.courses.length; i++) {
+                    var c = data.courses[i];
+                    var statusColor = c.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                    var statusText = c.is_active ? 'Active' : 'Inactive';
+                    var gradient = c.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
+                    coursesHtml += '<div class="card-glass p-0 overflow-hidden"><div class="bg-gradient-to-r ' + gradient + ' px-6 py-4"><h3 class="text-lg font-semibold text-white">' + c.code + '</h3><p class="text-white/80 text-sm">' + c.title + '</p></div><div class="p-6"><div class="space-y-2"><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Semester</span><span class="font-medium text-gray-800 dark:text-gray-100">' + c.semester + '</span></div><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">' + (c.students_count || 0) + '</span></div><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Groups</span><span class="font-medium text-gray-800 dark:text-gray-100">' + (c.groups_count || 0) + '</span></div><div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Status</span><span class="px-2 py-0.5 rounded-full text-xs ' + statusColor + '">' + statusText + '</span></div></div><button onclick="showCourseDetails(' + c.id + ')" class="mt-4 w-full btn-teal text-sm">📋 View Details</button></div></div>';
+                }
+            }
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${data.courses.length === 0 ? `
-                            <div class="col-span-full text-center py-12">
-                                <div class="text-6xl mb-4">📖</div>
-                                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Courses Created</h3>
-                                <p class="text-gray-500 dark:text-gray-400 mt-2">Click "New Course" to create your first course.</p>
-                            </div>
-                        ` : data.courses.map(function(course) {
-                            var statusColor = course.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
-                            var statusText = course.is_active ? 'Active' : 'Inactive';
-                            var gradient = course.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
-                            return `
-                                <div class="card-glass p-0 overflow-hidden">
-                                    <div class="bg-gradient-to-r ${gradient} px-6 py-4">
-                                        <h3 class="text-lg font-semibold text-white">${course.code}</h3>
-                                        <p class="text-white/80 text-sm">${course.title}</p>
-                                    </div>
-                                    <div class="p-6">
-                                        <div class="space-y-2">
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Semester</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.semester}</span></div>
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.students_count}</span></div>
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Groups</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.groups_count}</span></div>
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Status</span><span class="px-2 py-0.5 rounded-full text-xs ${statusColor}">${statusText}</span></div>
-                                        </div>
-                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">📋 View Details</button>
-                                    </div>
-                                </div>
-                            `;
-                        }).join('')}
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '<div class="space-y-6"><div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📚 Course Management</h2><button onclick="showCreateCourseModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">' + coursesHtml + '</div></div>';
+        }
+
+        // ============================================
+        // PAGE: Project
+        // ============================================
+        function renderProject() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+            var Project = data.Project || [];
+
+            var ProjectHtml = '';
+            if (Project.length === 0) {
+                ProjectHtml = '<div class="card-glass p-12 text-center"><div class="text-6xl mb-4">📋</div><h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Project Created</h3><p class="text-gray-500 dark:text-gray-400 mt-2">Click "New Project" to create your first assignment, project, or exam.</p></div>';
+            } else {
+                for (var i = 0; i < Project.length; i++) {
+                    var a = Project[i];
+                    var course = null;
+                    for (var j = 0; j < data.courses.length; j++) {
+                        if (data.courses[j].id === a.course_id) { course = data.courses[j]; break; }
+                    }
+                    var statusColors = { active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300', closed: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' };
+                    var statusColor = statusColors[a.status] || statusColors.pending;
+                    var typeIcons = { project: '📁', assignment: '📝', task: '✅', exam: '📊', mcq: '🔘', cq: '📖' };
+                    var icon = typeIcons[a.type] || '📝';
+                    var totalWeight = 0;
+                    if (a.weightage) {
+                        for (var key in a.weightage) { totalWeight += a.weightage[key]; }
+                    }
+                    ProjectHtml += '<div class="card-glass p-6"><div class="flex justify-between items-start"><div><span class="text-2xl mr-2">' + icon + '</span><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 inline">' + a.title + '</h3></div><span class="px-2 py-0.5 rounded-full text-xs ' + statusColor + '">' + a.status + '</span></div><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">' + (course ? course.code + ' - ' + course.title : 'No course') + '</p><p class="text-sm text-gray-600 dark:text-gray-300 mt-2">' + (a.description || 'No description') + '</p><div class="mt-3 flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400"><span><i class="far fa-calendar mr-1"></i> Deadline: ' + (a.deadline ? new Date(a.deadline).toLocaleString() : 'N/A') + '</span><span><i class="fas fa-weight-hanging mr-1"></i> Weightage: ' + totalWeight + '%</span></div><div class="mt-4 flex gap-2"><button onclick="window.toast.info(\'Viewing ' + a.title + '\')" class="btn-teal text-sm flex-1">View Details</button><button onclick="deleteAssignment(' + a.id + ')" class="btn-teal-outline text-sm px-3">🗑️</button></div></div>';
+                }
+                ProjectHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' + ProjectHtml + '</div>';
+            }
+
+            container.innerHTML = '<div class="space-y-6"><div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Project & Assignment</h2><button onclick="showCreateAssignmentModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Project</button></div>' + ProjectHtml + '</div>';
         }
 
         // ============================================
         // PAGE: GROUP ANALYTICS
         // ============================================
         function renderGroupAnalytics() {
-            const container = document.getElementById('page-content');
-            const data = loadProfessorData();
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
 
-            const totalContributions = data.groups.reduce((sum, g) => sum + (g.contribution_percentage || 0), 0);
-            const avgActivity = data.groups.length > 0 ? Math.round(totalContributions / data.groups.length) : 0;
+            var totalContributions = 0;
+            for (var i = 0; i < data.groups.length; i++) {
+                totalContributions += data.groups[i].contribution_percentage || 0;
+            }
+            var avgActivity = data.groups.length > 0 ? Math.round(totalContributions / data.groups.length) : 0;
+            var totalMembers = 0;
+            for (var i = 0; i < data.groups.length; i++) {
+                totalMembers += data.groups[i].members_count || 0;
+            }
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📈 Group Analytics</h2>
+            var rows = '';
+            for (var i = 0; i < data.groups.length; i++) {
+                var g = data.groups[i];
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="window.toast.info(\'Viewing ' + g.name + '\')"><td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">' + g.name + '</td><td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">' + (g.course_name || 'N/A') + '</td><td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">' + (g.members_count || 0) + '</td><td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">' + (g.contribution_percentage || 0) + '%</td></tr>';
+            }
 
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="stat-card text-center" onclick="showGroupsList()"><p class="text-sm text-gray-500 dark:text-gray-400">Total Groups</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${data.groups.length}</p><p class="text-xs text-gray-400">Click to view</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${avgActivity}%</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${data.groups.reduce((sum, g) => sum + (g.members_count || 0), 0)}</p></div>
-                    </div>
-
-                    <div class="card-glass p-0 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Performance</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${data.groups.map(function(g) {
-                                        return `
-                                            <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="window.toast.info('Viewing ${g.name}')">
-                                                <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${g.name}</td>
-                                                <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.course_name || 'N/A'}</td>
-                                                <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.members_count}</td>
-                                                <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.contribution_percentage}%</td>
-                                            </tr>
-                                        `;
-                                    }).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📈 Group Analytics</h2><div class="grid grid-cols-1 gap-4 sm:grid-cols-3"><div class="stat-card text-center" onclick="showGroupsList()"><p class="text-sm text-gray-500 dark:text-gray-400">Total Groups</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">' + data.groups.length + '</p><p class="text-xs text-gray-400">Click to view</p></div><div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">' + avgActivity + '%</p></div><div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">' + totalMembers + '</p></div></div><div class="card-glass p-0 overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Performance</h3></div><div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
         }
 
         // ============================================
         // PAGE: STUDENT EVALUATION
         // ============================================
         function renderEvaluation() {
-            const container = document.getElementById('page-content');
-            const data = loadProfessorData();
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
 
-            const activeCount = data.students.filter(s => s.classification === 'Active').length;
-            const moderateCount = data.students.filter(s => s.classification === 'Moderate').length;
-            const atRiskCount = data.students.filter(s => s.classification === 'Passive' || s.classification === 'Free Rider')
-                .length;
+            var activeCount = 0;
+            var moderateCount = 0;
+            var atRiskCount = 0;
+            for (var i = 0; i < data.students.length; i++) {
+                var s = data.students[i];
+                if (s.classification === 'Active') activeCount++;
+                else if (s.classification === 'Moderate') moderateCount++;
+                else if (s.classification === 'Passive' || s.classification === 'Free Rider') atRiskCount++;
+            }
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🎓 Student Evaluation</h2>
+            var rows = '';
+            for (var i = 0; i < data.students.length; i++) {
+                var s = data.students[i];
+                var badgeClass = getClassificationClass(s.classification);
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">' + s.name + '</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ' + badgeClass + '">' + s.classification + '</span></td><td class="px-4 py-2"><div class="flex items-center"><div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ' + s.activity_score + '%"></div></div><span class="text-sm text-gray-600 dark:text-gray-400">' + s.activity_score + '%</span></div></td><td class="px-4 py-2"><button onclick="window.toast.info(\'Viewing ' + s.name + '\')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">View</button></td></tr>';
+            }
 
-                    <div class="grid grid-cols-4 gap-4">
-                        <div class="stat-card text-center" onclick="window.toast.info('Total Students: ${data.students.length}')"><p class="text-2xl font-bold text-[#3AAFA9]">${data.students.length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p></div>
-                        <div class="stat-card text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">${activeCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Active</p></div>
-                        <div class="stat-card text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${moderateCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Moderate</p></div>
-                        <div class="stat-card text-center" onclick="showFreeRidersList()"><p class="text-2xl font-bold text-red-600 dark:text-red-400">${atRiskCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">At Risk</p><p class="text-xs text-gray-400">Click to view</p></div>
-                    </div>
-
-                    <div class="card-glass p-0 overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Performance</h3>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity Score</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${data.students.map(function(s) {
-                                        return `
-                                            <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                                <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${s.name}</td>
-                                                <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getClassificationClass(s.classification)}">${s.classification}</span></td>
-                                                <td class="px-4 py-2">
-                                                    <div class="flex items-center"><div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${s.activity_score}%"></div></div><span class="text-sm text-gray-600 dark:text-gray-400">${s.activity_score}%</span></div>
-                                                </td>
-                                                <td class="px-4 py-2">
-                                                    <button onclick="window.toast.info('Viewing ${s.name}')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">View</button>
-                                                </td>
-                                            </tr>
-                                        `;
-                                    }).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🎓 Student Evaluation</h2><div class="grid grid-cols-4 gap-4"><div class="stat-card text-center" onclick="window.toast.info(\'Total Students: ' + data.students.length + '\')"><p class="text-2xl font-bold text-[#3AAFA9]">' + data.students.length + '</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p></div><div class="stat-card text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">' + activeCount + '</p><p class="text-sm text-gray-500 dark:text-gray-400">Active</p></div><div class="stat-card text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">' + moderateCount + '</p><p class="text-sm text-gray-500 dark:text-gray-400">Moderate</p></div><div class="stat-card text-center" onclick="showFreeRidersList()"><p class="text-2xl font-bold text-red-600 dark:text-red-400">' + atRiskCount + '</p><p class="text-sm text-gray-500 dark:text-gray-400">At Risk</p><p class="text-xs text-gray-400">Click to view</p></div></div><div class="card-glass p-0 overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Performance</h3></div><div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity Score</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
         }
 
         // ============================================
         // PAGE: REPORTS
         // ============================================
         function renderReports() {
-            const container = document.getElementById('page-content');
-            const data = loadProfessorData();
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 PDF Reports</h2>
+            var studentOptions = '<option value="">Select Student</option>';
+            for (var i = 0; i < data.students.length; i++) {
+                studentOptions += '<option value="' + data.students[i].id + '">' + data.students[i].name + '</option>';
+            }
+            var groupOptions = '<option value="">Select Group</option>';
+            for (var i = 0; i < data.groups.length; i++) {
+                groupOptions += '<option value="' + data.groups[i].id + '">' + data.groups[i].name + '</option>';
+            }
+            var courseOptions = '<option value="">Select Course</option>';
+            for (var i = 0; i < data.courses.length; i++) {
+                courseOptions += '<option value="' + data.courses[i].id + '">' + data.courses[i].code + ' - ' + data.courses[i].title + '</option>';
+            }
 
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">👨‍🎓</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
-                            <div class="mt-4"><select id="studentReportSelect" class="input-teal"><option value="">Select Student</option>${data.students.map(function(s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('student')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">👥</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
-                            <div class="mt-4"><select id="groupReportSelect" class="input-teal"><option value="">Select Group</option>${data.groups.map(function(g) { return '<option value="' + g.id + '">' + g.name + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('group')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">📚</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
-                            <div class="mt-4"><select id="courseReportSelect" class="input-teal"><option value="">Select Course</option>${data.courses.map(function(c) { return '<option value="' + c.id + '">' + c.code + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('course')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 PDF Reports</h2><div class="grid md:grid-cols-3 gap-6"><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">👨‍🎓</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p><div class="mt-4"><select id="studentReportSelect" class="input-teal">' + studentOptions + '</select></div><button onclick="generateReport(\'student\')" class="btn-teal mt-4 w-full">Generate PDF</button></div><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">👥</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p><div class="mt-4"><select id="groupReportSelect" class="input-teal">' + groupOptions + '</select></div><button onclick="generateReport(\'group\')" class="btn-teal mt-4 w-full">Generate PDF</button></div><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">📚</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p><div class="mt-4"><select id="courseReportSelect" class="input-teal">' + courseOptions + '</select></div><button onclick="generateReport(\'course\')" class="btn-teal mt-4 w-full">Generate PDF</button></div></div></div>';
         }
 
         function generateReport(type) {
             window.toast.info('Generating ' + type + ' report...');
-            setTimeout(() => {
+            setTimeout(function() {
                 window.toast.success(type + ' report generated successfully! ✅');
             }, 1500);
         }
@@ -1231,74 +1032,29 @@
         // PAGE: PROFILE
         // ============================================
         function renderProfile() {
-            const user = AuthService.getUser();
-            const container = document.getElementById('page-content');
+            var user = AuthService.getUser();
+            var container = document.getElementById('page-content');
             if (!user) {
                 container.innerHTML = '<div class="text-center py-12 text-gray-500">Please log in again.</div>';
                 return;
             }
 
-            const extra = ProfileExtra.get();
-            const pic = ProfileExtra.getPic();
+            var extra = ProfileExtra.get();
+            var pic = ProfileExtra.getPic();
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👤 My Profile</h2>
-                    <div class="card-glass p-6">
-                        <div class="flex flex-col md:flex-row gap-8 items-start">
-                            <div class="flex flex-col items-center gap-3 flex-shrink-0">
-                                <img id="profilePicPreview" src="${pic || getUserAvatar(user)}" alt="Profile" class="profile-pic-preview" />
-                                <label class="file-input-label text-sm"><i class="fas fa-camera"></i> Upload Photo<input type="file" id="profilePicInput" accept="image/*" class="hidden" /></label>
-                                <button id="removePicBtn" class="text-xs text-red-400 hover:text-red-300 transition ${pic ? '' : 'hidden'}">Remove Photo</button>
-                            </div>
-                            <div class="flex-1 w-full space-y-4">
-                                <form id="profileForm" class="space-y-4">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label><input type="text" id="profileFirstName" value="${user.first_name || ''}" class="input-teal mt-1" /></div>
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label><input type="text" id="profileLastName" value="${user.last_name || ''}" class="input-teal mt-1" /></div>
-                                    </div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" value="${user.email || ''}" disabled class="input-teal mt-1 bg-gray-100 dark:bg-gray-800 cursor-not-allowed" /><p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed</p></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label><input type="text" id="profileDepartment" value="${user.department || ''}" class="input-teal mt-1" /></div>
-                                    <hr class="border-gray-200 dark:border-gray-700" />
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label><textarea id="profileBio" class="textarea-teal mt-1" placeholder="Tell us about yourself...">${extra.bio || ''}</textarea></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="${extra.skills || ''}" class="input-teal mt-1" placeholder="e.g. JavaScript, Python, Teamwork" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Education</label><input type="text" id="profileEducation" value="${extra.education || ''}" class="input-teal mt-1" placeholder="e.g. Ph.D. in CSE" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label><input type="text" id="profileExperience" value="${extra.experience || ''}" class="input-teal mt-1" placeholder="e.g. 10 years teaching" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub</label><input type="url" id="profileGithub" value="${extra.github || ''}" class="input-teal mt-1" placeholder="https://github.com/yourusername" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label><input type="url" id="profileLinkedin" value="${extra.linkedin || ''}" class="input-teal mt-1" placeholder="https://linkedin.com/in/yourprofile" /></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label><input type="url" id="profileWebsite" value="${extra.website || ''}" class="input-teal mt-1" placeholder="https://yourwebsite.com" /></div>
-                                    <div class="flex gap-3 flex-wrap">
-                                        <button type="submit" class="btn-teal">Update Profile</button>
-                                        <button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button>
-                                    </div>
-                                </form>
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👤 My Profile</h2><div class="card-glass p-6"><div class="flex flex-col md:flex-row gap-8 items-start"><div class="flex flex-col items-center gap-3 flex-shrink-0"><img id="profilePicPreview" src="' + (pic || getUserAvatar(user)) + '" alt="Profile" class="profile-pic-preview" /><label class="file-input-label text-sm"><i class="fas fa-camera"></i> Upload Photo<input type="file" id="profilePicInput" accept="image/*" class="hidden" /></label><button id="removePicBtn" class="text-xs text-red-400 hover:text-red-300 transition ' + (pic ? '' : 'hidden') + '">Remove Photo</button></div><div class="flex-1 w-full space-y-4"><form id="profileForm" class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label><input type="text" id="profileFirstName" value="' + (user.first_name || '') + '" class="input-teal mt-1" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label><input type="text" id="profileLastName" value="' + (user.last_name || '') + '" class="input-teal mt-1" /></div></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" value="' + (user.email || '') + '" disabled class="input-teal mt-1 bg-gray-100 dark:bg-gray-800 cursor-not-allowed" /><p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed</p></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label><input type="text" id="profileDepartment" value="' + (user.department || '') + '" class="input-teal mt-1" /></div><hr class="border-gray-200 dark:border-gray-700" /><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label><textarea id="profileBio" class="textarea-teal mt-1" placeholder="Tell us about yourself...">' + (extra.bio || '') + '</textarea></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="' + (extra.skills || '') + '" class="input-teal mt-1" placeholder="e.g. JavaScript, Python, Teamwork" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Education</label><input type="text" id="profileEducation" value="' + (extra.education || '') + '" class="input-teal mt-1" placeholder="e.g. Ph.D. in CSE" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label><input type="text" id="profileExperience" value="' + (extra.experience || '') + '" class="input-teal mt-1" placeholder="e.g. 10 years teaching" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub</label><input type="url" id="profileGithub" value="' + (extra.github || '') + '" class="input-teal mt-1" placeholder="https://github.com/yourusername" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label><input type="url" id="profileLinkedin" value="' + (extra.linkedin || '') + '" class="input-teal mt-1" placeholder="https://linkedin.com/in/yourprofile" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label><input type="url" id="profileWebsite" value="' + (extra.website || '') + '" class="input-teal mt-1" placeholder="https://yourwebsite.com" /></div><div class="flex gap-3 flex-wrap"><button type="submit" class="btn-teal">Update Profile</button><button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button></div></form><div id="passwordFormContainer" class="mt-6 hidden border-t border-gray-200 dark:border-gray-700 pt-6"><h4 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Change Password</h4><form id="passwordForm" class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label><input type="password" id="currentPassword" class="input-teal mt-1" placeholder="Enter current password" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label><input type="password" id="newPassword" class="input-teal mt-1" placeholder="Enter new password (min 6 chars)" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label><input type="password" id="confirmPassword" class="input-teal mt-1" placeholder="Confirm new password" /></div><div class="flex gap-3"><button type="submit" class="btn-teal">Update Password</button><button type="button" id="hidePasswordForm" class="btn-teal-outline">Cancel</button></div></form></div></div></div></div></div>';
 
-                                <div id="passwordFormContainer" class="mt-6 hidden border-t border-gray-200 dark:border-gray-700 pt-6">
-                                    <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Change Password</h4>
-                                    <form id="passwordForm" class="space-y-4">
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label><input type="password" id="currentPassword" class="input-teal mt-1" placeholder="Enter current password" /></div>
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label><input type="password" id="newPassword" class="input-teal mt-1" placeholder="Enter new password (min 6 chars)" /></div>
-                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label><input type="password" id="confirmPassword" class="input-teal mt-1" placeholder="Confirm new password" /></div>
-                                        <div class="flex gap-3"><button type="submit" class="btn-teal">Update Password</button><button type="button" id="hidePasswordForm" class="btn-teal-outline">Cancel</button></div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            // ---- Profile Picture Upload ----
-            const fileInput = document.getElementById('profilePicInput');
-            const preview = document.getElementById('profilePicPreview');
-            const removeBtn = document.getElementById('removePicBtn');
+            // Profile Picture Upload
+            var fileInput = document.getElementById('profilePicInput');
+            var preview = document.getElementById('profilePicPreview');
+            var removeBtn = document.getElementById('removePicBtn');
 
             fileInput.addEventListener('change', function(e) {
-                const file = e.target.files[0];
+                var file = e.target.files[0];
                 if (file) {
-                    const reader = new FileReader();
+                    var reader = new FileReader();
                     reader.onload = function(ev) {
-                        const base64 = ev.target.result;
+                        var base64 = ev.target.result;
                         preview.src = base64;
                         ProfileExtra.setPic(base64);
                         updateSidebarAvatar();
@@ -1317,15 +1073,15 @@
                 window.toast.info('Profile picture removed.');
             });
 
-            // ---- Profile Update ----
-            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+            // Profile Update
+            document.getElementById('profileForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                const firstName = document.getElementById('profileFirstName').value.trim();
-                const lastName = document.getElementById('profileLastName').value.trim();
-                const department = document.getElementById('profileDepartment').value.trim();
+                var firstName = document.getElementById('profileFirstName').value.trim();
+                var lastName = document.getElementById('profileLastName').value.trim();
+                var department = document.getElementById('profileDepartment').value.trim();
                 if (!firstName || !lastName) { window.toast.error('First and last name are required.'); return; }
 
-                const extraData = {
+                var extraData = {
                     bio: document.getElementById('profileBio').value.trim(),
                     skills: document.getElementById('profileSkills').value.trim(),
                     education: document.getElementById('profileEducation').value.trim(),
@@ -1336,34 +1092,33 @@
                 };
                 ProfileExtra.set(extraData);
 
-                const payload = { first_name: firstName, last_name: lastName, department };
-                const btn = this.querySelector('button[type="submit"]');
-                const original = btn.textContent;
+                var payload = { first_name: firstName, last_name: lastName, department: department };
+                var btn = this.querySelector('button[type="submit"]');
+                var original = btn.textContent;
                 btn.textContent = 'Saving...';
                 btn.disabled = true;
-                try {
-                    const response = await ApiService.put('/auth/profile', payload);
+                ApiService.put('/auth/profile', payload).then(function(response) {
                     if (response.success) {
-                        const user = AuthService.getUser();
+                        var user = AuthService.getUser();
                         user.first_name = firstName;
                         user.last_name = lastName;
                         user.department = department;
                         AuthService.updateUser(user);
-                        document.getElementById('user-name').textContent = `Prof. ${firstName} ${lastName}`.trim();
+                        document.getElementById('user-name').textContent = 'Prof. ' + firstName + ' ' + lastName;
                         updateSidebarAvatar();
                         window.toast.success('Profile updated successfully!');
                     } else {
                         window.toast.error(response.message || 'Update failed.');
                     }
-                } catch (err) {
+                }).catch(function(err) {
                     window.toast.error('Error updating profile. Please try again.');
-                } finally {
+                }).finally(function() {
                     btn.textContent = original;
                     btn.disabled = false;
-                }
+                });
             });
 
-            // ---- Password Change ----
+            // Password Change
             document.getElementById('showPasswordForm').addEventListener('click', function() {
                 document.getElementById('passwordFormContainer').classList.remove('hidden');
             });
@@ -1372,24 +1127,23 @@
                 document.getElementById('passwordForm').reset();
             });
 
-            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+            document.getElementById('passwordForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                const current = document.getElementById('currentPassword').value;
-                const newPass = document.getElementById('newPassword').value;
-                const confirm = document.getElementById('confirmPassword').value;
+                var current = document.getElementById('currentPassword').value;
+                var newPass = document.getElementById('newPassword').value;
+                var confirm = document.getElementById('confirmPassword').value;
                 if (!current || !newPass || !confirm) { window.toast.error('All password fields are required.'); return; }
                 if (newPass.length < 6) { window.toast.error('New password must be at least 6 characters.'); return; }
                 if (newPass !== confirm) { window.toast.error('Passwords do not match.'); return; }
-                const btn = this.querySelector('button[type="submit"]');
-                const original = btn.textContent;
+                var btn = this.querySelector('button[type="submit"]');
+                var original = btn.textContent;
                 btn.textContent = 'Updating...';
                 btn.disabled = true;
-                try {
-                    const response = await ApiService.post('/auth/change-password', {
-                        current_password: current,
-                        new_password: newPass,
-                        new_password_confirmation: confirm
-                    });
+                ApiService.post('/auth/change-password', {
+                    current_password: current,
+                    new_password: newPass,
+                    new_password_confirmation: confirm
+                }).then(function(response) {
                     if (response.success) {
                         window.toast.success('Password changed successfully!');
                         document.getElementById('passwordFormContainer').classList.add('hidden');
@@ -1397,12 +1151,12 @@
                     } else {
                         window.toast.error(response.message || 'Password change failed.');
                     }
-                } catch (err) {
+                }).catch(function(err) {
                     window.toast.error('Error changing password. Please try again.');
-                } finally {
+                }).finally(function() {
                     btn.textContent = original;
                     btn.disabled = false;
-                }
+                });
             });
         }
 
@@ -1411,38 +1165,33 @@
         // ============================================
         function navigate(page) {
             currentPage = page;
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
-            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
-            const titles = {
+            var links = document.querySelectorAll('.nav-link');
+            for (var i = 0; i < links.length; i++) {
+                links[i].classList.remove('active');
+            }
+            var activeLink = document.querySelector('.nav-link[data-page="' + page + '"]');
+            if (activeLink) activeLink.classList.add('active');
+
+            var titles = {
                 dashboard: 'Overview',
                 courses: 'Courses',
+                Project: 'Project',
                 analytics: 'Analytics',
                 evaluation: 'Evaluation',
                 reports: 'Reports',
                 profile: 'My Profile'
             };
             document.getElementById('page-title').textContent = titles[page] || 'Overview';
+
             switch (page) {
-                case 'dashboard':
-                    renderDashboard();
-                    break;
-                case 'courses':
-                    renderCourses();
-                    break;
-                case 'analytics':
-                    renderGroupAnalytics();
-                    break;
-                case 'evaluation':
-                    renderEvaluation();
-                    break;
-                case 'reports':
-                    renderReports();
-                    break;
-                case 'profile':
-                    renderProfile();
-                    break;
-                default:
-                    renderDashboard();
+                case 'dashboard': renderDashboard(); break;
+                case 'courses': renderCourses(); break;
+                case 'Project': renderProject(); break;
+                case 'analytics': renderGroupAnalytics(); break;
+                case 'evaluation': renderEvaluation(); break;
+                case 'reports': renderReports(); break;
+                case 'profile': renderProfile(); break;
+                default: renderDashboard();
             }
         }
 
@@ -1450,17 +1199,17 @@
         // THEME TOGGLE
         // ============================================
         (function initTheme() {
-            const toggle = document.getElementById('themeToggle');
-            const icon = document.getElementById('themeIcon');
-            const html = document.documentElement;
-            const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+            var toggle = document.getElementById('themeToggle');
+            var icon = document.getElementById('themeIcon');
+            var html = document.documentElement;
+            var saved = localStorage.getItem(STORAGE_KEYS.THEME);
             if (saved === 'dark') {
                 html.classList.add('dark');
                 icon.classList.remove('fa-sun');
                 icon.classList.add('fa-moon');
             }
             toggle.addEventListener('click', function() {
-                const isDark = html.classList.toggle('dark');
+                var isDark = html.classList.toggle('dark');
                 if (isDark) {
                     icon.classList.remove('fa-sun');
                     icon.classList.add('fa-moon');
@@ -1481,14 +1230,14 @@
                 window.location.href = '/login.html';
                 return;
             }
-            const user = AuthService.getUser();
+            var user = AuthService.getUser();
             if (user) {
-                const name = `${user.first_name || 'Professor'} ${user.last_name || ''}`.trim();
-                document.getElementById('user-name').textContent = `Prof. ${name}`;
-                const pic = ProfileExtra.getPic();
-                const avatarEl = document.getElementById('user-avatar');
+                var name = (user.first_name || 'Professor') + ' ' + (user.last_name || '');
+                document.getElementById('user-name').textContent = 'Prof. ' + name.trim();
+                var pic = ProfileExtra.getPic();
+                var avatarEl = document.getElementById('user-avatar');
                 if (pic) {
-                    avatarEl.style.backgroundImage = `url(${pic})`;
+                    avatarEl.style.backgroundImage = 'url(' + pic + ')';
                     avatarEl.style.backgroundSize = 'cover';
                     avatarEl.textContent = '';
                 } else {
@@ -1496,18 +1245,21 @@
                 }
                 avatarEl.addEventListener('click', function() { navigate('profile'); });
             }
-            document.getElementById('menuBtn')?.addEventListener('click', () => {
+            document.getElementById('menuBtn')?.addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', (e) => {
+            var links = document.querySelectorAll('.nav-link');
+            for (var i = 0; i < links.length; i++) {
+                links[i].addEventListener('click', function(e) {
                     e.preventDefault();
-                    const page = link.dataset.page;
+                    var page = this.dataset.page;
                     if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
                     navigate(page);
                 });
+            }
+            document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                AuthService.logout();
             });
-            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
             navigate('dashboard');
         }
         document.addEventListener('DOMContentLoaded', init);
