@@ -218,7 +218,7 @@
             animation: fadeIn 0.3s ease;
         }
         .modal-box {
-            background: white; border-radius: 24px; max-width: 700px; width: 95%;
+            background: white; border-radius: 24px; max-width: 800px; width: 95%;
             max-height: 85vh; overflow-y: auto; padding: 30px;
             position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
@@ -236,7 +236,7 @@
 </head>
 <body>
 
-    <!-- ===== SIDEBAR ===== -->
+    <!-- ===== SIDEBAR (Teal) ===== -->
     <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
         <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
             <a href="/" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm hover:opacity-80 transition">
@@ -282,7 +282,12 @@
     <!-- ===== MAIN CONTENT ===== -->
     <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
         <div id="page-content" class="animate-fade-in">
-            <!-- content dynamically loaded -->
+            <div class="flex items-center justify-center h-64">
+                <div class="text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
+                    <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading dashboard...</p>
+                </div>
+            </div>
         </div>
     </main>
 
@@ -302,13 +307,13 @@
         };
 
         // ============================================
-        // DEMO DATA
+        // DEMO DATA FOR PROFESSOR
         // ============================================
         const DEMO_PROFESSOR_DATA = {
             courses: [
-                { id: 1, code: 'CS401', title: 'Software Engineering', semester: 'Fall 2024', description: 'Introduction to software engineering.', students_count: 32, groups_count: 5, assignments_count: 2, is_active: true },
-                { id: 2, code: 'CS402', title: 'Database Systems', semester: 'Fall 2024', description: 'Relational database design and SQL.', students_count: 28, groups_count: 4, assignments_count: 1, is_active: true },
-                { id: 3, code: 'CS403', title: 'Web Development', semester: 'Fall 2024', description: 'Full-stack web development.', students_count: 25, groups_count: 3, assignments_count: 2, is_active: true }
+                { id: 1, code: 'CS401', title: 'Software Engineering', semester: 'Fall 2024', description: 'Introduction to software engineering principles and practices.', students_count: 32, groups_count: 5, is_active: true },
+                { id: 2, code: 'CS402', title: 'Database Systems', semester: 'Fall 2024', description: 'Relational database design and SQL.', students_count: 28, groups_count: 4, is_active: true },
+                { id: 3, code: 'CS403', title: 'Web Development', semester: 'Fall 2024', description: 'Full-stack web development with modern frameworks.', students_count: 25, groups_count: 3, is_active: true }
             ],
             students: [
                 { id: 1, name: 'John Doe', email: 'john@demo.com', classification: 'Active', activity_score: 85 },
@@ -322,11 +327,6 @@
                 { id: 2, name: 'Team Beta', course_name: 'CS401', members_count: 4, contribution_percentage: 65 },
                 { id: 3, name: 'Team Gamma', course_name: 'CS402', members_count: 3, contribution_percentage: 82 }
             ],
-            assignments: [
-                { id: 1, course_id: 1, title: 'Final Project', deadline: '2026-07-15', weightage: { commits: 40, attendance: 20, peer_reviews: 20, working_hours: 20 } },
-                { id: 2, course_id: 1, title: 'Midterm Project', deadline: '2026-06-30', weightage: { commits: 30, attendance: 25, peer_reviews: 25, working_hours: 20 } },
-                { id: 3, course_id: 2, title: 'Database Design Project', deadline: '2026-07-10', weightage: { commits: 35, attendance: 25, peer_reviews: 20, working_hours: 20 } }
-            ],
             alerts: [
                 { student_name: 'Mike Brown', severity: 'Medium', message: 'Low contribution for 2 weeks' },
                 { student_name: 'Lisa Wong', severity: 'High', message: 'Minimal commits in last 3 weeks' }
@@ -337,7 +337,8 @@
         // TOAST SYSTEM
         // ============================================
         class ToastManager {
-            constructor() { this.container = null; this.init(); }
+            constructor() { this.container = null;
+                this.init(); }
             init() {
                 this.container = document.createElement('div');
                 this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
@@ -352,8 +353,10 @@
                     info: 'bg-blue-50 border-blue-400 text-blue-800'
                 };
                 const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
-                toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
+                toast.className =
+                    `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
+                toast.innerHTML =
+                    `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
                 this.container.appendChild(toast);
                 requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
                 toast.querySelector('button').onclick = () => toast.remove();
@@ -365,7 +368,49 @@
             warning(m) { this.show(m, 'warning'); }
             info(m) { this.show(m, 'info'); }
         }
+function showTotalStudentsBreakdown() {
+    const data = loadProfessorData();
+    if (data.courses.length === 0) {
+        showModal('Total Students', '<p class="text-gray-500">No courses available.</p>');
+        return;
+    }
+    let total = 0;
+    let rows = data.courses.map(c => {
+        total += c.students_count || 0;
+        return `
+            <tr class="border-t border-gray-100 dark:border-gray-800">
+                <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td>
+                <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td>
+                <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td>
+                <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td>
+            </tr>
+        `;
+    }).join('');
 
+    const content = `
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+                <tfoot class="bg-gray-50 dark:bg-gray-800 font-bold">
+                    <tr>
+                        <td colspan="2" class="px-4 py-2 text-right">Total:</td>
+                        <td class="px-4 py-2 text-blue-600 dark:text-blue-400">${total}</td>
+                        <td class="px-4 py-2">${data.courses.reduce((sum, c) => sum + (c.groups_count || 0), 0)}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    `;
+    showModal('Total Students per Course', content);
+}
         // ============================================
         // AUTH SERVICE
         // ============================================
@@ -387,14 +432,25 @@
         // PROFILE EXTRA DATA
         // ============================================
         const ProfileExtra = {
-            get() { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_EXTRA) || '{}'); } catch { return {}; } },
-            set(data) { localStorage.setItem(STORAGE_KEYS.PROFILE_EXTRA, JSON.stringify(data)); },
-            getPic() { return localStorage.getItem(STORAGE_KEYS.PROFILE_PIC) || null; },
-            setPic(base64) { if (base64) localStorage.setItem(STORAGE_KEYS.PROFILE_PIC, base64); else localStorage.removeItem(STORAGE_KEYS.PROFILE_PIC); }
+            get() {
+                try {
+                    return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_EXTRA) || '{}');
+                } catch { return {}; }
+            },
+            set(data) {
+                localStorage.setItem(STORAGE_KEYS.PROFILE_EXTRA, JSON.stringify(data));
+            },
+            getPic() {
+                return localStorage.getItem(STORAGE_KEYS.PROFILE_PIC) || null;
+            },
+            setPic(base64) {
+                if (base64) localStorage.setItem(STORAGE_KEYS.PROFILE_PIC, base64);
+                else localStorage.removeItem(STORAGE_KEYS.PROFILE_PIC);
+            }
         };
 
         // ============================================
-        // API SERVICE
+        // API SERVICE (with fallback)
         // ============================================
         const ApiService = {
             async request(endpoint, options = {}) {
@@ -411,13 +467,15 @@
                     return data;
                 } catch (error) {
                     console.warn('API failed, using demo data');
-                    if (endpoint.includes('/courses/professor')) return { success: true, courses: DEMO_PROFESSOR_DATA.courses };
+                    if (endpoint.includes('/courses/professor')) return { success: true, courses: DEMO_PROFESSOR_DATA
+                            .courses };
                     if (endpoint.includes('/analytics/group')) return { success: true, ...DEMO_PROFESSOR_DATA };
                     throw error;
                 }
             },
             get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
+            put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); }
         };
 
         // ============================================
@@ -428,7 +486,6 @@
         window.auth = AuthService;
         let currentPage = 'dashboard';
         let charts = {};
-        let professorData = { ...DEMO_PROFESSOR_DATA };
 
         // ============================================
         // HELPERS
@@ -439,7 +496,8 @@
         }
 
         function getClassificationClass(classification) {
-            const map = { 'Active': 'badge-active', 'Moderate': 'badge-moderate', 'Passive': 'badge-passive', 'Free Rider': 'badge-free-rider' };
+            const map = { 'Active': 'badge-active', 'Moderate': 'badge-moderate', 'Passive': 'badge-passive',
+                'Free Rider': 'badge-free-rider' };
             return map[classification] || 'badge-moderate';
         }
 
@@ -466,11 +524,32 @@
         }
 
         // ============================================
+        // PROFESSOR DATA (localStorage with demo fallback)
+        // ============================================
+        function loadProfessorData() {
+            const key = STORAGE_KEYS.PROFESSOR_DATA;
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    return { ...DEMO_PROFESSOR_DATA, ...parsed };
+                } catch (e) { return { ...DEMO_PROFESSOR_DATA }; }
+            }
+            return { ...DEMO_PROFESSOR_DATA };
+        }
+
+        function saveProfessorData(data) {
+            localStorage.setItem(STORAGE_KEYS.PROFESSOR_DATA, JSON.stringify(data));
+        }
+
+        // ============================================
         // MODAL FUNCTIONS
         // ============================================
         function showModal(title, contentHtml) {
+            // Remove any existing modal
             const oldModal = document.getElementById('dynamicModal');
             if (oldModal) oldModal.remove();
+
             const modalHtml = `
                 <div id="dynamicModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
                     <div class="modal-box">
@@ -488,47 +567,55 @@
             if (modal) modal.remove();
         }
 
-        function showTotalStudentsBreakdown() {
-            if (professorData.courses.length === 0) {
-                showModal('Total Students', '<p class="text-gray-500">No courses available.</p>');
-                return;
-            }
-            let total = 0;
-            let rows = professorData.courses.map(c => {
-                total += c.students_count || 0;
-                return `<tr class="border-t border-gray-100 dark:border-gray-800"><td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td></tr>`;
-            }).join('');
-            showModal('Total Students per Course', `
-                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th></tr></thead><tbody>${rows}</tbody><tfoot class="bg-gray-50 dark:bg-gray-800 font-bold"><tr><td colspan="2" class="px-4 py-2 text-right">Total:</td><td class="px-4 py-2 text-blue-600 dark:text-blue-400">${total}</td><td class="px-4 py-2">${professorData.courses.reduce((sum, c) => sum + (c.groups_count || 0), 0)}</td></tr></tfoot></table></div>
-            `);
-        }
-
+        // ============================================
+        // DETAILS FUNCTIONS
+        // ============================================
         function showCoursesList() {
-            if (professorData.courses.length === 0) {
+            const data = loadProfessorData();
+            const activeCourses = data.courses.filter(c => c.is_active);
+            if (activeCourses.length === 0) {
                 showModal('Active Courses', '<p class="text-gray-500">No active courses found.</p>');
                 return;
             }
-            let rows = professorData.courses.filter(c => c.is_active).map(c => `
+            let rows = activeCourses.map(c => `
                 <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="closeModal(); showCourseDetails(${c.id})">
                     <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400"><span class="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Active</span></td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">
+                        <span class="px-2 py-0.5 rounded-full text-xs ${c.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}">${c.is_active ? 'Active' : 'Inactive'}</span>
+                    </td>
                 </tr>
             `).join('');
-            showModal('Active Courses', `
-                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Code</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+
+            const content = `
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Code</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
                 <p class="text-xs text-gray-400 mt-2">Click on a course to view details.</p>
-            `);
+            `;
+            showModal('Active Courses', content);
         }
 
         function showGroupsList() {
-            if (professorData.groups.length === 0) {
+            const data = loadProfessorData();
+            if (data.groups.length === 0) {
                 showModal('Groups', '<p class="text-gray-500">No groups found.</p>');
                 return;
             }
-            let rows = professorData.groups.map(g => `
+            let rows = data.groups.map(g => `
                 <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${g.name}</td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.course_name || 'N/A'}</td>
@@ -536,13 +623,28 @@
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.contribution_percentage}%</td>
                 </tr>
             `).join('');
-            showModal('All Groups', `
-                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th></tr></thead><tbody>${rows}</tbody></table></div>
-            `);
+
+            const content = `
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            `;
+            showModal('All Groups', content);
         }
 
         function showFreeRidersList() {
-            const freeRiders = professorData.students.filter(s => s.classification === 'Free Rider');
+            const data = loadProfessorData();
+            const freeRiders = data.students.filter(s => s.classification === 'Free Rider');
             if (freeRiders.length === 0) {
                 showModal('Free Riders', '<p class="text-gray-500">No free riders detected.</p>');
                 return;
@@ -551,159 +653,92 @@
                 <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${s.name}</td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${s.email}</td>
-                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400"><span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Free Rider</span></td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">
+                        <span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Free Rider</span>
+                    </td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${s.activity_score}%</td>
                 </tr>
             `).join('');
-            showModal('Free Riders', `
-                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th></tr></thead><tbody>${rows}</tbody></table></div>
+
+            const content = `
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
                 <p class="text-xs text-red-400 mt-2">⚠️ These students need immediate attention.</p>
-            `);
+            `;
+            showModal('Free Riders', content);
         }
 
+        // ----- Existing course details (reuse from earlier) -----
         function showCourseDetails(courseId) {
-            const course = professorData.courses.find(c => c.id === courseId);
+            const data = loadProfessorData();
+            const course = data.courses.find(c => c.id === courseId);
             if (!course) {
                 window.toast.error('Course not found');
                 return;
             }
-            const courseAssignments = professorData.assignments.filter(a => a.course_id === courseId);
-            let studentsHtml = professorData.students.slice(0, course.students_count).map(s => `
+            // Build modal content
+            let studentsHtml = data.students.slice(0, course.students_count).map(s => `
                 <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                     <span class="text-sm">${s.name}</span>
                     <span class="px-2 py-0.5 rounded-full text-xs ${getClassificationClass(s.classification)}">${s.classification}</span>
                 </div>
             `).join('') || '<p class="text-gray-500 text-sm">No students enrolled yet.</p>';
 
-            let assignmentsHtml = courseAssignments.map(a => `
-                <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
-                    <span class="text-sm font-medium">${a.title}</span>
-                    <span class="text-xs text-gray-500">Deadline: ${a.deadline ? new Date(a.deadline).toLocaleDateString() : 'N/A'}</span>
-                </div>
-            `).join('') || '<p class="text-gray-500 text-sm">No assignments created yet.</p>';
-
-            showModal(`${course.code} - ${course.title}`, `
+            let content = `
                 <div class="space-y-4">
-                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg"><p class="text-gray-700 dark:text-gray-300">${course.description || 'No description available.'}</p></div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${course.semester}</p><p class="text-xs text-gray-500 dark:text-gray-400">Semester</p></div>
-                        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">${course.students_count}</p><p class="text-xs text-gray-500 dark:text-gray-400">Students</p></div>
-                        <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-purple-600 dark:text-purple-400">${course.groups_count}</p><p class="text-xs text-gray-500 dark:text-gray-400">Groups</p></div>
-                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${Math.round(course.students_count / (course.groups_count || 1))}</p><p class="text-xs text-gray-500 dark:text-gray-400">Avg Group Size</p></div>
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-gray-700 dark:text-gray-300">${course.description || 'No description available.'}</p>
                     </div>
-                    <div><h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">📋 Assignments</h4><div class="max-h-40 overflow-y-auto">${assignmentsHtml}</div></div>
-                    <div><h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">👨‍🎓 Students Enrolled</h4><div class="max-h-40 overflow-y-auto">${studentsHtml}</div></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center">
+                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${course.semester}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Semester</p>
+                        </div>
+                        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center">
+                            <p class="text-2xl font-bold text-green-600 dark:text-green-400">${course.students_count}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Students</p>
+                        </div>
+                        <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-center">
+                            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">${course.groups_count}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Groups</p>
+                        </div>
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center">
+                            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${Math.round(course.students_count / (course.groups_count || 1))}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Avg Group Size</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">Students Enrolled</h4>
+                        <div class="max-h-40 overflow-y-auto">${studentsHtml}</div>
+                    </div>
                 </div>
-            `);
+            `;
+            showModal(`${course.code} - ${course.title}`, content);
         }
 
         // ============================================
-        // PROFESSOR DASHBOARD FUNCTIONS
+        // PAGE: DASHBOARD
         // ============================================
-        function loadProfessorData() {
-            const key = STORAGE_KEYS.PROFESSOR_DATA;
-            const stored = localStorage.getItem(key);
-            if (stored) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    professorData = { ...DEMO_PROFESSOR_DATA, ...parsed };
-                    return professorData;
-                } catch (e) { professorData = { ...DEMO_PROFESSOR_DATA }; }
-            }
-            professorData = { ...DEMO_PROFESSOR_DATA };
-            return professorData;
-        }
-
-        function saveProfessorData() {
-            localStorage.setItem(STORAGE_KEYS.PROFESSOR_DATA, JSON.stringify(professorData));
-        }
-
-        // ----- ASSIGNMENT FUNCTIONS -----
-        function showAssignmentModal() {
-            const modal = document.getElementById('createAssignmentModal');
-            if (modal) modal.classList.remove('hidden');
-        }
-
-        function closeAssignmentModal() {
-            const modal = document.getElementById('createAssignmentModal');
-            if (modal) modal.classList.add('hidden');
-        }
-
-        async function handleCreateAssignment(e) {
-            e.preventDefault();
-            const courseId = document.getElementById('assignmentCourse').value;
-            const title = document.getElementById('assignmentTitle').value.trim();
-            const description = document.getElementById('assignmentDescription').value.trim();
-            const deadline = document.getElementById('assignmentDeadline').value;
-
-            if (!courseId || !title || !deadline) {
-                window.toast.error('Please fill in all required fields.');
-                return;
-            }
-
-            const weightage = {
-                commits: parseInt(document.getElementById('weightCommits').value) || 0,
-                attendance: parseInt(document.getElementById('weightAttendance').value) || 0,
-                peer_reviews: parseInt(document.getElementById('weightPeerReviews').value) || 0,
-                working_hours: parseInt(document.getElementById('weightWorkingHours').value) || 0
-            };
-
-            const total = Object.values(weightage).reduce((a, b) => a + b, 0);
-            if (total !== 100) {
-                window.toast.error('Total weightage must equal 100%. Current total: ' + total + '%');
-                return;
-            }
-
-            const btn = e.target.querySelector('button[type="submit"]');
-            const original = btn.textContent;
-            btn.textContent = 'Creating...';
-            btn.disabled = true;
-
-            try {
-                const response = await ApiService.post('/assignments/create', {
-                    course_id: courseId,
-                    title: title,
-                    description: description,
-                    weightage: weightage,
-                    deadline: deadline
-                });
-
-                if (response.success) {
-                    window.toast.success(`✅ Project "${title}" created successfully!`);
-                    closeAssignmentModal();
-                    // Add to local data
-                    professorData.assignments.push({
-                        id: Date.now(),
-                        course_id: parseInt(courseId),
-                        title: title,
-                        description: description,
-                        deadline: deadline,
-                        weightage: weightage
-                    });
-                    const course = professorData.courses.find(c => c.id == courseId);
-                    if (course) course.assignments_count = (course.assignments_count || 0) + 1;
-                    saveProfessorData();
-                    renderCourses();
-                } else {
-                    window.toast.error(response.message || 'Failed to create project.');
-                }
-            } catch (error) {
-                window.toast.error('Error creating project. Please try again.');
-            } finally {
-                btn.textContent = original;
-                btn.disabled = false;
-            }
-        }
-
-        // ----- DASHBOARD RENDER -----
         function renderDashboard() {
             const user = AuthService.getUser();
             const container = document.getElementById('page-content');
+            const data = loadProfessorData();
 
-            const totalStudents = professorData.students.length;
-            const totalGroups = professorData.groups.length;
-            const activeCourses = professorData.courses.filter(c => c.is_active).length;
-            const freeRiders = professorData.students.filter(s => s.classification === 'Free Rider').length;
+            const totalStudents = data.students.length;
+            const totalGroups = data.groups.length;
+            const activeCourses = data.courses.filter(c => c.is_active).length;
+            const freeRiders = data.students.filter(s => s.classification === 'Free Rider').length;
 
             container.innerHTML = `
                 <div class="space-y-6">
@@ -739,7 +774,7 @@
                                 <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalStudents}</p></div>
                                 <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">Click for breakdown</p>
+                            <p class="text-xs text-gray-400 mt-1">Click for count</p>
                         </div>
                     </div>
 
@@ -753,7 +788,7 @@
                             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Alerts</h3>
                         </div>
                         <div id="alerts-list" class="divide-y divide-gray-100 dark:divide-gray-800">
-                            ${professorData.alerts.length > 0 ? professorData.alerts.map(function(alert) {
+                            ${data.alerts.length > 0 ? data.alerts.map(function(alert) {
                                 var color = alert.severity === 'High' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
                                 var icon = alert.severity === 'High' ? '⚠️' : '⚡';
                                 var bg = alert.severity === 'High' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20';
@@ -765,19 +800,43 @@
                             }).join('') : '<div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No alerts</div>'}
                         </div>
                     </div>
+
+                    <!-- Courses Grid (existing) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${data.courses.filter(c => c.is_active).map(function(course) {
+                            var gradient = course.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
+                            return `
+                                <div class="card-glass p-0 overflow-hidden">
+                                    <div class="bg-gradient-to-r ${gradient} px-6 py-4">
+                                        <h3 class="text-lg font-semibold text-white">${course.code}</h3>
+                                        <p class="text-white/80 text-sm">${course.title}</p>
+                                    </div>
+                                    <div class="p-6">
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Semester</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.semester}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.students_count}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Groups</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.groups_count}</span></div>
+                                        </div>
+                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">📋 View Details</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
                 </div>
             `;
 
             // Render risk chart
             setTimeout(() => {
                 const ctx = document.getElementById('riskChart')?.getContext('2d');
-                if (ctx && professorData.courses.length > 0) {
+                if (ctx && data.courses.length > 0) {
                     if (charts.risk) charts.risk.destroy();
-                    const activeCoursesList = professorData.courses.filter(c => c.is_active);
+                    const activeCoursesList = data.courses.filter(c => c.is_active);
                     const labels = activeCoursesList.map(c => c.code);
                     const highRisk = activeCoursesList.map(() => Math.floor(Math.random() * 2));
                     const mediumRisk = activeCoursesList.map(() => Math.floor(Math.random() * 3));
                     const lowRisk = activeCoursesList.map(c => (c.students_count || 0) - 3);
+
                     charts.risk = new Chart(ctx, {
                         type: 'bar',
                         data: {
@@ -791,7 +850,10 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: true,
-                            scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Students' } } },
+                            scales: {
+                                x: { stacked: true },
+                                y: { stacked: true, title: { display: true, text: 'Students' } }
+                            },
                             plugins: { legend: { position: 'top' } }
                         }
                     });
@@ -799,22 +861,24 @@
             }, 100);
         }
 
-        // ----- COURSE MANAGEMENT -----
+        // ============================================
+        // PAGE: COURSES (unchanged)
+        // ============================================
         function renderCourses() {
             const container = document.getElementById('page-content');
+            const data = loadProfessorData();
 
             container.innerHTML = `
                 <div class="space-y-6">
-                    <div class="flex justify-between items-center flex-wrap gap-4">
+                    <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📚 Course Management</h2>
-                        <div class="flex gap-3">
-                            <button id="createCourseBtn" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
-                            <button id="createAssignmentBtn" class="btn-teal-outline"><i class="fas fa-tasks mr-2"></i> Create Project</button>
-                        </div>
+                        <button id="createCourseBtn" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${professorData.courses.map(function(course) {
+                        ${data.courses.map(function(course) {
+                            var statusColor = course.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+                            var statusText = course.is_active ? 'Active' : 'Inactive';
                             var gradient = course.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
                             return `
                                 <div class="card-glass p-0 overflow-hidden">
@@ -826,75 +890,41 @@
                                         <div class="space-y-2">
                                             <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Semester</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.semester}</span></div>
                                             <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.students_count}</span></div>
-                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Projects</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.assignments_count || 0}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Groups</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.groups_count}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Status</span><span class="px-2 py-0.5 rounded-full text-xs ${statusColor}">${statusText}</span></div>
                                         </div>
-                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">📋 View Details</button>
+                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">View Details</button>
                                     </div>
                                 </div>
                             `;
                         }).join('')}
                     </div>
                 </div>
-
-                <!-- Create Assignment Modal -->
-                <div id="createAssignmentModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
-                    <div class="bg-white dark:bg-[#132424] rounded-2xl shadow-2xl max-w-lg w-full p-6 relative">
-                        <button onclick="closeAssignmentModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl">&times;</button>
-                        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">📋 Create Project Assignment</h3>
-                        <form id="createAssignmentForm" class="space-y-4">
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course</label>
-                                <select id="assignmentCourse" class="input-teal" required>
-                                    <option value="">Select a course</option>
-                                    ${professorData.courses.map(c => `<option value="${c.id}">${c.code} - ${c.title}</option>`).join('')}
-                                </select>
-                            </div>
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Title</label>
-                                <input type="text" id="assignmentTitle" placeholder="e.g., Final Project" class="input-teal" required />
-                            </div>
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                                <textarea id="assignmentDescription" rows="3" placeholder="Project description..." class="textarea-teal"></textarea>
-                            </div>
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline</label>
-                                <input type="datetime-local" id="assignmentDeadline" class="input-teal" required />
-                            </div>
-                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contribution Weightage</label>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Commits</label><input type="number" id="weightCommits" value="40" min="0" max="100" class="input-teal" /></div>
-                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Attendance</label><input type="number" id="weightAttendance" value="20" min="0" max="100" class="input-teal" /></div>
-                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Peer Reviews</label><input type="number" id="weightPeerReviews" value="20" min="0" max="100" class="input-teal" /></div>
-                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Working Hours</label><input type="number" id="weightWorkingHours" value="20" min="0" max="100" class="input-teal" /></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Total must equal 100%</p>
-                            </div>
-                            <div class="flex gap-3 pt-2">
-                                <button type="submit" class="btn-teal flex-1">Create Project</button>
-                                <button type="button" onclick="closeAssignmentModal()" class="btn-teal-outline flex-1">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
             `;
 
-            document.getElementById('createCourseBtn').addEventListener('click', function() { window.toast.info('Create course form coming soon!'); });
-            document.getElementById('createAssignmentBtn').addEventListener('click', showAssignmentModal);
-            document.getElementById('createAssignmentForm').addEventListener('submit', handleCreateAssignment);
+            document.getElementById('createCourseBtn')?.addEventListener('click', function() {
+                window.toast.info('Create course form coming soon!');
+            });
         }
 
-        // ----- GROUP ANALYTICS -----
+        // ============================================
+        // PAGE: GROUP ANALYTICS (unchanged)
+        // ============================================
         function renderGroupAnalytics() {
             const container = document.getElementById('page-content');
+            const data = loadProfessorData();
 
-            const totalContributions = professorData.groups.reduce((sum, g) => sum + (g.contribution_percentage || 0), 0);
-            const avgActivity = professorData.groups.length > 0 ? Math.round(totalContributions / professorData.groups.length) : 0;
+            const totalContributions = data.groups.reduce((sum, g) => sum + (g.contribution_percentage || 0), 0);
+            const avgActivity = data.groups.length > 0 ? Math.round(totalContributions / data.groups.length) : 0;
 
             container.innerHTML = `
                 <div class="space-y-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📈 Group Analytics</h2>
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="stat-card text-center" onclick="showGroupsList()"><p class="text-sm text-gray-500 dark:text-gray-400">Total Groups</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${professorData.groups.length}</p><p class="text-xs text-gray-400">Click to view</p></div>
+                        <div class="stat-card text-center" onclick="showGroupsList()"><p class="text-sm text-gray-500 dark:text-gray-400">Total Groups</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${data.groups.length}</p><p class="text-xs text-gray-400">Click to view</p></div>
                         <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${avgActivity}%</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${professorData.groups.reduce((sum, g) => sum + (g.members_count || 0), 0)}</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${data.groups.reduce((sum, g) => sum + (g.members_count || 0), 0)}</p></div>
                     </div>
 
                     <div class="card-glass p-0 overflow-hidden">
@@ -912,13 +942,15 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${professorData.groups.map(function(g) {
-                                        return `<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="window.toast.info('Viewing ${g.name}')">
-                                            <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${g.name}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.course_name || 'N/A'}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.members_count}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.contribution_percentage}%</td>
-                                        </tr>`;
+                                    ${data.groups.map(function(g) {
+                                        return `
+                                            <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="window.toast.info('Viewing ${g.name}')">
+                                                <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${g.name}</td>
+                                                <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.course_name || 'N/A'}</td>
+                                                <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.members_count}</td>
+                                                <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.contribution_percentage}%</td>
+                                            </tr>
+                                        `;
                                     }).join('')}
                                 </tbody>
                             </table>
@@ -928,20 +960,24 @@
             `;
         }
 
-        // ----- STUDENT EVALUATION -----
+        // ============================================
+        // PAGE: STUDENT EVALUATION (unchanged)
+        // ============================================
         function renderEvaluation() {
             const container = document.getElementById('page-content');
+            const data = loadProfessorData();
 
-            const activeCount = professorData.students.filter(s => s.classification === 'Active').length;
-            const moderateCount = professorData.students.filter(s => s.classification === 'Moderate').length;
-            const atRiskCount = professorData.students.filter(s => s.classification === 'Passive' || s.classification === 'Free Rider').length;
+            const activeCount = data.students.filter(s => s.classification === 'Active').length;
+            const moderateCount = data.students.filter(s => s.classification === 'Moderate').length;
+            const atRiskCount = data.students.filter(s => s.classification === 'Passive' || s.classification === 'Free Rider')
+                .length;
 
             container.innerHTML = `
                 <div class="space-y-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🎓 Student Evaluation</h2>
 
                     <div class="grid grid-cols-4 gap-4">
-                        <div class="stat-card text-center" onclick="window.toast.info('Total Students: ${professorData.students.length}')"><p class="text-2xl font-bold text-[#3AAFA9]">${professorData.students.length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p></div>
+                        <div class="stat-card text-center" onclick="window.toast.info('Total Students: ${data.students.length}')"><p class="text-2xl font-bold text-[#3AAFA9]">${data.students.length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p></div>
                         <div class="stat-card text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">${activeCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Active</p></div>
                         <div class="stat-card text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${moderateCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Moderate</p></div>
                         <div class="stat-card text-center" onclick="showFreeRidersList()"><p class="text-2xl font-bold text-red-600 dark:text-red-400">${atRiskCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">At Risk</p><p class="text-xs text-gray-400">Click to view</p></div>
@@ -962,17 +998,19 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${professorData.students.map(function(s) {
-                                        return `<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                                            <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${s.name}</td>
-                                            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getClassificationClass(s.classification)}">${s.classification}</span></td>
-                                            <td class="px-4 py-2">
-                                                <div class="flex items-center"><div class="w-16 bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${s.activity_score}%"></div></div><span class="text-sm text-gray-600 dark:text-gray-400">${s.activity_score}%</span></div>
-                                            </td>
-                                            <td class="px-4 py-2">
-                                                <button onclick="window.toast.info('Viewing ${s.name}')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">View</button>
-                                            </td>
-                                        </tr>`;
+                                    ${data.students.map(function(s) {
+                                        return `
+                                            <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                                <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${s.name}</td>
+                                                <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getClassificationClass(s.classification)}">${s.classification}</span></td>
+                                                <td class="px-4 py-2">
+                                                    <div class="flex items-center"><div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${s.activity_score}%"></div></div><span class="text-sm text-gray-600 dark:text-gray-400">${s.activity_score}%</span></div>
+                                                </td>
+                                                <td class="px-4 py-2">
+                                                    <button onclick="window.toast.info('Viewing ${s.name}')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">View</button>
+                                                </td>
+                                            </tr>
+                                        `;
                                     }).join('')}
                                 </tbody>
                             </table>
@@ -982,11 +1020,6 @@
             `;
         }
 
-<<<<<<< HEAD
-        // ----- PDF REPORTS -----
-        function renderReports() {
-            const container = document.getElementById('page-content');
-=======
         // ============================================
         // PAGE: REPORTS (unchanged)
         // ============================================
@@ -994,36 +1027,11 @@
                        function renderReports() {
     const container = document.getElementById('page-content');
     const data = loadProfessorData();
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
 
     container.innerHTML = `
         <div class="space-y-6">
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 Generate Reports</h2>
 
-<<<<<<< HEAD
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">👨‍🎓</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
-                            <div class="mt-4"><select id="studentReportSelect" class="input-teal"><option value="">Select Student</option>${professorData.students.map(function(s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('student')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">👥</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
-                            <div class="mt-4"><select id="groupReportSelect" class="input-teal"><option value="">Select Group</option>${professorData.groups.map(function(g) { return '<option value="' + g.id + '">' + g.name + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('group')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <div class="text-5xl mb-4">📚</div>
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
-                            <div class="mt-4"><select id="courseReportSelect" class="input-teal"><option value="">Select Course</option>${professorData.courses.map(function(c) { return '<option value="' + c.id + '">' + c.code + '</option>'; }).join('')}</select></div>
-                            <button onclick="generateReport('course')" class="btn-teal mt-4 w-full">Generate PDF</button>
-                        </div>
-=======
             <div class="grid md:grid-cols-3 gap-6">
                 <!-- Student Report -->
                 <div class="card-glass p-6 text-center">
@@ -1042,7 +1050,6 @@
                         <button onclick="generateStudentReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
                         <button onclick="generateStudentReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
                         <button onclick="generateStudentReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
                     </div>
                 </div>
 
@@ -1180,7 +1187,9 @@ async function generateReport(type, id, format) {
             }, 1500);
         }
 
-        // ----- PROFILE -----
+        // ============================================
+        // PAGE: PROFILE (matches student dashboard)
+        // ============================================
         function renderProfile() {
             const user = AuthService.getUser();
             const container = document.getElementById('page-content');
@@ -1188,8 +1197,10 @@ async function generateReport(type, id, format) {
                 container.innerHTML = '<div class="text-center py-12 text-gray-500">Please log in again.</div>';
                 return;
             }
+
             const extra = ProfileExtra.get();
             const pic = ProfileExtra.getPic();
+
             container.innerHTML = `
                 <div class="space-y-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👤 My Profile</h2>
@@ -1210,14 +1221,18 @@ async function generateReport(type, id, format) {
                                     <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label><input type="text" id="profileDepartment" value="${user.department || ''}" class="input-teal mt-1" /></div>
                                     <hr class="border-gray-200 dark:border-gray-700" />
                                     <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label><textarea id="profileBio" class="textarea-teal mt-1" placeholder="Tell us about yourself...">${extra.bio || ''}</textarea></div>
-                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="${extra.skills || ''}" class="input-teal mt-1" placeholder="e.g. JavaScript, Python" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="${extra.skills || ''}" class="input-teal mt-1" placeholder="e.g. JavaScript, Python, Teamwork" /></div>
                                     <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Education</label><input type="text" id="profileEducation" value="${extra.education || ''}" class="input-teal mt-1" placeholder="e.g. Ph.D. in CSE" /></div>
                                     <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label><input type="text" id="profileExperience" value="${extra.experience || ''}" class="input-teal mt-1" placeholder="e.g. 10 years teaching" /></div>
                                     <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub</label><input type="url" id="profileGithub" value="${extra.github || ''}" class="input-teal mt-1" placeholder="https://github.com/yourusername" /></div>
                                     <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label><input type="url" id="profileLinkedin" value="${extra.linkedin || ''}" class="input-teal mt-1" placeholder="https://linkedin.com/in/yourprofile" /></div>
                                     <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label><input type="url" id="profileWebsite" value="${extra.website || ''}" class="input-teal mt-1" placeholder="https://yourwebsite.com" /></div>
-                                    <div class="flex gap-3 flex-wrap"><button type="submit" class="btn-teal">Update Profile</button><button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button></div>
+                                    <div class="flex gap-3 flex-wrap">
+                                        <button type="submit" class="btn-teal">Update Profile</button>
+                                        <button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button>
+                                    </div>
                                 </form>
+
                                 <div id="passwordFormContainer" class="mt-6 hidden border-t border-gray-200 dark:border-gray-700 pt-6">
                                     <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Change Password</h4>
                                     <form id="passwordForm" class="space-y-4">
@@ -1232,34 +1247,55 @@ async function generateReport(type, id, format) {
                     </div>
                 </div>
             `;
-            // Profile pic upload, form submit, password change handlers...
+
+            // ---- Profile Picture Upload ----
             const fileInput = document.getElementById('profilePicInput');
             const preview = document.getElementById('profilePicPreview');
             const removeBtn = document.getElementById('removePicBtn');
+
             fileInput.addEventListener('change', function(e) {
                 const file = e.target.files[0];
-                if (file) { const reader = new FileReader();
-                    reader.onload = function(ev) { const base64 = ev.target.result;
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        const base64 = ev.target.result;
                         preview.src = base64;
                         ProfileExtra.setPic(base64);
                         updateSidebarAvatar();
                         removeBtn.classList.remove('hidden');
-                        window.toast.success('Profile picture updated!'); };
-                    reader.readAsDataURL(file); }
+                        window.toast.success('Profile picture updated!');
+                    };
+                    reader.readAsDataURL(file);
+                }
             });
-            removeBtn.addEventListener('click', function() { ProfileExtra.setPic(null);
+
+            removeBtn.addEventListener('click', function() {
+                ProfileExtra.setPic(null);
                 preview.src = getUserAvatar(user);
                 removeBtn.classList.add('hidden');
                 updateSidebarAvatar();
-                window.toast.info('Profile picture removed.'); });
+                window.toast.info('Profile picture removed.');
+            });
+
+            // ---- Profile Update ----
             document.getElementById('profileForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const firstName = document.getElementById('profileFirstName').value.trim();
                 const lastName = document.getElementById('profileLastName').value.trim();
                 const department = document.getElementById('profileDepartment').value.trim();
                 if (!firstName || !lastName) { window.toast.error('First and last name are required.'); return; }
-                const extraData = { bio: document.getElementById('profileBio').value.trim(), skills: document.getElementById('profileSkills').value.trim(), education: document.getElementById('profileEducation').value.trim(), experience: document.getElementById('profileExperience').value.trim(), github: document.getElementById('profileGithub').value.trim(), linkedin: document.getElementById('profileLinkedin').value.trim(), website: document.getElementById('profileWebsite').value.trim() };
+
+                const extraData = {
+                    bio: document.getElementById('profileBio').value.trim(),
+                    skills: document.getElementById('profileSkills').value.trim(),
+                    education: document.getElementById('profileEducation').value.trim(),
+                    experience: document.getElementById('profileExperience').value.trim(),
+                    github: document.getElementById('profileGithub').value.trim(),
+                    linkedin: document.getElementById('profileLinkedin').value.trim(),
+                    website: document.getElementById('profileWebsite').value.trim()
+                };
                 ProfileExtra.set(extraData);
+
                 const payload = { first_name: firstName, last_name: lastName, department };
                 const btn = this.querySelector('button[type="submit"]');
                 const original = btn.textContent;
@@ -1276,13 +1312,26 @@ async function generateReport(type, id, format) {
                         document.getElementById('user-name').textContent = `Prof. ${firstName} ${lastName}`.trim();
                         updateSidebarAvatar();
                         window.toast.success('Profile updated successfully!');
-                    } else { window.toast.error(response.message || 'Update failed.'); }
-                } catch (err) { window.toast.error('Error updating profile. Please try again.'); } finally { btn.textContent = original;
-                    btn.disabled = false; }
+                    } else {
+                        window.toast.error(response.message || 'Update failed.');
+                    }
+                } catch (err) {
+                    window.toast.error('Error updating profile. Please try again.');
+                } finally {
+                    btn.textContent = original;
+                    btn.disabled = false;
+                }
             });
-            document.getElementById('showPasswordForm').addEventListener('click', function() { document.getElementById('passwordFormContainer').classList.remove('hidden'); });
-            document.getElementById('hidePasswordForm').addEventListener('click', function() { document.getElementById('passwordFormContainer').classList.add('hidden');
-                document.getElementById('passwordForm').reset(); });
+
+            // ---- Password Change ----
+            document.getElementById('showPasswordForm').addEventListener('click', function() {
+                document.getElementById('passwordFormContainer').classList.remove('hidden');
+            });
+            document.getElementById('hidePasswordForm').addEventListener('click', function() {
+                document.getElementById('passwordFormContainer').classList.add('hidden');
+                document.getElementById('passwordForm').reset();
+            });
+
             document.getElementById('passwordForm').addEventListener('submit', async function(e) {
                 e.preventDefault();
                 const current = document.getElementById('currentPassword').value;
@@ -1296,12 +1345,24 @@ async function generateReport(type, id, format) {
                 btn.textContent = 'Updating...';
                 btn.disabled = true;
                 try {
-                    const response = await ApiService.post('/auth/change-password', { current_password: current, new_password: newPass, new_password_confirmation: confirm });
-                    if (response.success) { window.toast.success('Password changed successfully!');
+                    const response = await ApiService.post('/auth/change-password', {
+                        current_password: current,
+                        new_password: newPass,
+                        new_password_confirmation: confirm
+                    });
+                    if (response.success) {
+                        window.toast.success('Password changed successfully!');
                         document.getElementById('passwordFormContainer').classList.add('hidden');
-                        document.getElementById('passwordForm').reset(); } else { window.toast.error(response.message || 'Password change failed.'); }
-                } catch (err) { window.toast.error('Error changing password. Please try again.'); } finally { btn.textContent = original;
-                    btn.disabled = false; }
+                        document.getElementById('passwordForm').reset();
+                    } else {
+                        window.toast.error(response.message || 'Password change failed.');
+                    }
+                } catch (err) {
+                    window.toast.error('Error changing password. Please try again.');
+                } finally {
+                    btn.textContent = original;
+                    btn.disabled = false;
+                }
             });
         }
 
@@ -1312,18 +1373,16 @@ async function generateReport(type, id, format) {
             currentPage = page;
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
             document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
-            const titles = { dashboard: 'Overview', courses: 'Courses', analytics: 'Analytics', evaluation: 'Evaluation', reports: 'Reports', profile: 'My Profile' };
+            const titles = {
+                dashboard: 'Overview',
+                courses: 'Courses',
+                analytics: 'Analytics',
+                evaluation: 'Evaluation',
+                reports: 'Reports',
+                profile: 'My Profile'
+            };
             document.getElementById('page-title').textContent = titles[page] || 'Overview';
             switch (page) {
-<<<<<<< HEAD
-                case 'dashboard': renderDashboard(); break;
-                case 'courses': renderCourses(); break;
-                case 'analytics': renderGroupAnalytics(); break;
-                case 'evaluation': renderEvaluation(); break;
-                case 'reports': renderReports(); break;
-                case 'profile': renderProfile(); break;
-                default: renderDashboard();
-=======
                 case 'dashboard':
                     renderDashboard();
                     break;
@@ -1347,7 +1406,6 @@ async function generateReport(type, id, format) {
     break;
                 default:
                     renderDashboard();
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
             }
         }
 
@@ -1555,7 +1613,6 @@ function renderAttendanceTable(attendanceData) {
                 });
             });
             document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
-            loadProfessorData();
             navigate('dashboard');
         }
         document.addEventListener('DOMContentLoaded', init);

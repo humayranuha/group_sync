@@ -1,868 +1,369 @@
-<!-- D:\wamp64\www\gorupSync\group_sync\frontend\pages\student\group-details.html -->
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Group - GroupSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        * { font-family: 'Inter', system-ui, sans-serif; }
-        body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
-        .dark body { background: #0b1717; color: #e8edf0; }
-        html { scroll-behavior: smooth; }
-
-        /* Dark Mode */
-        .dark .bg-white { background-color: #132424 !important; }
-        .dark .bg-gray-50 { background-color: #0b1717 !important; }
-        .dark .bg-gray-100 { background-color: #1a2d2d !important; }
-        .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
-        .dark .text-gray-500 { color: #94a3b8 !important; }
-        .dark .border-gray-200 { border-color: #1e3a3a !important; }
-        .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
-        .dark .shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important; }
-        .dark .divide-gray-200>* { border-color: #1e3a3a !important; }
-
-        /* Sidebar */
-        .sidebar-teal {
-            background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
-            border-right: 1px solid rgba(58,175,169,0.08);
-        }
-        .dark .sidebar-teal { background: linear-gradient(180deg, #071010 0%, #0f2624 100%); }
-
-        .nav-link {
-            transition: all 0.3s ease;
-            color: rgba(255,255,255,0.55);
-            border-radius: 12px;
-            padding: 0.65rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 500;
-            font-size: 0.95rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
-        .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
-        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
-        .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
-
-        /* Cards */
-        .card-glass {
-            background: rgba(255,255,255,0.80);
-            backdrop-filter: blur(4px);
-            border: 1px solid rgba(58,175,169,0.06);
-            border-radius: 20px;
-            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
-        }
-        .card-glass:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 20px 40px -12px rgba(58,175,169,0.12); }
-        .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
-
-        .btn-teal {
-            background: #3AAFA9; color: #fff; transition: all 0.3s ease;
-            box-shadow: 0 4px 14px rgba(58,175,169,0.25);
-            padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
-        }
-        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); }
-        .dark .btn-teal { background: #2B7A78; }
-
-        .btn-teal-outline {
-            background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9;
-            padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-teal-outline:hover { background: #3AAFA9; color: #fff; }
-
-        /* Badges */
-        .badge-active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
-        .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
-        .badge-passive { background: rgba(58,175,169,0.08); color: #94a3b8; }
-        .badge-free-rider { background: rgba(58,175,169,0.06); color: #64748b; }
-        .badge-not-started { background: rgba(148,163,184,0.15); color: #94a3b8; }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
-            border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer;
-            color: rgba(255,255,255,0.70); font-size: 17px;
-        }
-        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); }
-
-        .menu-btn {
-            background: rgba(58,175,169,0.90); backdrop-filter: blur(8px);
-            border: 1px solid rgba(255,255,255,0.08);
-        }
-        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
-
-        .logout-btn {
-            transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent;
-            border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px;
-        }
-        .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
-
-        /* Animations */
-        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
-        @keyframes spin { to { transform:rotate(360deg); } }
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
         .animate-spin { animation: spin 1s linear infinite; }
-
-        .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
-        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
-
-        .member-item {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-        }
-        .member-item:hover {
-            background: rgba(58,175,169,0.05);
-            transform: translateX(4px);
-        }
-        .dark .member-item:hover {
-            background: rgba(58,175,169,0.08);
-        }
-
-        .stat-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: #2B7A78;
-        }
-        .dark .stat-number {
-            color: #5ccbc5;
-        }
-
-        /* Custom Select Styles */
-        .custom-select {
-            position: relative;
-            width: 100%;
-        }
-        .custom-select select {
-            appearance: none;
-            -webkit-appearance: none;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            padding-right: 2.5rem;
-            border: 2px solid rgba(58, 175, 169, 0.2);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.05);
-            color: var(--text-color, #1a1a2e);
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            outline: none;
-        }
-        .dark .custom-select select {
-            background: rgba(0,0,0,0.25);
-            border-color: rgba(255,255,255,0.08);
-            color: #e8edf0;
-        }
-        .custom-select select:focus {
-            border-color: #3AAFA9;
-            box-shadow: 0 0 0 4px rgba(58, 175, 169, 0.1);
-        }
-        .custom-select select option {
-            padding: 10px;
-            background: #ffffff;
-            color: #1a1a2e;
-        }
-        .dark .custom-select select option {
-            background: #132424;
-            color: #e8edf0;
-        }
-        .custom-select::after {
-            content: '\f107';
-            font-family: 'Font Awesome 6 Free';
-            font-weight: 900;
-            position: absolute;
-            right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #3AAFA9;
-            pointer-events: none;
-            font-size: 1.1rem;
-        }
-        .custom-select select option:hover,
-        .custom-select select option:checked {
-            background: #3AAFA9 !important;
-            color: #ffffff !important;
-        }
-        .custom-select select option:checked {
-            background: #3AAFA9 !important;
-            color: #ffffff !important;
-        }
-
-        .course-option {
-            display: flex;
-            flex-direction: column;
-            padding: 4px 0;
-        }
-        .course-option .course-code {
-            font-weight: 600;
-            color: #3AAFA9;
-        }
-        .dark .course-option .course-code {
-            color: #5ccbc5;
-        }
-        .course-option .course-title {
-            font-weight: 400;
-            color: #64748b;
-        }
-        .dark .course-option .course-title {
-            color: #94a3b8;
-        }
-
-        @media (max-width:768px) {
-            .stat-number { font-size: 1.5rem; }
-            .card-glass { padding: 1rem; }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
-<body>
-
-    <!-- ===== SIDEBAR ===== -->
-    <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
-        <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
-            <a href="#" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
-                Group<span class="text-[#c6f0ee]">Sync</span>
-            </a>
-            <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Student</span>
-        </div>
-        <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
-            <a href="dashboard.html" data-page="dashboard" class="nav-link"><span class="icon">📊</span> Dashboard</a>
-            <a href="group-details.html" data-page="group" class="nav-link active"><span class="icon">👥</span> My Group</a>
-            <a href="repository-connection.html" data-page="repository" class="nav-link"><span class="icon">🔗</span> GitHub Connection</a>
-            <a href="contribution-analytics.html" data-page="analytics" class="nav-link"><span class="icon">📈</span> Analytics</a>
-            <a href="peer-review.html" data-page="peer-review" class="nav-link"><span class="icon">⭐</span> Peer Reviews</a>
-            <a href="ai-feedback.html" data-page="ai-feedback" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
-            <a href="#" data-page="profile" class="nav-link" onclick="showProfileModal()"><span class="icon">👤</span> Profile</a>
-        </nav>
-        <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
-            <div class="flex items-center gap-3">
-                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20">ST</div>
-                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Student</p><p class="text-xs text-white/40 truncate">Student</p></div>
-                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+<body class="bg-gray-50">
+    <div id="student-dashboard">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+            <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center">
+                <h1 class="text-xl font-bold text-white">GroupSync</h1>
+                <span class="ml-2 text-xs text-blue-200">Student</span>
             </div>
-        </div>
-    </aside>
-
-    <!-- ===== MOBILE MENU ===== -->
-    <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
-
-    <!-- ===== HEADER ===== -->
-    <header class="fixed top-0 right-0 left-0 md:left-64 z-30 bg-[rgba(43,122,120,0.88)] backdrop-blur-[14px] border-b border-[rgba(58,175,169,0.12)] transition-colors">
-        <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <span class="text-sm font-medium text-white/70 hidden sm:block">My Group</span>
-                <span class="h-4 w-px bg-white/10 hidden sm:block"></span>
-                <span id="page-title" class="text-sm font-medium text-white/50">Team Overview</span>
+            <nav class="p-4 space-y-1">
+                <a href="/student/dashboard.html" data-page="dashboard" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📊</span><span>Dashboard</span>
+                </a>
+                <a href="/student/group-details.html" data-page="group" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">👥</span><span>My Group</span>
+                </a>
+                <a href="/student/repository-connection.html" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">🔗</span><span>GitHub Connection</span>
+                </a>
+                <a href="/student/contribution-analytics.html" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📈</span><span>Analytics</span>
+                </a>
+                <a href="#" data-page="peer-review" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">⭐</span><span>Peer Reviews</span>
+                </a>
+                <a href="/student/ai-feedback.html" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">🤖</span><span>AI Feedback</span>
+                </a>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">ST</div>
+                    <div class="ml-3 flex-1">
+                        <p id="user-name" class="text-sm font-medium text-gray-800">Student</p>
+                        <p class="text-xs text-gray-500">Student</p>
+                    </div>
+                    <button id="logoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+                </div>
             </div>
-            <div class="flex items-center gap-3">
-                <button id="themeToggle" class="theme-toggle"><i id="themeIcon" class="fas fa-sun"></i></button>
-            </div>
-        </div>
-    </header>
+        </aside>
 
-    <!-- ===== MAIN CONTENT ===== -->
-    <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
-        <div id="page-content" class="animate-fade-in">
-            <!-- Content loaded dynamically -->
-        </div>
-    </main>
+        <!-- Mobile Menu Button -->
+        <button id="menuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Main Content -->
+        <main class="md:ml-64 p-6">
+            <div id="page-content">
+                <div class="space-y-6 animate-fade-in">
+                    <!-- Group Header -->
+                    <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h2 class="text-2xl font-bold" id="group-name">Loading...</h2>
+                                <p class="text-blue-100 mt-1" id="course-name">Course: Loading...</p>
+                            </div>
+                            <span id="member-count" class="px-3 py-1 bg-white/20 rounded-full text-sm">0 Members</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Group Stats -->
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <p class="text-sm text-gray-600">Total Contributions</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1" id="total-contributions">0</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <p class="text-sm text-gray-600">Average Activity</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1" id="avg-activity">0%</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <p class="text-sm text-gray-600">Team Performance</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1" id="team-performance">0/100</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Team Members -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Team Members</h3>
+                        </div>
+                        <div id="members-list" class="divide-y divide-gray-200">
+                            <div class="p-6 text-center text-gray-500">Loading team members...</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Contribution Distribution -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Contribution Distribution</h3>
+                        <canvas id="contributionChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
     <script>
         // ============================================
-        // COMPLETE RESET - NO DEMO DATA
-        // ============================================
-        (function resetAllData() {
-            sessionStorage.clear();
-            localStorage.removeItem('group_demo_data');
-            console.log('🧹 All group demo data cleared!');
-        })();
-
-        // ============================================
         // CONFIGURATION
         // ============================================
-        const API_BASE = 'http://127.0.0.1:8000/api';
+        const API_BASE = '/api';
         const STORAGE_KEYS = {
             TOKEN: 'groupsync_auth_token',
-            USER: 'groupsync_user_data',
-            THEME: 'theme'
+            USER: 'groupsync_user_data'
         };
 
         // ============================================
         // TOAST SYSTEM
         // ============================================
-        function showToast(message, type = 'info', duration = 5000) {
-            const container = document.getElementById('toast-container') || (() => {
-                const c = document.createElement('div');
-                c.id = 'toast-container';
-                c.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
-                document.body.appendChild(c);
-                return c;
-            })();
+        class ToastManager {
+            constructor() {
+                this.container = null;
+                this.init();
+            }
+            init() {
+                this.container = document.createElement('div');
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                document.body.appendChild(this.container);
+            }
+            show(message, type, duration) {
+                type = type || 'info';
+                duration = duration || 5000;
+                var toast = document.createElement('div');
+                var colors = {
+                    success: 'bg-green-50 border-green-400 text-green-800',
+                    error: 'bg-red-50 border-red-400 text-red-800',
+                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                    info: 'bg-blue-50 border-blue-400 text-blue-800'
+                };
+                var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ' + colors[type];
+                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm">' + message + '</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>';
+                this.container.appendChild(toast);
+                setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
+                toast.querySelector('button').onclick = function() { toast.remove(); };
+                setTimeout(function() { if(toast.parentNode) toast.remove(); }, duration);
+                return toast;
+            }
+            success(m) { this.show(m, 'success'); }
+            error(m) { this.show(m, 'error'); }
+            warning(m) { this.show(m, 'warning'); }
+            info(m) { this.show(m, 'info'); }
+        }
 
-            const toast = document.createElement('div');
-            const colors = {
-                success: 'bg-green-50 border-green-400 text-green-800 dark:bg-green-900/20 dark:text-green-300',
-                error: 'bg-red-50 border-red-400 text-red-800 dark:bg-red-900/20 dark:text-red-300',
-                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
-                info: 'bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
-            };
-            const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-            
-            toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]}`;
-            toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
-            container.appendChild(toast);
-            
-            requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
-            toast.querySelector('button').onclick = () => toast.remove();
-            setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
-            return toast;
+        // ============================================
+        // LOADING SYSTEM
+        // ============================================
+        class LoadingManager {
+            show() {
+                if(this.loader) return;
+                this.loader = document.createElement('div');
+                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
+                document.body.appendChild(this.loader);
+            }
+            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
         }
 
         // ============================================
         // AUTH SERVICE
         // ============================================
-        const AuthService = {
-            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
-            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
-            isAuthenticated() { return !!this.getToken(); },
-            logout() {
+        var AuthService = {
+            getToken: function() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser: function() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated: function() { return !!this.getToken(); },
+            logout: function() {
                 localStorage.removeItem(STORAGE_KEYS.TOKEN);
                 localStorage.removeItem(STORAGE_KEYS.USER);
-                sessionStorage.clear();
-                window.location.href = '/frontend/pages/public/login.html';
-            },
-            updateUser(userData) {
-                localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+                window.location.href = '/login.html';
             }
         };
 
         // ============================================
         // API SERVICE
         // ============================================
-        const ApiService = {
-            async request(endpoint, options = {}) {
-                const token = AuthService.getToken();
-                const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-                
-                try {
-                    const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-                    if (!response.ok) {
-                        console.warn(`API Error: ${response.status} - ${response.statusText}`);
-                        return null;
-                    }
-                    const data = await response.json();
-                    return data;
-                } catch (error) {
-                    console.error('API Request failed:', error);
-                    return null;
+        var ApiService = {
+            request: async function(endpoint, options) {
+                options = options || {};
+                var token = AuthService.getToken();
+                var headers = {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                };
+                if (token) {
+                    headers['Authorization'] = 'Bearer ' + token;
                 }
+                var response = await fetch(API_BASE + endpoint, {
+                    method: options.method || 'GET',
+                    headers: headers,
+                    body: options.body || null
+                });
+                var data = await response.json();
+                if (!response.ok) {
+                    if (response.status === 401) AuthService.logout();
+                    throw new Error(data.message || 'Request failed');
+                }
+                return data;
             },
-            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
+            get: function(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+            post: function(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
         };
 
         // ============================================
-        // HELPERS
+        // GLOBALS
         // ============================================
+        window.toast = new ToastManager();
+        window.loading = new LoadingManager();
+        window.api = ApiService;
+        window.auth = AuthService;
+
+        // ============================================
+        // GROUP DETAILS LOGIC
+        // ============================================
+        var charts = {};
+
         function getInitials(name) {
             if (!name) return 'ST';
-            const parts = name.split(' ');
-            if (parts.length >= 2) {
-                return (parts[0][0] + parts[1][0]).toUpperCase();
-            }
-            return name.substring(0, 2).toUpperCase();
+            var parts = name.split(' ');
+            return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
         }
 
         function getClassificationClass(classification) {
-            const map = { 
-                'Active': 'badge-active', 
-                'Moderate': 'badge-moderate', 
-                'Passive': 'badge-passive', 
-                'Free Rider': 'badge-free-rider',
-                'Not Started': 'badge-not-started'
+            var classes = {
+                'Active': 'bg-green-100 text-green-800',
+                'Moderate': 'bg-yellow-100 text-yellow-800',
+                'Passive': 'bg-orange-100 text-orange-800',
+                'Free Rider': 'bg-red-100 text-red-800'
             };
-            return map[classification] || 'badge-not-started';
-        }
-
-        function getClassificationIcon(classification) {
-            const map = {
-                'Active': '🚀',
-                'Moderate': '📊',
-                'Passive': '⏳',
-                'Free Rider': '⚠️',
-                'Not Started': '📝'
-            };
-            return map[classification] || '📝';
-        }
-
-        // ============================================
-        // EMPTY GROUP DATA
-        // ============================================
-        const EMPTY_GROUP = {
-            id: null,
-            name: 'No Group',
-            course_name: 'Not Enrolled',
-            member_count: 0,
-            total_contributions: 0,
-            avg_activity: 0,
-            team_performance: 0,
-            members: [],
-            invitation_code: null
-        };
-
-        // ============================================
-        // STUDENT ENROLLED COURSES
-        // ============================================
-        let enrolledCourses = [];
-
-        // ============================================
-        // SHOW PROFILE MODAL
-        // ============================================
-        function showProfileModal() {
-            const user = AuthService.getUser();
-            if (!user) {
-                showToast('Please login first', 'error');
-                return;
-            }
-            
-            showModal('👤 My Profile', `
-                <div class="space-y-4">
-                    <div class="flex items-center gap-4">
-                        <div class="w-20 h-20 rounded-full bg-gradient-to-r from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white text-2xl font-bold">
-                            ${getInitials((user.first_name || 'S') + ' ' + (user.last_name || 'T'))}
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">${user.first_name || 'Student'} ${user.last_name || ''}</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">${user.email || ''}</p>
-                            <p class="text-xs text-gray-400 dark:text-gray-500">${user.role || 'Student'}</p>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
-                            <p class="font-medium text-gray-800 dark:text-gray-100">${user.department || 'N/A'}</p>
-                        </div>
-                        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Joined</p>
-                            <p class="font-medium text-gray-800 dark:text-gray-100">${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</p>
-                        </div>
-                    </div>
-                    <hr class="border-gray-200 dark:border-gray-700">
-                    <div class="space-y-3">
-                        <button onclick="closeModal(); showChangePassword()" class="btn-teal w-full">Change Password</button>
-                        <button onclick="closeModal()" class="btn-teal-outline w-full">Close</button>
-                    </div>
-                </div>
-            `);
-        }
-
-        function showChangePassword() {
-            showModal('🔑 Change Password', `
-                <form id="passwordForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
-                        <input type="password" id="currentPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Enter current password" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
-                        <input type="password" id="newPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Enter new password (min 6 chars)" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
-                        <input type="password" id="confirmPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Confirm new password" required>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="submit" class="btn-teal flex-1">Update Password</button>
-                        <button type="button" onclick="closeModal()" class="btn-teal-outline flex-1">Cancel</button>
-                    </div>
-                </form>
-            `);
-
-            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const current = document.getElementById('currentPassword').value;
-                const newPass = document.getElementById('newPassword').value;
-                const confirm = document.getElementById('confirmPassword').value;
-
-                if (!current || !newPass || !confirm) {
-                    showToast('All fields are required', 'error');
-                    return;
-                }
-                if (newPass.length < 6) {
-                    showToast('New password must be at least 6 characters', 'error');
-                    return;
-                }
-                if (newPass !== confirm) {
-                    showToast('Passwords do not match', 'error');
-                    return;
-                }
-
-                try {
-                    const response = await ApiService.post('/auth/change-password', {
-                        current_password: current,
-                        new_password: newPass,
-                        new_password_confirmation: confirm
-                    });
-                    if (response && response.success) {
-                        showToast('✅ Password changed successfully!', 'success');
-                        closeModal();
-                    } else {
-                        showToast('❌ ' + (response?.message || 'Failed to change password'), 'error');
-                    }
-                } catch (error) {
-                    showToast('❌ Error: ' + error.message, 'error');
-                }
-            });
-        }
-
-        function showModal(title, contentHtml) {
-            const oldModal = document.getElementById('dynamicModal');
-            if (oldModal) oldModal.remove();
-            
-            const modalHtml = `
-                <div id="dynamicModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
-                    <div class="modal-box">
-                        <span class="modal-close" onclick="closeModal()">&times;</span>
-                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">${title}</h2>
-                        ${contentHtml}
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('dynamicModal');
-            if (modal) modal.remove();
-        }
-
-        // ============================================
-        // MODAL OVERLAY STYLES
-        // ============================================
-        const style = document.createElement('style');
-        style.textContent = `
-            .modal-overlay {
-                position: fixed; inset: 0; background: rgba(0,0,0,0.6);
-                display: flex; align-items: center; justify-content: center;
-                z-index: 9999; backdrop-filter: blur(4px);
-                animation: fadeIn 0.3s ease;
-            }
-            .modal-box {
-                background: white; border-radius: 24px; max-width: 700px; width: 95%;
-                max-height: 85vh; overflow-y: auto; padding: 30px;
-                position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            }
-            .dark .modal-box { background: #132424; }
-            .modal-close {
-                position: absolute; top: 16px; right: 20px; font-size: 28px;
-                cursor: pointer; color: #999; transition: color 0.2s;
-            }
-            .modal-close:hover { color: #333; }
-            .dark .modal-close { color: #666; }
-            .dark .modal-close:hover { color: #ccc; }
-            .btn-teal-outline {
-                background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9;
-                padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer;
-                transition: all 0.3s;
-            }
-            .btn-teal-outline:hover { background: #3AAFA9; color: #fff; }
-        `;
-        document.head.appendChild(style);
-
-        // ============================================
-        // LOAD ENROLLED COURSES
-        // ============================================
-        async function loadEnrolledCourses() {
-            try {
-                const user = AuthService.getUser();
-                if (!user) return [];
-
-                const response = await ApiService.get(`/courses/student/${user.id}`);
-                if (response && response.success && response.data) {
-                    enrolledCourses = response.data;
-                    console.log('📚 Enrolled courses loaded:', enrolledCourses);
-                    return enrolledCourses;
-                }
-            } catch (error) {
-                console.warn('Could not load enrolled courses, using demo data');
-            }
-
-            // Fallback demo data
-            enrolledCourses = [
-                { id: 1, code: 'CS401', title: 'Software Engineering', semester: 'Spring 2026' },
-                { id: 2, code: 'CS402', title: 'Database Systems', semester: 'Spring 2026' },
-                { id: 3, code: 'CS403', title: 'Web Development', semester: 'Spring 2026' }
-            ];
-            return enrolledCourses;
+            return classes[classification] || 'bg-gray-100 text-gray-600';
         }
 
         // ============================================
         // LOAD GROUP DATA
         // ============================================
-        let groupChart = null;
-        let currentGroupData = null;
-
         async function loadGroupDetails() {
-            const container = document.getElementById('page-content');
-            
-            // Show loading
-            container.innerHTML = `
-                <div class="flex items-center justify-center h-64">
-                    <div class="text-center">
-                        <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
-                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading group details...</p>
-                    </div>
-                </div>
-            `;
-
             try {
-                const user = AuthService.getUser();
+                var user = AuthService.getUser();
                 if (!user) {
-                    window.location.href = '/frontend/pages/public/login.html';
+                    window.location.href = '/login.html';
                     return;
                 }
 
-                // Load enrolled courses first
-                await loadEnrolledCourses();
+                // Demo data - in real app, fetch from API
+                var groupData = {
+                    name: 'Team Alpha',
+                    course_name: 'Software Engineering (CS401)',
+                    member_count: 4,
+                    total_contributions: 98,
+                    avg_activity: 78,
+                    team_performance: 82,
+                    members: [
+                        { name: 'John Doe', role: 'Student', contribution_percentage: 35, classification: 'Active', commits: 45, prs: 8, lines_added: 1250 },
+                        { name: 'Jane Smith', role: 'Student', contribution_percentage: 28, classification: 'Active', commits: 32, prs: 5, lines_added: 890 },
+                        { name: 'Mike Brown', role: 'Student', contribution_percentage: 22, classification: 'Moderate', commits: 18, prs: 3, lines_added: 450 },
+                        { name: 'Lisa Wong', role: 'Student', contribution_percentage: 15, classification: 'Passive', commits: 8, prs: 1, lines_added: 200 }
+                    ]
+                };
 
-                // Try to fetch group from API
-                let groupData = null;
-                try {
-                    const response = await ApiService.get(`/groups/student/${user.id}`);
-                    if (response && response.success && response.data) {
-                        groupData = response.data;
-                        console.log('✅ Group data loaded from API:', groupData);
-                    }
-                } catch (e) {
-                    console.log('⚠️ No group data from API');
-                }
-
-                // If no group data, show empty state
-                if (!groupData || !groupData.id) {
-                    currentGroupData = { ...EMPTY_GROUP };
-                    renderEmptyGroup();
-                    return;
-                }
-
-                currentGroupData = groupData;
-                renderGroupUI(groupData);
+                updateGroupUI(groupData);
+                renderMembersList(groupData.members);
+                renderContributionChart(groupData.members);
 
             } catch (error) {
-                console.error('Error loading group:', error);
-                currentGroupData = { ...EMPTY_GROUP };
-                renderEmptyGroup();
+                console.error('Error loading group details:', error);
+                window.toast.error('Failed to load group data');
             }
         }
 
-        // ============================================
-        // RENDER EMPTY GROUP
-        // ============================================
-        function renderEmptyGroup() {
-            const container = document.getElementById('page-content');
-            const user = AuthService.getUser();
-            
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <!-- Group Header - Empty -->
-                    <div class="bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] rounded-lg shadow-lg p-6 text-white">
-                        <div class="flex flex-wrap justify-between items-start gap-4">
-                            <div>
-                                <h2 class="text-2xl font-bold">No Group Yet</h2>
-                                <p class="text-white/80 mt-1">${user?.first_name || 'Student'}, you haven't joined any group yet</p>
-                            </div>
-                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">0 Members</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Empty State -->
-                    <div class="card-glass p-12 text-center">
-                        <div class="text-6xl mb-6">👥</div>
-                        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-3">Join or Create a Group</h3>
-                        <p class="text-gray-500 dark:text-gray-400 max-w-md mx-auto mb-6">
-                            You're not part of any group yet. Join an existing group using an invitation code or create a new group to get started.
-                        </p>
-                        <div class="flex flex-wrap gap-4 justify-center">
-                            <button onclick="showJoinGroupModal()" class="btn-teal">
-                                <i class="fas fa-sign-in-alt mr-2"></i> Join Group
-                            </button>
-                            <button onclick="showCreateGroupModal()" class="btn-teal-outline">
-                                <i class="fas fa-plus-circle mr-2"></i> Create Group
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Stats - All Zero -->
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="card-glass p-6 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Contributions</p>
-                            <p class="stat-number mt-1">0</p>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p>
-                            <p class="stat-number mt-1">0%</p>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Team Performance</p>
-                            <p class="stat-number mt-1">0/100</p>
-                        </div>
-                    </div>
-                </div>
-            `;
+        function updateGroupUI(group) {
+            document.getElementById('group-name').textContent = group.name;
+            document.getElementById('course-name').textContent = 'Course: ' + group.course_name;
+            document.getElementById('member-count').textContent = group.member_count + ' Members';
+            document.getElementById('total-contributions').textContent = group.total_contributions || 0;
+            document.getElementById('avg-activity').textContent = (group.avg_activity || 0) + '%';
+            document.getElementById('team-performance').textContent = group.team_performance || 0;
         }
 
-        // ============================================
-        // RENDER GROUP UI
-        // ============================================
-        function renderGroupUI(group) {
-            const container = document.getElementById('page-content');
+        function renderMembersList(members) {
+            var container = document.getElementById('members-list');
             
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <!-- Group Header -->
-                    <div class="bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] rounded-lg shadow-lg p-6 text-white">
-                        <div class="flex flex-wrap justify-between items-start gap-4">
-                            <div>
-                                <h2 class="text-2xl font-bold" id="group-name">${group.name || 'Unnamed Group'}</h2>
-                                <p class="text-white/80 mt-1" id="course-name">Course: ${group.course_name || 'Not Assigned'}</p>
-                                ${group.invitation_code ? `<p class="text-white/60 text-sm mt-1"><i class="fas fa-key mr-1"></i> Invitation Code: <span class="font-mono bg-white/20 px-2 py-0.5 rounded">${group.invitation_code}</span></p>` : ''}
+            if (members && members.length > 0) {
+                var html = '';
+                for (var i = 0; i < members.length; i++) {
+                    var member = members[i];
+                    var isYou = (i === 0) ? ' (You)' : '';
+                    html += `
+                        <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
+                                    ${getInitials(member.name)}
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-900">${member.name}${isYou}</p>
+                                    <p class="text-xs text-gray-500">${member.role || 'Student'}</p>
+                                </div>
                             </div>
-                            <span id="member-count" class="px-3 py-1 bg-white/20 rounded-full text-sm">${group.member_count || 0} Members</span>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-right">
+                                    <p class="text-sm font-semibold text-gray-900">${member.contribution_percentage || 0}%</p>
+                                    <p class="text-xs text-gray-500">Contributions</p>
+                                </div>
+                                <span class="px-2 py-1 rounded-full text-xs font-medium ${getClassificationClass(member.classification)}">
+                                    ${member.classification || 'Moderate'}
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Group Stats -->
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="card-glass p-6 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Contributions</p>
-                            <p class="stat-number mt-1" id="total-contributions">${group.total_contributions || 0}</p>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p>
-                            <p class="stat-number mt-1" id="avg-activity">${group.avg_activity || 0}%</p>
-                        </div>
-                        <div class="card-glass p-6 text-center">
-                            <p class="text-sm text-gray-500 dark:text-gray-400">Team Performance</p>
-                            <p class="stat-number mt-1" id="team-performance">${group.team_performance || 0}/100</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Team Members -->
-                    <div class="card-glass overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Team Members</h3>
-                            <span class="text-sm text-gray-500 dark:text-gray-400">${group.members?.length || 0} members</span>
-                        </div>
-                        <div id="members-list" class="divide-y divide-gray-100 dark:divide-gray-800">
-                            ${group.members && group.members.length > 0 ? 
-                                group.members.map((member, index) => {
-                                    const isYou = member.is_you || (index === 0 && member.name.includes('You'));
-                                    return `
-                                        <div class="member-item flex items-center justify-between p-4 ${isYou ? 'bg-[#3AAFA9]/5 dark:bg-[#3AAFA9]/10' : ''}">
-                                            <div class="flex items-center min-w-0">
-                                                <div class="w-10 h-10 rounded-full bg-gradient-to-r from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                                                    ${getInitials(member.name)}
-                                                </div>
-                                                <div class="ml-4 min-w-0">
-                                                    <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                                                        ${member.name} ${isYou ? '👈' : ''}
-                                                    </p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">${member.role || 'Student'} • ${member.commits || 0} commits</p>
-                                                </div>
-                                            </div>
-                                            <div class="flex items-center gap-3 flex-shrink-0">
-                                                <div class="text-right hidden sm:block">
-                                                    <p class="text-sm font-semibold text-gray-900 dark:text-gray-100">${member.contribution_percentage || 0}%</p>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">contribution</p>
-                                                </div>
-                                                <span class="px-2 py-1 rounded-full text-xs font-medium ${getClassificationClass(member.classification)} flex items-center gap-1">
-                                                    ${getClassificationIcon(member.classification)} ${member.classification || 'Not Started'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('') 
-                            : 
-                                `<div class="p-6 text-center text-gray-500 dark:text-gray-400">No members in this group</div>`
-                            }
-                        </div>
-                    </div>
-                    
-                    <!-- Contribution Chart -->
-                    <div class="card-glass p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contribution Distribution</h3>
-                        <canvas id="contributionChart" height="280"></canvas>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex flex-wrap gap-3">
-                        <button onclick="showJoinGroupModal()" class="btn-teal-outline text-sm">
-                            <i class="fas fa-sign-in-alt mr-2"></i> Join Another Group
-                        </button>
-                        <button onclick="showCreateGroupModal()" class="btn-teal-outline text-sm">
-                            <i class="fas fa-plus-circle mr-2"></i> Create New Group
-                        </button>
-                        <button onclick="window.location.href='repository-connection.html'" class="btn-teal text-sm">
-                            <i class="fab fa-github mr-2"></i> Connect GitHub
-                        </button>
-                    </div>
-                </div>
-            `;
-
-            // Render chart if there are members
-            if (group.members && group.members.length > 0) {
-                renderContributionChart(group.members);
+                    `;
+                }
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<div class="p-6 text-center text-gray-500">No members found in this group.</div>';
             }
         }
 
-        // ============================================
-        // RENDER CONTRIBUTION CHART
-        // ============================================
         function renderContributionChart(members) {
-            const ctx = document.getElementById('contributionChart')?.getContext('2d');
+            var ctx = document.getElementById('contributionChart')?.getContext('2d');
             if (!ctx || !members || members.length === 0) return;
             
-            if (groupChart) groupChart.destroy();
+            if (charts.contribution) charts.contribution.destroy();
             
-            const labels = members.map(m => m.name);
-            const data = members.map(m => m.contribution_percentage || 0);
-            const colors = ['#3AAFA9', '#5ccbc5', '#7ccfca', '#a0d6d3', '#c6f0ee', '#2B7A78', '#4ECDC4', '#45B7D1'];
+            var labels = members.map(function(m) { return m.name; });
+            var data = members.map(function(m) { return m.contribution_percentage || 0; });
+            var colors = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1e3a8a', '#2563eb', '#1d4ed8', '#1e40af'];
             
-            groupChart = new Chart(ctx, {
+            charts.contribution = new Chart(ctx, {
                 type: 'pie',
                 data: {
                     labels: labels,
                     datasets: [{
                         data: data,
                         backgroundColor: colors.slice(0, data.length),
-                        borderWidth: 2,
-                        borderColor: '#fff'
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
-                        legend: { 
-                            position: 'bottom', 
-                            labels: { 
-                                font: { size: 12 }, 
-                                padding: 20,
-                                color: document.documentElement.classList.contains('dark') ? '#cbd5e1' : '#1a1a2e'
-                            } 
+                        legend: {
+                            position: 'bottom'
                         },
-                        tooltip: { 
-                            callbacks: { 
+                        tooltip: {
+                            callbacks: {
                                 label: function(context) {
                                     return context.label + ': ' + context.parsed + '%';
                                 }
-                            } 
+                            }
                         }
                     }
                 }
@@ -870,242 +371,27 @@
         }
 
         // ============================================
-        // JOIN GROUP MODAL
-        // ============================================
-        function showJoinGroupModal() {
-            showModal('🔑 Join a Group', `
-                <form id="joinGroupForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Invitation Code</label>
-                        <input type="text" id="invitationCode" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Enter invitation code (e.g., ALPHA123)" required>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Ask your group leader for the invitation code</p>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="submit" class="btn-teal flex-1">Join Group</button>
-                        <button type="button" onclick="closeModal()" class="btn-teal-outline flex-1">Cancel</button>
-                    </div>
-                </form>
-            `);
-
-            document.getElementById('joinGroupForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const code = document.getElementById('invitationCode').value.trim().toUpperCase();
-                
-                if (!code) {
-                    showToast('Please enter an invitation code', 'error');
-                    return;
-                }
-
-                const btn = this.querySelector('button[type="submit"]');
-                const original = btn.textContent;
-                btn.textContent = 'Joining...';
-                btn.disabled = true;
-
-                try {
-                    const response = await ApiService.post('/groups/join', {
-                        invitation_code: code
-                    });
-
-                    if (response && response.success) {
-                        showToast('✅ Joined group successfully!', 'success');
-                        closeModal();
-                        setTimeout(loadGroupDetails, 1000);
-                    } else {
-                        showToast('❌ ' + (response?.message || 'Failed to join group'), 'error');
-                    }
-                } catch (error) {
-                    showToast('❌ Error: ' + error.message, 'error');
-                } finally {
-                    btn.textContent = original;
-                    btn.disabled = false;
-                }
-            });
-        }
-
-        // ============================================
-        // CREATE GROUP MODAL (UPDATED with enrolled courses)
-        // ============================================
-        function showCreateGroupModal() {
-            // Get enrolled courses
-            const courses = enrolledCourses.length > 0 ? enrolledCourses : [
-                { id: 1, code: 'CS401', title: 'Software Engineering', semester: 'Spring 2026' },
-                { id: 2, code: 'CS402', title: 'Database Systems', semester: 'Spring 2026' },
-                { id: 3, code: 'CS403', title: 'Web Development', semester: 'Spring 2026' }
-            ];
-
-            let courseOptions = courses.map(c => `
-                <option value="${c.id}" style="padding: 10px 12px;">
-                    ${c.code} — ${c.title} (${c.semester || 'Current'})
-                </option>
-            `).join('');
-
-            showModal('📝 Create a Group', `
-                <form id="createGroupForm" class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Group Name</label>
-                        <input type="text" id="groupName" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent focus:border-[#3AAFA9] focus:ring-4 focus:ring-[#3AAFA9]/10 transition-all outline-none" placeholder="e.g., Team Alpha" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Select Course</label>
-                        <div class="custom-select">
-                            <select id="groupCourse" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:border-[#3AAFA9] focus:ring-4 focus:ring-[#3AAFA9]/10 transition-all outline-none appearance-none cursor-pointer">
-                                <option value="" style="color: #94a3b8; padding: 10px 12px;">— Select a course you're enrolled in —</option>
-                                ${courseOptions}
-                            </select>
-                            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#3AAFA9]">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
-                            <i class="fas fa-info-circle mr-1"></i> 
-                            Only courses you're enrolled in are shown
-                        </p>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">GitHub Repository URL <span class="text-gray-400 text-xs">(Optional)</span></label>
-                        <input type="url" id="groupRepo" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-transparent focus:border-[#3AAFA9] focus:ring-4 focus:ring-[#3AAFA9]/10 transition-all outline-none" placeholder="https://github.com/username/repository">
-                    </div>
-                    <div class="flex gap-3 pt-2">
-                        <button type="submit" class="btn-teal flex-1 py-3 text-base">
-                            <i class="fas fa-plus-circle mr-2"></i> Create Group
-                        </button>
-                        <button type="button" onclick="closeModal()" class="btn-teal-outline flex-1 py-3 text-base">Cancel</button>
-                    </div>
-                </form>
-            `);
-
-            // Add extra styles for the select options
-            const styleTag = document.createElement('style');
-            styleTag.textContent = `
-                .custom-select select option {
-                    padding: 12px 16px;
-                    font-size: 0.95rem;
-                    border-bottom: 1px solid #e5e7eb;
-                }
-                .dark .custom-select select option {
-                    border-bottom: 1px solid #1e3a3a;
-                }
-                .custom-select select option:hover,
-                .custom-select select option:focus,
-                .custom-select select option:checked {
-                    background: #3AAFA9 !important;
-                    color: #ffffff !important;
-                }
-                .dark .custom-select select option:hover,
-                .dark .custom-select select option:focus,
-                .dark .custom-select select option:checked {
-                    background: #3AAFA9 !important;
-                    color: #ffffff !important;
-                }
-                .custom-select select option:checked {
-                    background: #3AAFA9 !important;
-                    color: #ffffff !important;
-                }
-                /* Firefox support */
-                .custom-select select option:checked {
-                    background: #3AAFA9 !important;
-                    color: #ffffff !important;
-                }
-            `;
-            document.head.appendChild(styleTag);
-
-            document.getElementById('createGroupForm').addEventListener('submit', async function(e) {
-                e.preventDefault();
-                const name = document.getElementById('groupName').value.trim();
-                const courseId = document.getElementById('groupCourse').value;
-                const repo = document.getElementById('groupRepo').value.trim();
-
-                if (!name) {
-                    showToast('Please enter a group name', 'error');
-                    return;
-                }
-                if (!courseId) {
-                    showToast('Please select a course', 'error');
-                    return;
-                }
-
-                const btn = this.querySelector('button[type="submit"]');
-                const original = btn.textContent;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Creating...';
-                btn.disabled = true;
-
-                try {
-                    const response = await ApiService.post('/groups/create', {
-                        name: name,
-                        course_id: parseInt(courseId),
-                        github_repo_url: repo || null
-                    });
-
-                    if (response && response.success) {
-                        showToast('✅ Group "' + name + '" created successfully!', 'success');
-                        closeModal();
-                        setTimeout(loadGroupDetails, 1000);
-                    } else {
-                        showToast('❌ ' + (response?.message || 'Failed to create group'), 'error');
-                    }
-                } catch (error) {
-                    showToast('❌ Error: ' + error.message, 'error');
-                } finally {
-                    btn.innerHTML = original;
-                    btn.disabled = false;
-                }
-            });
-        }
-
-        // ============================================
-        // THEME TOGGLE
-        // ============================================
-        (function initTheme() {
-            const toggle = document.getElementById('themeToggle');
-            const icon = document.getElementById('themeIcon');
-            const html = document.documentElement;
-            const saved = localStorage.getItem(STORAGE_KEYS.THEME);
-            
-            if (saved === 'dark') {
-                html.classList.add('dark');
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            }
-            
-            toggle.addEventListener('click', function() {
-                const isDark = html.classList.toggle('dark');
-                if (isDark) {
-                    icon.classList.remove('fa-sun');
-                    icon.classList.add('fa-moon');
-                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
-                } else {
-                    icon.classList.remove('fa-moon');
-                    icon.classList.add('fa-sun');
-                    localStorage.setItem(STORAGE_KEYS.THEME, 'light');
-                }
-                // Re-render chart with new theme colors
-                if (currentGroupData && currentGroupData.members && currentGroupData.members.length > 0) {
-                    setTimeout(() => renderContributionChart(currentGroupData.members), 100);
-                }
-            });
-        })();
-
-        // ============================================
         // INITIALIZATION
         // ============================================
         function init() {
             if (!AuthService.isAuthenticated()) {
-                window.location.href = '/frontend/pages/public/login.html';
+                window.location.href = '/login.html';
                 return;
             }
 
-            const user = AuthService.getUser();
+            var user = AuthService.getUser();
             if (user) {
-                const name = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
-                document.getElementById('user-name').textContent = name;
-                document.getElementById('user-avatar').textContent = getInitials(name);
+                document.getElementById('user-name').textContent = (user.first_name || 'Student') + ' ' + (user.last_name || '');
+                document.getElementById('user-avatar').textContent = getInitials((user.first_name || 'S') + ' ' + (user.last_name || 'T'));
             }
 
-            document.getElementById('menuBtn')?.addEventListener('click', () => {
+            document.getElementById('menuBtn')?.addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
 
-            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+            document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                AuthService.logout();
+            });
 
             loadGroupDetails();
         }

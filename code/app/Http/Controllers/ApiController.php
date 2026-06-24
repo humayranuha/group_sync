@@ -6,11 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-<<<<<<< HEAD
-use Illuminate\Support\Facades\Http;
-=======
 use Illuminate\Support\Facades\Http;  // 👈 এই লাইন যোগ করুন
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Group;
@@ -197,31 +193,13 @@ class ApiController extends Controller
     public function getCourses()
     {
         $courses = Course::with('teacher')->get();
-<<<<<<< HEAD
-        return response()->json([
-            'success' => true,
-            'courses' => $courses
-        ]);
-=======
         return response()->json(['success' => true, 'courses' => $courses]);
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
     }
 
     public function getProfessorCourses($id)
     {
-<<<<<<< HEAD
-        $courses = Course::where('teacher_id', $id)
-            ->withCount(['students', 'groups', 'assignments'])
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'courses' => $courses
-        ]);
-=======
         $courses = Course::where('teacher_id', $id)->withCount(['students', 'groups'])->get();
         return response()->json(['success' => true, 'courses' => $courses]);
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
     }
 
     public function getStudentCourses($id)
@@ -353,145 +331,33 @@ class ApiController extends Controller
         return response()->json(['success' => true, 'students' => $course->students]);
     }
 
-<<<<<<< HEAD
-    /**
-     * ============================================
-     * ASSIGNMENT MANAGEMENT SECTION
-     * ============================================
-     */
-
-    public function createAssignment(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'course_id' => 'required|exists:courses,id',
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'weightage' => 'required|array',
-            'weightage.commits' => 'required|numeric|min:0|max:100',
-            'weightage.attendance' => 'required|numeric|min:0|max:100',
-            'weightage.peer_reviews' => 'required|numeric|min:0|max:100',
-            'weightage.working_hours' => 'required|numeric|min:0|max:100',
-            'deadline' => 'required|date|after:now',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
-        }
-
-        $total = $request->weightage['commits'] + 
-                 $request->weightage['attendance'] + 
-                 $request->weightage['peer_reviews'] + 
-                 $request->weightage['working_hours'];
-
-        if ($total != 100) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Total weightage must equal 100%. Current total: ' . $total . '%'
-            ], 400);
-        }
-
-        $course = Course::find($request->course_id);
-        if ($course->teacher_id !== $request->user()->id) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Unauthorized to create assignments for this course'
-            ], 403);
-        }
-
-        $assignment = Assignment::create([
-            'course_id' => $request->course_id,
-            'title' => $request->title,
-            'description' => $request->description ?? null,
-            'weightage' => json_encode($request->weightage),
-            'deadline' => $request->deadline,
-            'created_by' => $request->user()->id,
-            'status' => 'active'
-        ]);
-
-        $this->logActivity('create_assignment', $request->user()->id,
-            'Created assignment: ' . $assignment->title);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Assignment created successfully',
-            'assignment' => $assignment
-        ], 201);
-    }
-
-    public function getAssignments($courseId)
-    {
-        $assignments = Assignment::where('course_id', $courseId)->get();
-        return response()->json([
-            'success' => true,
-            'assignments' => $assignments
-        ]);
-    }
-
-    /**
-     * ============================================
-     * GROUP MANAGEMENT SECTION
-     * ============================================
-     */
-=======
     // ============================================
     // GROUP MANAGEMENT SECTION
     // ============================================
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
 
     public function getGroups()
     {
         $groups = Group::with(['course', 'members'])->get();
-<<<<<<< HEAD
-        return response()->json([
-            'success' => true,
-            'groups' => $groups
-        ]);
-=======
         return response()->json(['success' => true, 'groups' => $groups]);
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
     }
 
     public function getGroup($id)
     {
         $group = Group::with(['course', 'members', 'assignments'])->findOrFail($id);
-<<<<<<< HEAD
-        return response()->json([
-            'success' => true,
-            'group' => $group
-        ]);
-=======
         return response()->json(['success' => true, 'group' => $group]);
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
     }
 
     public function getGroupMembers($id)
     {
         $group = Group::findOrFail($id);
         $members = $group->members()->with('contributionScores')->get();
-<<<<<<< HEAD
-        return response()->json([
-            'success' => true,
-            'members' => $members
-        ]);
-=======
         return response()->json(['success' => true, 'members' => $members]);
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
     }
 
     public function getUserGroups(Request $request)
     {
         $groups = $request->user()->groups()->with(['course', 'members'])->get();
-<<<<<<< HEAD
-        return response()->json([
-            'success' => true,
-            'groups' => $groups
-        ]);
-=======
         return response()->json(['success' => true, 'groups' => $groups]);
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
     }
 
     public function createGroup(Request $request)
@@ -899,16 +765,8 @@ class ApiController extends Controller
     {
         $scores = ContributionScore::where('student_id', $id)->get();
         $avgScore = $scores->avg('score') ?? 75;
-        
-        $isFreeRider = $avgScore < 30;
-        $classification = $isFreeRider ? 'Free Rider' : $this->getClassification($avgScore);
-        $feedback = $isFreeRider 
-            ? '⚠️ Warning: Your contribution is significantly low. Please communicate with your team and increase your involvement in the project.' 
-            : $this->getFeedback($classification);
-        
-        $suggestions = $isFreeRider 
-            ? ['Schedule a meeting with your team', 'Start contributing to the repository', 'Communicate challenges to your professor']
-            : $this->getSuggestions($classification);
+        $classification = $this->getClassification($avgScore);
+        $feedback = $this->getFeedback($classification);
 
         return response()->json([
             'success' => true,
@@ -917,9 +775,8 @@ class ApiController extends Controller
             'quality_score' => round($avgScore * 0.9, 2),
             'consistency_score' => round($avgScore * 1.1, 2),
             'overall_score' => round($avgScore, 2),
-            'is_free_rider' => $isFreeRider,
             'feedback' => $feedback,
-            'suggestions' => $suggestions,
+            'suggestions' => $this->getSuggestions($classification),
             'weekly_labels' => ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
             'weekly_scores' => [
                 rand(60, 80), rand(60, 80), rand(60, 80), rand(60, 80),
@@ -941,7 +798,8 @@ class ApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'notifications' => $notifications        ]);
+            'notifications' => $notifications
+        ]);
     }
 
     public function markNotificationRead(Request $request, $id)
@@ -1113,28 +971,8 @@ class ApiController extends Controller
 
             if ($response->successful()) {
                 $commits = $response->json();
-<<<<<<< HEAD
-                
-                $authorCommits = [];
-                foreach ($commits as $commit) {
-                    $author = $commit['commit']['author']['name'] ?? 'unknown';
-                    if (!isset($authorCommits[$author])) {
-                        $authorCommits[$author] = 0;
-                    }
-                    $authorCommits[$author]++;
-                }
-
-                $totalCommits = array_sum($authorCommits);
-                if ($totalCommits === 0) return 0;
-                
-                $studentCommits = $authorCommits[$user->github_username] ?? 0;
-                $percentage = round(($studentCommits / $totalCommits) * 100, 2);
-                
-                return $percentage;
-=======
                 $commitCount = count($commits);
                 return min(100, ($commitCount / 50) * 100);
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
             }
             return 0;
         } catch (\Exception $e) {
@@ -1142,12 +980,8 @@ class ApiController extends Controller
         }
     }
 
-<<<<<<< HEAD
-    private function getAttendance($studentId, $assignmentId)
-=======
     // 👇 নাম পরিবর্তন করা হয়েছে (পুরনো getAttendance থেকে getAttendanceScore)
     private function getAttendanceScore($studentId, $assignmentId)
->>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
     {
         $assignment = Assignment::find($assignmentId);
         if (!$assignment) return 0;
