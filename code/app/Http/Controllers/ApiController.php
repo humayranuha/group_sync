@@ -49,7 +49,8 @@ class ApiController extends Controller
                     'department' => $user->department ?? null,
                     'profile_picture' => $user->profile_picture ?? null,
                     'github_connected' => $user->hasGithubConnected(),
-                    'github_repo_url' => $user->github_repo_url
+                    'github_repo_url' => $user->github_repo_url,
+                    'github_username' => $user->github_username
                 ],
                 'redirect' => $this->getRedirectUrl($user->role)
             ]);
@@ -69,7 +70,7 @@ class ApiController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
+            'password' => 'required|min:6|confirmed',
             'role' => 'required|in:student,professor,admin',
             'department' => 'nullable|string|max:255'
         ]);
@@ -203,28 +204,13 @@ class ApiController extends Controller
             ], 403);
         }
 
-        // Get or calculate contribution data
         $contributionData = $this->getStudentContributions($user);
-
-        // Get peer reviews
         $peerReviews = $this->getStudentPeerReviews($user);
-
-        // Get group info
         $groupInfo = $this->getStudentGroupInfo($user);
-
-        // Get weekly data
         $weeklyData = $this->getWeeklyData($user->id);
-
-        // Get daily activity
         $dailyActivity = $this->getDailyActivity($user->id);
-
-        // Get score breakdown
         $scoreBreakdown = $this->getScoreBreakdown($user->id);
-
-        // Get team rankings
         $teamRankings = $this->getTeamRankings($user->id);
-
-        // Get AI feedback
         $aiFeedback = $this->getAIFeedback($user, $contributionData);
 
         return response()->json([
@@ -238,6 +224,7 @@ class ApiController extends Controller
                 'team_rank' => $groupInfo['rank'] ?? 'N/A',
                 'is_github_connected' => $user->hasGithubConnected(),
                 'github_repo_url' => $user->github_repo_url,
+                'github_username' => $user->github_username,
                 'weekly_data' => $weeklyData,
                 'daily_activity' => $dailyActivity,
                 'score_breakdown' => $scoreBreakdown,
@@ -262,7 +249,6 @@ class ApiController extends Controller
 
     private function getStudentContributions($user)
     {
-        // Try to get from database
         $contribution = ContributionScore::where('student_id', $user->id)
             ->latest('calculated_at')
             ->first();
@@ -282,11 +268,9 @@ class ApiController extends Controller
             ];
         }
 
-        // If no contribution found, try to calculate from GitHub
         if ($user->hasGithubConnected()) {
             $githubData = $this->fetchGitHubData($user);
             if ($githubData) {
-                // Save to database
                 $contribution = ContributionScore::create([
                     'student_id' => $user->id,
                     'commits' => $githubData['commits'] ?? 0,
@@ -313,7 +297,6 @@ class ApiController extends Controller
             }
         }
 
-        // Return default data
         return [
             'commits' => 0,
             'pull_requests' => 0,
@@ -345,7 +328,6 @@ class ApiController extends Controller
                 return null;
             }
 
-            // Fetch commits
             $commitsResponse = Http::withHeaders([
                 'Authorization' => "token {$token}",
                 'Accept' => 'application/vnd.github.v3+json'
@@ -356,7 +338,6 @@ class ApiController extends Controller
 
             $commits = $commitsResponse->successful() ? count($commitsResponse->json()) : 0;
 
-            // Fetch pull requests
             $prResponse = Http::withHeaders([
                 'Authorization' => "token {$token}",
                 'Accept' => 'application/vnd.github.v3+json'
@@ -367,7 +348,6 @@ class ApiController extends Controller
 
             $pullRequests = $prResponse->successful() ? count($prResponse->json()) : 0;
 
-            // Fetch forks
             $forksResponse = Http::withHeaders([
                 'Authorization' => "token {$token}",
                 'Accept' => 'application/vnd.github.v3+json'
@@ -377,7 +357,6 @@ class ApiController extends Controller
 
             $forks = $forksResponse->successful() ? count($forksResponse->json()) : 0;
 
-            // Calculate score
             $score = $this->calculateScore($commits, $pullRequests, $forks);
 
             return [
@@ -439,8 +418,6 @@ class ApiController extends Controller
         }
 
         $members = $group->members()->get();
-
-        // Calculate rank
         $rank = $this->calculateTeamRank($user->id, $group->id);
 
         return [
@@ -512,7 +489,6 @@ class ApiController extends Controller
             ];
         }
 
-        // If no data, return default
         if (empty($data)) {
             for ($i = 1; $i <= 8; $i++) {
                 $data[] = ['week' => $i, 'commits' => 0];
@@ -611,21 +587,21 @@ class ApiController extends Controller
         $suggestions = [];
 
         if ($score >= 80) {
-            $feedback = "Excellent contribution quality and consistency! You're demonstrating strong collaboration skills and delivering high-quality work. Your activity pattern shows regular engagement with the repository. You've consistently met your team's expectations and shown initiative in completing tasks.";
+            $feedback = "Excellent contribution quality and consistency! You're demonstrating strong collaboration skills and delivering high-quality work.";
             $suggestions = [
                 "Continue mentoring other team members",
                 "Share your best practices with the team",
                 "Take on more challenging tasks"
             ];
         } elseif ($score >= 60) {
-            $feedback = "Good performance! You're consistently contributing to the project. Keep up the momentum. Your work quality is good and you're showing reliability in completing tasks.";
+            $feedback = "Good performance! You're consistently contributing to the project. Keep up the momentum.";
             $suggestions = [
                 "Increase code review participation by reviewing teammates' PRs regularly",
                 "Help mentor passive group members to improve overall team performance",
                 "Document your code more thoroughly for better knowledge transfer"
             ];
         } elseif ($score >= 40) {
-            $feedback = "You're showing moderate participation. There's room for improvement in your contribution levels. Try to engage more with the repository and your team members.";
+            $feedback = "You're showing moderate participation. There's room for improvement in your contribution levels.";
             $suggestions = [
                 "Set daily contribution goals",
                 "Participate more in code reviews",
@@ -633,7 +609,7 @@ class ApiController extends Controller
                 "Try to make at least one commit per day"
             ];
         } else {
-            $feedback = "Your contribution levels are below expectations. We recommend taking immediate action to improve participation. Your team may be relying on you for specific tasks.";
+            $feedback = "Your contribution levels are below expectations. We recommend taking immediate action to improve participation.";
             $suggestions = [
                 "Reach out to your team members for support",
                 "Set a regular schedule for contributions",
@@ -654,9 +630,12 @@ class ApiController extends Controller
     }
 
     // ============================================
-    // GITHUB OAUTH SECTION (সম্পূর্ণ আপডেটেড)
+    // GITHUB OAUTH - সম্পূর্ণ আপডেটেড
     // ============================================
 
+    /**
+     * Redirect user to GitHub for authorization
+     */
     public function githubRedirect()
     {
         $clientId = env('GITHUB_CLIENT_ID');
@@ -669,6 +648,9 @@ class ApiController extends Controller
         return redirect($url);
     }
 
+    /**
+     * Handle GitHub OAuth callback (PUBLIC ROUTE - session থেকে user নিবে)
+     */
     public function githubCallback(Request $request)
     {
         $code = $request->code;
@@ -695,7 +677,7 @@ class ApiController extends Controller
         $data = json_decode($response, true);
 
         if (!isset($data['access_token'])) {
-            return redirect('/student/dashboard.html?error=github_auth_failed');
+            return redirect('/student/repository-connection.html?error=github_auth_failed');
         }
 
         $accessToken = $data['access_token'];
@@ -711,19 +693,24 @@ class ApiController extends Controller
         $userInfo = json_decode(curl_exec($ch), true);
         curl_close($ch);
 
-        // Save GitHub token to user
-        $user = $request->user();
+        // 🔥 IMPORTANT: Get user from session (not from request)
+        // Since this is a public route, we use Auth::user() which reads from session
+        $user = Auth::user();
+        
         if (!$user) {
-            return redirect('/login.html?error=user_not_found');
+            // If user not logged in, redirect to login
+            return redirect('/login.html?error=github_auth_failed&message=Please login first');
         }
 
+        // Save GitHub token to user
         $user->github_token = $accessToken;
         $user->github_username = $userInfo['login'] ?? null;
         $user->save();
 
         $this->logActivity('github_connect', $user->id, 'Connected GitHub account');
 
-        return redirect('/student/dashboard.html?github_connected=success');
+        // Redirect back to repository connection page with success
+        return redirect('/student/repository-connection.html?github_connected=success');
     }
 
     /**
@@ -744,50 +731,8 @@ class ApiController extends Controller
         ]);
     }
 
-    /**
-     * Sync GitHub repository data
-     */
-    public function syncGitHub(Request $request)
-    {
-        $user = $request->user();
-        
-        if (!$user->hasGithubConnected()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'No GitHub repository connected'
-            ], 400);
-        }
-        
-        // Calculate contributions
-        $this->calculateContributions($user);
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Repository synced successfully'
-        ]);
-    }
-
-    /**
-     * Disconnect GitHub repository
-     */
-    public function disconnectGitHub(Request $request)
-    {
-        $user = $request->user();
-        
-        $user->github_token = null;
-        $user->github_username = null;
-        $user->github_repo_url = null;
-        $user->github_connected_at = null;
-        $user->save();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'GitHub disconnected successfully'
-        ]);
-    }
-
     // ============================================
-    // GITHUB CONNECTION (আপডেটেড)
+    // GITHUB REPOSITORY CONNECTION
     // ============================================
 
     public function connectGitHub(Request $request)
@@ -833,7 +778,7 @@ class ApiController extends Controller
             if (!$response->successful()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Repository not found or you don\'t have access. Make sure the repository exists and you have connected your GitHub account.'
+                    'message' => 'Repository not found or you don\'t have access.'
                 ], 400);
             }
 
@@ -895,6 +840,97 @@ class ApiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
+    }
+
+    /**
+     * Sync GitHub repository data
+     */
+    public function syncGitHub(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user->hasGithubConnected()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No GitHub repository connected'
+            ], 400);
+        }
+        
+        $this->calculateContributions($user);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Repository synced successfully'
+        ]);
+    }
+
+    /**
+     * Disconnect GitHub repository
+     */
+    public function disconnectGitHub(Request $request)
+    {
+        $user = $request->user();
+        
+        $user->github_token = null;
+        $user->github_username = null;
+        $user->github_repo_url = null;
+        $user->github_connected_at = null;
+        $user->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'GitHub disconnected successfully'
+        ]);
+    }
+
+    private function validateGithubRepo($url, $user)
+    {
+        $pattern = '/^https?:\/\/github\.com\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-._]+$/';
+        if (!preg_match($pattern, $url)) {
+            return false;
+        }
+
+        try {
+            $repoPath = $this->extractRepoPath($url);
+            $token = $user->github_token;
+
+            if (!$token) {
+                return false;
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => "token {$token}",
+                'Accept' => 'application/vnd.github.v3+json'
+            ])->get("https://api.github.com/repos/{$repoPath}");
+
+            return $response->successful();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    private function calculateContributions($user)
+    {
+        $githubData = $this->fetchGitHubData($user);
+
+        if ($githubData) {
+            ContributionScore::create([
+                'student_id' => $user->id,
+                'commits' => $githubData['commits'] ?? 0,
+                'pull_requests' => $githubData['pull_requests'] ?? 0,
+                'forks' => $githubData['forks'] ?? 0,
+                'lines_added' => $githubData['lines_added'] ?? 0,
+                'lines_deleted' => $githubData['lines_deleted'] ?? 0,
+                'score' => $githubData['score'] ?? 0,
+                'calculated_at' => now()
+            ]);
+        }
+    }
+
+    private function extractRepoPath($url)
+    {
+        preg_match('/github\.com\/([^\/]+\/[^\/]+)/', $url, $matches);
+        return $matches[1] ?? null;
     }
 
     // ============================================

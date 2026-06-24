@@ -18,6 +18,10 @@ return new class extends Migration
             $table->string('enrollment_code')->unique()->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
+            
+            // Indexes
+            $table->index('teacher_id');
+            $table->index('semester');
         });
     }
 

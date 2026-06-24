@@ -13,8 +13,10 @@ use App\Http\Controllers\ApiController;
 Route::post('/auth/login', [ApiController::class, 'login']);
 Route::post('/auth/register', [ApiController::class, 'register']);
 
-// GitHub OAuth routes (public)
+// GitHub OAuth redirect (public)
 Route::get('/auth/github/redirect', [ApiController::class, 'githubRedirect'])->name('github.redirect');
+
+// GitHub OAuth Callback (public - কিন্তু user session থেকে পাবেন)
 Route::get('/auth/github/callback', [ApiController::class, 'githubCallback']);
 
 // ========== Protected Routes (require authentication) ==========
@@ -25,18 +27,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/user', [ApiController::class, 'user']);
 
     // ---- Profile Management ----
-    Route::put('/auth/profile', [ApiController::class, 'updateProfile'])->name('profile.update');
-    Route::post('/auth/change-password', [ApiController::class, 'changePassword'])->name('password.change');
+    Route::put('/auth/profile', [ApiController::class, 'updateProfile']);
+    Route::post('/auth/change-password', [ApiController::class, 'changePassword']);
 
     // ---- Student Dashboard ----
     Route::get('/student/dashboard', [ApiController::class, 'getStudentDashboard']);
 
     // ---- GitHub Routes ----
+    Route::get('/github/redirect', [ApiController::class, 'githubOAuthRedirect']);
     Route::get('/github/repo-details', [ApiController::class, 'getGitHubRepoDetails']);
     Route::post('/github/connect', [ApiController::class, 'connectGitHub']);
     Route::post('/github/sync', [ApiController::class, 'syncGitHub']);
     Route::delete('/github/disconnect', [ApiController::class, 'disconnectGitHub']);
-    Route::get('/github/redirect', [ApiController::class, 'githubOAuthRedirect']);
 
     // ---- Courses ----
     Route::get('/courses', [ApiController::class, 'getCourses']);

@@ -17,9 +17,23 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['student', 'professor', 'admin'])->default('student');
             $table->string('department')->nullable();
+            $table->boolean('is_active')->default(true);
+            $table->timestamp('last_login_at')->nullable();
             $table->string('profile_picture')->nullable();
+            
+            // GitHub fields
+            $table->string('github_token')->nullable();
+            $table->string('github_username')->nullable();
+            $table->string('github_repo_url')->nullable();
+            $table->timestamp('github_connected_at')->nullable();
+            
             $table->rememberToken();
             $table->timestamps();
+            
+            // Indexes
+            $table->index('email');
+            $table->index('role');
+            $table->index('github_username');
         });
     }
 

@@ -14,6 +14,10 @@ return new class extends Migration
             $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
             $table->timestamp('enrolled_at')->nullable();
             $table->timestamps();
+            
+            // Indexes
+            $table->index(['course_id', 'student_id']);
+            $table->index('enrolled_at');
         });
     }
 

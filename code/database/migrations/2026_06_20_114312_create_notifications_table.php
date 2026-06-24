@@ -18,7 +18,14 @@ return new class extends Migration
             $table->timestamp('read_at')->nullable();
             $table->string('link')->nullable();
             $table->json('data')->nullable();
+            $table->boolean('sent_via_email')->default(false);
+            $table->timestamp('email_sent_at')->nullable();
             $table->timestamps();
+            
+            // Indexes
+            $table->index(['user_id', 'is_read']);
+            $table->index('created_at');
+            $table->index('type');
         });
     }
 

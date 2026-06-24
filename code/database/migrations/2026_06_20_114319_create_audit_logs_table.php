@@ -17,6 +17,11 @@ return new class extends Migration
             $table->text('user_agent')->nullable();
             $table->json('data')->nullable();
             $table->timestamps();
+            
+            // Indexes
+            $table->index('user_id');
+            $table->index('action');
+            $table->index('created_at');
         });
     }
 

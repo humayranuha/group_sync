@@ -15,6 +15,10 @@ return new class extends Migration
             $table->timestamp('joined_at')->nullable();
             $table->string('role')->default('member');
             $table->timestamps();
+            
+            // Indexes
+            $table->index(['group_id', 'user_id']);
+            $table->index('joined_at');
         });
     }
 

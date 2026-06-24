@@ -19,6 +19,12 @@ return new class extends Migration
             $table->string('github_repo_url')->nullable();
             $table->string('github_repo_id')->nullable();
             $table->timestamps();
+            
+            // Indexes
+            $table->index('course_id');
+            $table->index('created_by');
+            $table->index('status');
+            $table->index('invitation_code');
         });
     }
 

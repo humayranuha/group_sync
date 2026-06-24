@@ -17,10 +17,17 @@ return new class extends Migration
             $table->integer('communication_rating');
             $table->integer('reliability_rating');
             $table->integer('task_participation_rating');
+            $table->integer('overall_rating')->nullable();
             $table->text('comments')->nullable();
             $table->timestamp('submitted_at')->nullable();
             $table->boolean('is_anonymous')->default(true);
             $table->timestamps();
+            
+            // Indexes
+            $table->index(['reviewer_id', 'reviewee_id', 'assignment_id']);
+            $table->index('submitted_at');
+            $table->index('group_id');
+            $table->index('assignment_id');
         });
     }
 

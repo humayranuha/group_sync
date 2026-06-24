@@ -19,6 +19,12 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
             $table->enum('status', ['active', 'closed', 'archived'])->default('active');
             $table->timestamps();
+            
+            // Indexes
+            $table->index('course_id');
+            $table->index('created_by');
+            $table->index('status');
+            $table->index('deadline');
         });
     }
 

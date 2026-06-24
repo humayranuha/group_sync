@@ -16,8 +16,24 @@ return new class extends Migration
             $table->decimal('score', 5, 2)->default(0);
             $table->enum('status', ['normal', 'warning', 'critical'])->default('normal');
             $table->json('breakdown')->nullable();
+            
+            // GitHub related fields
+            $table->integer('commits')->default(0);
+            $table->integer('pull_requests')->default(0);
+            $table->integer('forks')->default(0);
+            $table->integer('lines_added')->default(0);
+            $table->integer('lines_deleted')->default(0);
+            $table->integer('peer_review_score')->default(0);
+            $table->integer('attendance_score')->default(0);
+            $table->integer('working_hours_score')->default(0);
+            
             $table->timestamp('calculated_at')->nullable();
             $table->timestamps();
+            
+            // Indexes
+            $table->index(['student_id', 'assignment_id']);
+            $table->index('group_id');
+            $table->index('calculated_at');
         });
     }
 
