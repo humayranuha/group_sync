@@ -251,6 +251,7 @@
             <a href="#" data-page="evaluation" class="nav-link"><span class="icon">🎓</span> Student Evaluation</a>
             <a href="#" data-page="reports" class="nav-link"><span class="icon">📄</span> PDF Reports</a>
             <a href="#" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
+            <a href="#" data-page="attendance" class="nav-link"><span class="icon">📋</span> Attendance</a>
         </nav>
         <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
             <div class="flex items-center gap-3">
@@ -981,14 +982,25 @@
             `;
         }
 
+<<<<<<< HEAD
         // ----- PDF REPORTS -----
         function renderReports() {
             const container = document.getElementById('page-content');
+=======
+        // ============================================
+        // PAGE: REPORTS (unchanged)
+        // ============================================
+        
+                       function renderReports() {
+    const container = document.getElementById('page-content');
+    const data = loadProfessorData();
+>>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 PDF Reports</h2>
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 Generate Reports</h2>
 
+<<<<<<< HEAD
                     <div class="grid md:grid-cols-3 gap-6">
                         <div class="card-glass p-6 text-center">
                             <div class="text-5xl mb-4">👨‍🎓</div>
@@ -1011,10 +1023,155 @@
                             <div class="mt-4"><select id="courseReportSelect" class="input-teal"><option value="">Select Course</option>${professorData.courses.map(function(c) { return '<option value="' + c.id + '">' + c.code + '</option>'; }).join('')}</select></div>
                             <button onclick="generateReport('course')" class="btn-teal mt-4 w-full">Generate PDF</button>
                         </div>
+=======
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Student Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">👨‍🎓</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
+                    <div class="mt-4">
+                        <select id="studentReportSelect" class="input-teal">
+                            <option value="">Select Student</option>
+                            ${data.students.map(function(s) {
+                                return '<option value="' + s.id + '">' + s.name + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateStudentReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateStudentReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateStudentReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+>>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
                     </div>
                 </div>
-            `;
+
+                <!-- Group Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">👥</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
+                    <div class="mt-4">
+                        <select id="groupReportSelect" class="input-teal">
+                            <option value="">Select Group</option>
+                            ${data.groups.map(function(g) {
+                                return '<option value="' + g.id + '">' + g.name + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateGroupReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateGroupReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateGroupReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+                    </div>
+                </div>
+
+                <!-- Course Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">📚</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
+                    <div class="mt-4">
+                        <select id="courseReportSelect" class="input-teal">
+                            <option value="">Select Course</option>
+                            ${data.courses.map(function(c) {
+                                return '<option value="' + c.id + '">' + c.code + ' - ' + c.title + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateCourseReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateCourseReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateCourseReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+// ============================================
+// REPORT GENERATION FUNCTIONS (Frontend)
+// ============================================
+
+async function generateStudentReport(format) {
+    const select = document.getElementById('studentReportSelect');
+    const studentId = select.value;
+    if (!studentId) {
+        window.toast.warning('Please select a student first');
+        return;
+    }
+    await generateReport('student', studentId, format);
+}
+
+async function generateGroupReport(format) {
+    const select = document.getElementById('groupReportSelect');
+    const groupId = select.value;
+    if (!groupId) {
+        window.toast.warning('Please select a group first');
+        return;
+    }
+    await generateReport('group', groupId, format);
+}
+
+async function generateCourseReport(format) {
+    const select = document.getElementById('courseReportSelect');
+    const courseId = select.value;
+    if (!courseId) {
+        window.toast.warning('Please select a course first');
+        return;
+    }
+    await generateReport('course', courseId, format);
+}
+
+async function generateReport(type, id, format) {
+    const token = AuthService.getToken();
+    if (!token) {
+        window.toast.error('Please login again');
+        return;
+    }
+
+    window.toast.info('Generating report...');
+
+    try {
+        const response = await fetch('/api/reports/generate', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ type, id, format })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to generate report');
         }
+
+        if (format === 'html') {
+            // HTML report - open in new tab
+            const html = await response.text();
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.document.close();
+            window.toast.success('Report opened in new tab!');
+        } else {
+            // CSV or TXT - download as file
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_report_${id}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            window.toast.success('Report downloaded successfully!');
+        }
+    } catch (error) {
+        console.error('Report error:', error);
+        window.toast.error(error.message || 'Failed to generate report');
+    }
+}
 
         function generateReport(type) {
             window.toast.info('Generating ' + type + ' report...');
@@ -1158,6 +1315,7 @@
             const titles = { dashboard: 'Overview', courses: 'Courses', analytics: 'Analytics', evaluation: 'Evaluation', reports: 'Reports', profile: 'My Profile' };
             document.getElementById('page-title').textContent = titles[page] || 'Overview';
             switch (page) {
+<<<<<<< HEAD
                 case 'dashboard': renderDashboard(); break;
                 case 'courses': renderCourses(); break;
                 case 'analytics': renderGroupAnalytics(); break;
@@ -1165,6 +1323,31 @@
                 case 'reports': renderReports(); break;
                 case 'profile': renderProfile(); break;
                 default: renderDashboard();
+=======
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'courses':
+                    renderCourses();
+                    break;
+                case 'analytics':
+                    renderGroupAnalytics();
+                    break;
+                case 'evaluation':
+                    renderEvaluation();
+                    break;
+                case 'reports':
+                    renderReports();
+                    break;
+                case 'profile':
+                    renderProfile();
+                    break;
+                    case 'attendance':
+    renderAttendance();
+    break;
+                default:
+                    renderDashboard();
+>>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
             }
         }
 
@@ -1194,6 +1377,148 @@
                 }
             });
         })();
+        // ============================================
+// ATTENDANCE MANAGEMENT
+// ============================================
+
+function renderAttendance() {
+    const container = document.getElementById('page-content');
+    const data = loadProfessorData();
+
+    const courseId = data.courses.length > 0 ? data.courses[0].id : null;
+
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Attendance Management</h2>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Mark Attendance</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student</label>
+                        <select id="attendanceStudent" class="input-teal">
+                            ${data.students.map(s => 
+                                `<option value="${s.id}">${s.name}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                        <input type="date" id="attendanceDate" class="input-teal" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="attendanceStatus" class="input-teal">
+                            <option value="1">✅ Present</option>
+                            <option value="0">❌ Absent</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="markAttendance()" class="btn-teal mt-4">Mark Attendance</button>
+            </div>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Attendance Report</h3>
+                <div id="attendanceReport">
+                    <p class="text-gray-500 text-sm">Click "Load Report" to view attendance</p>
+                    <button onclick="loadAttendanceReport()" class="btn-teal mt-2 text-sm">Load Report</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function markAttendance() {
+    const studentId = document.getElementById('attendanceStudent').value;
+    const date = document.getElementById('attendanceDate').value;
+    const present = document.getElementById('attendanceStatus').value === '1';
+
+    const courseId = loadProfessorData().courses[0]?.id;
+
+    if (!courseId) {
+        window.toast.error('No course found');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/attendance/mark', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + AuthService.getToken(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ student_id: studentId, course_id: courseId, date, present })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.toast.success('Attendance marked successfully!');
+            loadAttendanceReport();
+        } else {
+            window.toast.error(data.message || 'Failed to mark attendance');
+        }
+    } catch (error) {
+        window.toast.error('Error marking attendance');
+    }
+}
+
+async function loadAttendanceReport() {
+    const courseId = loadProfessorData().courses[0]?.id;
+    if (!courseId) {
+        window.toast.warning('No course found');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/attendance/course/${courseId}`, {
+            headers: { 'Authorization': 'Bearer ' + AuthService.getToken() }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            renderAttendanceTable(data.attendance);
+        }
+    } catch (error) {
+        window.toast.error('Failed to load attendance report');
+    }
+}
+
+function renderAttendanceTable(attendanceData) {
+    const container = document.getElementById('attendanceReport');
+    if (!attendanceData || attendanceData.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No attendance records found.</p>';
+        return;
+    }
+
+    let html = `
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Present</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Absent</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    attendanceData.forEach(a => {
+        const color = a.attendance_rate >= 80 ? 'text-green-600' : a.attendance_rate >= 50 ? 'text-yellow-600' : 'text-red-600';
+        html += `
+            <tr class="border-t border-gray-100">
+                <td class="px-4 py-2 font-medium">${a.student_name}</td>
+                <td class="px-4 py-2 text-center text-green-600">${a.present_days}</td>
+                <td class="px-4 py-2 text-center text-red-600">${a.absent_days}</td>
+                <td class="px-4 py-2 text-center font-bold ${color}">${a.attendance_rate}%</td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
 
         // ============================================
         // INITIALIZATION

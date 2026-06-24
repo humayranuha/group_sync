@@ -119,6 +119,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(PeerReview::class, 'reviewee_id');
     }
+    public function peerReviewsReceived()
+{
+    return $this->receivedPeerReviews();
+}
 
     /**
      * Get the contribution scores for this student
