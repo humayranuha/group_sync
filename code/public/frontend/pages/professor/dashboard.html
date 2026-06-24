@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Professor Dashboard — GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+    <style>
+        /* ----- Global Reset & Transitions ----- */
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
+        .dark body { background: #0b1717; color: #e8edf0; }
+        html { scroll-behavior: smooth; }
+
+        /* ----- Dark mode overrides (Teal theme) ----- */
+        .dark .bg-white { background-color: #132424 !important; }
+        .dark .bg-gray-50 { background-color: #0b1717 !important; }
+        .dark .bg-gray-100 { background-color: #1a2d2d !important; }
+        .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .text-gray-400 { color: #81999b !important; }
+        .dark .border-gray-200 { border-color: #1e3a3a !important; }
+        .dark .border-gray-100 { border-color: #1e3a3a !important; }
+        .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-sm { box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important; }
+        .dark .divide-gray-200>* { border-color: #1e3a3a !important; }
+        .dark .bg-blue-50 { background-color: rgba(58,175,169,0.08) !important; }
+        .dark .bg-indigo-50 { background-color: rgba(43,122,120,0.08) !important; }
+        .dark .bg-green-100 { background-color: rgba(58,175,169,0.12) !important; }
+        .dark .bg-yellow-100 { background-color: rgba(58,175,169,0.10) !important; }
+        .dark .bg-purple-100 { background-color: rgba(43,122,120,0.10) !important; }
+        .dark .bg-red-100 { background-color: rgba(58,175,169,0.10) !important; }
+        .dark .text-green-800 { color: #7ccfca !important; }
+        .dark .text-yellow-800 { color: #7ccfca !important; }
+        .dark .text-purple-800 { color: #7ccfca !important; }
+        .dark .text-red-800 { color: #7ccfca !important; }
+
+        /* ----- Sidebar (Teal) ----- */
+        .sidebar-teal {
+            background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
+            border-right: 1px solid rgba(58,175,169,0.08);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .dark .sidebar-teal { background: linear-gradient(180deg, #071010 0%, #0f2624 100%); }
+        .sidebar-teal .brand {
+            background: linear-gradient(135deg, #3AAFA9, #2B7A78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.55);
+            border-radius: 12px;
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
+        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.05); }
+        .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
+        .dark .nav-link.active { background: rgba(58,175,169,0.12); }
+
+        .header-teal {
+            background: rgba(43,122,120,0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(58,175,169,0.12);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .dark .header-teal { background: rgba(11,23,23,0.92); border-bottom-color: rgba(58,175,169,0.06); }
+
+        .card-glass {
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(58,175,169,0.06);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        .card-glass:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 20px 40px -12px rgba(58,175,169,0.12); }
+        .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        .dark .card-glass:hover { box-shadow: 0 20px 40px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
+
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+            border: 1px solid rgba(58,175,169,0.06);
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+        }
+        .stat-card:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 16px 32px -12px rgba(58,175,169,0.12); }
+        .dark .stat-card { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        .dark .stat-card:hover { box-shadow: 0 16px 32px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
+
+        .stat-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: 14px; font-size: 1.3rem;
+            transition: background 0.3s;
+        }
+        .stat-icon.teal-bg { background: rgba(58,175,169,0.10); color: #3AAFA9; }
+        .dark .stat-icon.teal-bg { background: rgba(58,175,169,0.08); }
+        .stat-card:hover .stat-icon.teal-bg { background: rgba(58,175,169,0.18); }
+
+        .badge-active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
+        .badge-passive { background: rgba(58,175,169,0.08); color: #94a3b8; }
+        .badge-free-rider { background: rgba(58,175,169,0.06); color: #64748b; }
+        .dark .badge-active { background: rgba(58,175,169,0.15); color: #5ccbc5; }
+        .dark .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
+        .dark .badge-passive { background: rgba(58,175,169,0.06); color: #94a3b8; }
+        .dark .badge-free-rider { background: rgba(58,175,169,0.04); color: #64748b; }
+
+        .btn-teal {
+            background: #3AAFA9; color: #fff; transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(58,175,169,0.25);
+            padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
+        }
+        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58,175,169,0.30); }
+        .btn-teal-outline {
+            background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9;
+            transition: all 0.3s ease; padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer;
+        }
+        .btn-teal-outline:hover { background: #3AAFA9; color: #fff; transform: translateY(-2px); }
+        .dark .btn-teal { background: #2B7A78; box-shadow: 0 4px 14px rgba(43,122,120,0.20); }
+        .dark .btn-teal:hover { background: #3AAFA9; box-shadow: 0 8px 24px rgba(58,175,169,0.20); }
+
+        .progress-teal { background: rgba(58,175,169,0.10); border-radius: 999px; overflow: hidden; height: 8px; }
+        .progress-teal .bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2B7A78, #3AAFA9); transition: width 0.6s ease; }
+
+        .theme-toggle {
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer;
+            color: rgba(255,255,255,0.70); font-size: 17px;
+        }
+        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); color: #fff; }
+
+        .menu-btn {
+            background: rgba(58,175,169,0.90); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s;
+        }
+        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
+        .dark .menu-btn { background: rgba(43,122,120,0.80); }
+
+        .logout-btn {
+            transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent;
+            border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px;
+        }
+        .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
+
+        .input-teal {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
+            width: 100%; font-size: 0.95rem;
+        }
+        .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
+        .input-teal::placeholder { color: rgba(255,255,255,0.25); }
+        .dark .input-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
+        .dark .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+
+        .textarea-teal {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
+            width: 100%; font-size: 0.95rem; resize: vertical; min-height: 80px;
+        }
+        .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
+        .textarea-teal::placeholder { color: rgba(255,255,255,0.25); }
+        .dark .textarea-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
+        .dark .textarea-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+
+        .file-input-label {
+            cursor: pointer; transition: all 0.3s ease;
+            background: rgba(58,175,169,0.08); border: 2px dashed rgba(58,175,169,0.3);
+            border-radius: 12px; padding: 0.5rem 1rem; display: inline-flex; align-items: center; gap: 0.5rem;
+            color: rgba(255,255,255,0.70);
+        }
+        .file-input-label:hover { background: rgba(58,175,169,0.15); border-color: #3AAFA9; }
+
+        .profile-pic-preview {
+            width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+            border: 4px solid #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.20);
+            transition: all 0.3s ease;
+        }
+        .profile-pic-preview:hover { transform: scale(1.04); border-color: #2B7A78; }
+        .dark .profile-pic-preview { border-color: #5ccbc5; }
+
+        .brand-gradient { background: linear-gradient(135deg, #3AAFA9, #2B7A78); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .border-teal-soft { border-color: rgba(58,175,169,0.08); }
+        .bg-teal-soft { background: rgba(58,175,169,0.06); }
+        .dark .bg-teal-soft { background: rgba(58,175,169,0.04); }
+
+        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
+
+        /* ----- Modal Styles ----- */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-box {
+            background: white; border-radius: 24px; max-width: 700px; width: 95%;
+            max-height: 85vh; overflow-y: auto; padding: 30px;
+            position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .dark .modal-box { background: #132424; }
+        .modal-close {
+            position: absolute; top: 16px; right: 20px; font-size: 28px;
+            cursor: pointer; color: #999; transition: color 0.2s;
+        }
+        .modal-close:hover { color: #333; }
+        .dark .modal-close { color: #666; }
+        .dark .modal-close:hover { color: #ccc; }
+
+        @media (max-width:768px) { .stat-card { padding:1rem; } .stat-icon { width:40px; height:40px; font-size:1.1rem; } }
+    </style>
+</head>
+<body>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
+        <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
+            <a href="/" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm hover:opacity-80 transition">
+                Group<span class="text-[#c6f0ee]">Sync</span>
+            </a>
+            <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Professor</span>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
+            <a href="#" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
+            <a href="#" data-page="courses" class="nav-link"><span class="icon">📚</span> Course Management</a>
+            <a href="#" data-page="analytics" class="nav-link"><span class="icon">📈</span> Group Analytics</a>
+            <a href="#" data-page="evaluation" class="nav-link"><span class="icon">🎓</span> Student Evaluation</a>
+            <a href="#" data-page="reports" class="nav-link"><span class="icon">📄</span> PDF Reports</a>
+            <a href="#" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
+            <a href="#" data-page="attendance" class="nav-link"><span class="icon">📋</span> Attendance</a>
+        </nav>
+        <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20 cursor-pointer hover:scale-105 transition">PR</div>
+                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Professor</p><p class="text-xs text-white/40 truncate">Professor</p></div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== MOBILE MENU ===== -->
+    <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header-teal fixed top-0 right-0 left-0 md:left-64 z-30 transition-colors">
+        <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-white/70 hidden sm:block">Professor Dashboard</span>
+                <span class="h-4 w-px bg-white/10 hidden sm:block"></span>
+                <span id="page-title" class="text-sm font-medium text-white/50">Overview</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme"><i id="themeIcon" class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <div id="page-content" class="animate-fade-in">
+            <!-- content dynamically loaded -->
+        </div>
+    </main>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = '/api';
+        const STORAGE_KEYS = {
+            TOKEN: 'groupsync_auth_token',
+            USER: 'groupsync_user_data',
+            THEME: 'theme',
+            PROFESSOR_DATA: 'professor_data',
+            PROFILE_PIC: 'groupsync_profile_pic',
+            PROFILE_EXTRA: 'groupsync_profile_extra'
+        };
+
+        // ============================================
+        // DEMO DATA
+        // ============================================
+        const DEMO_PROFESSOR_DATA = {
+            courses: [
+                { id: 1, code: 'CS401', title: 'Software Engineering', semester: 'Fall 2024', description: 'Introduction to software engineering.', students_count: 32, groups_count: 5, assignments_count: 2, is_active: true },
+                { id: 2, code: 'CS402', title: 'Database Systems', semester: 'Fall 2024', description: 'Relational database design and SQL.', students_count: 28, groups_count: 4, assignments_count: 1, is_active: true },
+                { id: 3, code: 'CS403', title: 'Web Development', semester: 'Fall 2024', description: 'Full-stack web development.', students_count: 25, groups_count: 3, assignments_count: 2, is_active: true }
+            ],
+            students: [
+                { id: 1, name: 'John Doe', email: 'john@demo.com', classification: 'Active', activity_score: 85 },
+                { id: 2, name: 'Jane Smith', email: 'jane@demo.com', classification: 'Active', activity_score: 78 },
+                { id: 3, name: 'Mike Brown', email: 'mike@demo.com', classification: 'Moderate', activity_score: 62 },
+                { id: 4, name: 'Lisa Wong', email: 'lisa@demo.com', classification: 'Passive', activity_score: 45 },
+                { id: 5, name: 'Tom Wilson', email: 'tom@demo.com', classification: 'Free Rider', activity_score: 25 }
+            ],
+            groups: [
+                { id: 1, name: 'Team Alpha', course_name: 'CS401', members_count: 4, contribution_percentage: 78 },
+                { id: 2, name: 'Team Beta', course_name: 'CS401', members_count: 4, contribution_percentage: 65 },
+                { id: 3, name: 'Team Gamma', course_name: 'CS402', members_count: 3, contribution_percentage: 82 }
+            ],
+            assignments: [
+                { id: 1, course_id: 1, title: 'Final Project', deadline: '2026-07-15', weightage: { commits: 40, attendance: 20, peer_reviews: 20, working_hours: 20 } },
+                { id: 2, course_id: 1, title: 'Midterm Project', deadline: '2026-06-30', weightage: { commits: 30, attendance: 25, peer_reviews: 25, working_hours: 20 } },
+                { id: 3, course_id: 2, title: 'Database Design Project', deadline: '2026-07-10', weightage: { commits: 35, attendance: 25, peer_reviews: 20, working_hours: 20 } }
+            ],
+            alerts: [
+                { student_name: 'Mike Brown', severity: 'Medium', message: 'Low contribution for 2 weeks' },
+                { student_name: 'Lisa Wong', severity: 'High', message: 'Minimal commits in last 3 weeks' }
+            ]
+        };
+
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        class ToastManager {
+            constructor() { this.container = null; this.init(); }
+            init() {
+                this.container = document.createElement('div');
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
+                document.body.appendChild(this.container);
+            }
+            show(message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'bg-[#3AAFA9]/10 border-[#3AAFA9] text-[#2B7A78]',
+                    error: 'bg-red-50 border-red-400 text-red-800',
+                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                    info: 'bg-blue-50 border-blue-400 text-blue-800'
+                };
+                const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
+                toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
+                this.container.appendChild(toast);
+                requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
+                toast.querySelector('button').onclick = () => toast.remove();
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
+                return toast;
+            }
+            success(m) { this.show(m, 'success'); }
+            error(m) { this.show(m, 'error'); }
+            warning(m) { this.show(m, 'warning'); }
+            info(m) { this.show(m, 'info'); }
+        }
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        const AuthService = {
+            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated() { return !!this.getToken(); },
+            logout() {
+                localStorage.removeItem(STORAGE_KEYS.TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER);
+                window.location.href = '/login.html';
+            },
+            updateUser(userData) {
+                localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+            }
+        };
+
+        // ============================================
+        // PROFILE EXTRA DATA
+        // ============================================
+        const ProfileExtra = {
+            get() { try { return JSON.parse(localStorage.getItem(STORAGE_KEYS.PROFILE_EXTRA) || '{}'); } catch { return {}; } },
+            set(data) { localStorage.setItem(STORAGE_KEYS.PROFILE_EXTRA, JSON.stringify(data)); },
+            getPic() { return localStorage.getItem(STORAGE_KEYS.PROFILE_PIC) || null; },
+            setPic(base64) { if (base64) localStorage.setItem(STORAGE_KEYS.PROFILE_PIC, base64); else localStorage.removeItem(STORAGE_KEYS.PROFILE_PIC); }
+        };
+
+        // ============================================
+        // API SERVICE
+        // ============================================
+        const ApiService = {
+            async request(endpoint, options = {}) {
+                const token = AuthService.getToken();
+                const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+                    const data = await response.json();
+                    if (!response.ok) {
+                        if (response.status === 401) AuthService.logout();
+                        throw new Error(data.message || 'Request failed');
+                    }
+                    return data;
+                } catch (error) {
+                    console.warn('API failed, using demo data');
+                    if (endpoint.includes('/courses/professor')) return { success: true, courses: DEMO_PROFESSOR_DATA.courses };
+                    if (endpoint.includes('/analytics/group')) return { success: true, ...DEMO_PROFESSOR_DATA };
+                    throw error;
+                }
+            },
+            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
+        };
+
+        // ============================================
+        // GLOBALS
+        // ============================================
+        window.toast = new ToastManager();
+        window.api = ApiService;
+        window.auth = AuthService;
+        let currentPage = 'dashboard';
+        let charts = {};
+        let professorData = { ...DEMO_PROFESSOR_DATA };
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function getInitials(name) {
+            if (!name) return 'PR';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function getClassificationClass(classification) {
+            const map = { 'Active': 'badge-active', 'Moderate': 'badge-moderate', 'Passive': 'badge-passive', 'Free Rider': 'badge-free-rider' };
+            return map[classification] || 'badge-moderate';
+        }
+
+        function getUserAvatar(user) {
+            const pic = ProfileExtra.getPic();
+            if (pic) return pic;
+            const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Professor';
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=3AAFA9&color=fff&size=120&font-size=0.5&bold=true`;
+        }
+
+        function updateSidebarAvatar() {
+            const user = AuthService.getUser();
+            const pic = ProfileExtra.getPic();
+            const avatarEl = document.getElementById('user-avatar');
+            if (pic) {
+                avatarEl.style.backgroundImage = `url(${pic})`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.textContent = '';
+            } else {
+                avatarEl.style.backgroundImage = '';
+                const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Professor';
+                avatarEl.textContent = getInitials(name);
+            }
+        }
+
+        // ============================================
+        // MODAL FUNCTIONS
+        // ============================================
+        function showModal(title, contentHtml) {
+            const oldModal = document.getElementById('dynamicModal');
+            if (oldModal) oldModal.remove();
+            const modalHtml = `
+                <div id="dynamicModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+                    <div class="modal-box">
+                        <span class="modal-close" onclick="closeModal()">&times;</span>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">${title}</h2>
+                        ${contentHtml}
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('dynamicModal');
+            if (modal) modal.remove();
+        }
+
+        function showTotalStudentsBreakdown() {
+            if (professorData.courses.length === 0) {
+                showModal('Total Students', '<p class="text-gray-500">No courses available.</p>');
+                return;
+            }
+            let total = 0;
+            let rows = professorData.courses.map(c => {
+                total += c.students_count || 0;
+                return `<tr class="border-t border-gray-100 dark:border-gray-800"><td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td></tr>`;
+            }).join('');
+            showModal('Total Students per Course', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th></tr></thead><tbody>${rows}</tbody><tfoot class="bg-gray-50 dark:bg-gray-800 font-bold"><tr><td colspan="2" class="px-4 py-2 text-right">Total:</td><td class="px-4 py-2 text-blue-600 dark:text-blue-400">${total}</td><td class="px-4 py-2">${professorData.courses.reduce((sum, c) => sum + (c.groups_count || 0), 0)}</td></tr></tfoot></table></div>
+            `);
+        }
+
+        function showCoursesList() {
+            if (professorData.courses.length === 0) {
+                showModal('Active Courses', '<p class="text-gray-500">No active courses found.</p>');
+                return;
+            }
+            let rows = professorData.courses.filter(c => c.is_active).map(c => `
+                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="closeModal(); showCourseDetails(${c.id})">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400"><span class="px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">Active</span></td>
+                </tr>
+            `).join('');
+            showModal('Active Courses', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Code</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+                <p class="text-xs text-gray-400 mt-2">Click on a course to view details.</p>
+            `);
+        }
+
+        function showGroupsList() {
+            if (professorData.groups.length === 0) {
+                showModal('Groups', '<p class="text-gray-500">No groups found.</p>');
+                return;
+            }
+            let rows = professorData.groups.map(g => `
+                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${g.name}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.course_name || 'N/A'}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.members_count}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${g.contribution_percentage}%</td>
+                </tr>
+            `).join('');
+            showModal('All Groups', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th></tr></thead><tbody>${rows}</tbody></table></div>
+            `);
+        }
+
+        function showFreeRidersList() {
+            const freeRiders = professorData.students.filter(s => s.classification === 'Free Rider');
+            if (freeRiders.length === 0) {
+                showModal('Free Riders', '<p class="text-gray-500">No free riders detected.</p>');
+                return;
+            }
+            let rows = freeRiders.map(s => `
+                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${s.name}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${s.email}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400"><span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300">Free Rider</span></td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${s.activity_score}%</td>
+                </tr>
+            `).join('');
+            showModal('Free Riders', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th></tr></thead><tbody>${rows}</tbody></table></div>
+                <p class="text-xs text-red-400 mt-2">⚠️ These students need immediate attention.</p>
+            `);
+        }
+
+        function showCourseDetails(courseId) {
+            const course = professorData.courses.find(c => c.id === courseId);
+            if (!course) {
+                window.toast.error('Course not found');
+                return;
+            }
+            const courseAssignments = professorData.assignments.filter(a => a.course_id === courseId);
+            let studentsHtml = professorData.students.slice(0, course.students_count).map(s => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                    <span class="text-sm">${s.name}</span>
+                    <span class="px-2 py-0.5 rounded-full text-xs ${getClassificationClass(s.classification)}">${s.classification}</span>
+                </div>
+            `).join('') || '<p class="text-gray-500 text-sm">No students enrolled yet.</p>';
+
+            let assignmentsHtml = courseAssignments.map(a => `
+                <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                    <span class="text-sm font-medium">${a.title}</span>
+                    <span class="text-xs text-gray-500">Deadline: ${a.deadline ? new Date(a.deadline).toLocaleDateString() : 'N/A'}</span>
+                </div>
+            `).join('') || '<p class="text-gray-500 text-sm">No assignments created yet.</p>';
+
+            showModal(`${course.code} - ${course.title}`, `
+                <div class="space-y-4">
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg"><p class="text-gray-700 dark:text-gray-300">${course.description || 'No description available.'}</p></div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${course.semester}</p><p class="text-xs text-gray-500 dark:text-gray-400">Semester</p></div>
+                        <div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">${course.students_count}</p><p class="text-xs text-gray-500 dark:text-gray-400">Students</p></div>
+                        <div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-purple-600 dark:text-purple-400">${course.groups_count}</p><p class="text-xs text-gray-500 dark:text-gray-400">Groups</p></div>
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${Math.round(course.students_count / (course.groups_count || 1))}</p><p class="text-xs text-gray-500 dark:text-gray-400">Avg Group Size</p></div>
+                    </div>
+                    <div><h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">📋 Assignments</h4><div class="max-h-40 overflow-y-auto">${assignmentsHtml}</div></div>
+                    <div><h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">👨‍🎓 Students Enrolled</h4><div class="max-h-40 overflow-y-auto">${studentsHtml}</div></div>
+                </div>
+            `);
+        }
+
+        // ============================================
+        // PROFESSOR DASHBOARD FUNCTIONS
+        // ============================================
+        function loadProfessorData() {
+            const key = STORAGE_KEYS.PROFESSOR_DATA;
+            const stored = localStorage.getItem(key);
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    professorData = { ...DEMO_PROFESSOR_DATA, ...parsed };
+                    return professorData;
+                } catch (e) { professorData = { ...DEMO_PROFESSOR_DATA }; }
+            }
+            professorData = { ...DEMO_PROFESSOR_DATA };
+            return professorData;
+        }
+
+        function saveProfessorData() {
+            localStorage.setItem(STORAGE_KEYS.PROFESSOR_DATA, JSON.stringify(professorData));
+        }
+
+        // ----- ASSIGNMENT FUNCTIONS -----
+        function showAssignmentModal() {
+            const modal = document.getElementById('createAssignmentModal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeAssignmentModal() {
+            const modal = document.getElementById('createAssignmentModal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        async function handleCreateAssignment(e) {
+            e.preventDefault();
+            const courseId = document.getElementById('assignmentCourse').value;
+            const title = document.getElementById('assignmentTitle').value.trim();
+            const description = document.getElementById('assignmentDescription').value.trim();
+            const deadline = document.getElementById('assignmentDeadline').value;
+
+            if (!courseId || !title || !deadline) {
+                window.toast.error('Please fill in all required fields.');
+                return;
+            }
+
+            const weightage = {
+                commits: parseInt(document.getElementById('weightCommits').value) || 0,
+                attendance: parseInt(document.getElementById('weightAttendance').value) || 0,
+                peer_reviews: parseInt(document.getElementById('weightPeerReviews').value) || 0,
+                working_hours: parseInt(document.getElementById('weightWorkingHours').value) || 0
+            };
+
+            const total = Object.values(weightage).reduce((a, b) => a + b, 0);
+            if (total !== 100) {
+                window.toast.error('Total weightage must equal 100%. Current total: ' + total + '%');
+                return;
+            }
+
+            const btn = e.target.querySelector('button[type="submit"]');
+            const original = btn.textContent;
+            btn.textContent = 'Creating...';
+            btn.disabled = true;
+
+            try {
+                const response = await ApiService.post('/assignments/create', {
+                    course_id: courseId,
+                    title: title,
+                    description: description,
+                    weightage: weightage,
+                    deadline: deadline
+                });
+
+                if (response.success) {
+                    window.toast.success(`✅ Project "${title}" created successfully!`);
+                    closeAssignmentModal();
+                    // Add to local data
+                    professorData.assignments.push({
+                        id: Date.now(),
+                        course_id: parseInt(courseId),
+                        title: title,
+                        description: description,
+                        deadline: deadline,
+                        weightage: weightage
+                    });
+                    const course = professorData.courses.find(c => c.id == courseId);
+                    if (course) course.assignments_count = (course.assignments_count || 0) + 1;
+                    saveProfessorData();
+                    renderCourses();
+                } else {
+                    window.toast.error(response.message || 'Failed to create project.');
+                }
+            } catch (error) {
+                window.toast.error('Error creating project. Please try again.');
+            } finally {
+                btn.textContent = original;
+                btn.disabled = false;
+            }
+        }
+
+        // ----- DASHBOARD RENDER -----
+        function renderDashboard() {
+            const user = AuthService.getUser();
+            const container = document.getElementById('page-content');
+
+            const totalStudents = professorData.students.length;
+            const totalGroups = professorData.groups.length;
+            const activeCourses = professorData.courses.filter(c => c.is_active).length;
+            const freeRiders = professorData.students.filter(s => s.classification === 'Free Rider').length;
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                        <h2 class="text-2xl font-bold">Welcome back, Prof. ${user?.first_name || 'Professor'}! 👋</h2>
+                        <p class="text-white/80 mt-1 text-sm">Here's your academic overview</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="stat-card" onclick="showCoursesList()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Active Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${activeCourses}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-book"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to view all</p>
+                        </div>
+                        <div class="stat-card" onclick="showGroupsList()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Groups</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalGroups}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-layer-group"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to view all</p>
+                        </div>
+                        <div class="stat-card" onclick="showFreeRidersList()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Free Riders</p><p class="text-2xl font-bold ${freeRiders > 0 ? 'text-red-600' : 'text-green-600'} mt-1">${freeRiders}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-exclamation-triangle"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to view all</p>
+                        </div>
+                        <div class="stat-card" onclick="showTotalStudentsBreakdown()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalStudents}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for breakdown</p>
+                        </div>
+                    </div>
+
+                    <div class="card-glass p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Risk Indicators by Course</h3>
+                        <canvas id="riskChart" height="220"></canvas>
+                    </div>
+
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Alerts</h3>
+                        </div>
+                        <div id="alerts-list" class="divide-y divide-gray-100 dark:divide-gray-800">
+                            ${professorData.alerts.length > 0 ? professorData.alerts.map(function(alert) {
+                                var color = alert.severity === 'High' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+                                var icon = alert.severity === 'High' ? '⚠️' : '⚡';
+                                var bg = alert.severity === 'High' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20';
+                                return `<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer" onclick="window.toast.info('${alert.message}')">
+                                    <div class="flex-shrink-0"><div class="w-10 h-10 rounded-full ${bg} flex items-center justify-center"><span class="text-lg">${icon}</span></div></div>
+                                    <div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${alert.student_name}</p><p class="text-xs text-gray-500 dark:text-gray-400">${alert.message}</p></div>
+                                    <div><span class="px-2 py-1 text-xs rounded-full ${color}">${alert.severity}</span></div>
+                                </div>`;
+                            }).join('') : '<div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No alerts</div>'}
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Render risk chart
+            setTimeout(() => {
+                const ctx = document.getElementById('riskChart')?.getContext('2d');
+                if (ctx && professorData.courses.length > 0) {
+                    if (charts.risk) charts.risk.destroy();
+                    const activeCoursesList = professorData.courses.filter(c => c.is_active);
+                    const labels = activeCoursesList.map(c => c.code);
+                    const highRisk = activeCoursesList.map(() => Math.floor(Math.random() * 2));
+                    const mediumRisk = activeCoursesList.map(() => Math.floor(Math.random() * 3));
+                    const lowRisk = activeCoursesList.map(c => (c.students_count || 0) - 3);
+                    charts.risk = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                { label: 'High Risk', data: highRisk, backgroundColor: '#ef4444' },
+                                { label: 'Medium Risk', data: mediumRisk, backgroundColor: '#f59e0b' },
+                                { label: 'Low Risk', data: lowRisk, backgroundColor: '#10b981' }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            scales: { x: { stacked: true }, y: { stacked: true, title: { display: true, text: 'Students' } } },
+                            plugins: { legend: { position: 'top' } }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        // ----- COURSE MANAGEMENT -----
+        function renderCourses() {
+            const container = document.getElementById('page-content');
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center flex-wrap gap-4">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📚 Course Management</h2>
+                        <div class="flex gap-3">
+                            <button id="createCourseBtn" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
+                            <button id="createAssignmentBtn" class="btn-teal-outline"><i class="fas fa-tasks mr-2"></i> Create Project</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${professorData.courses.map(function(course) {
+                            var gradient = course.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
+                            return `
+                                <div class="card-glass p-0 overflow-hidden">
+                                    <div class="bg-gradient-to-r ${gradient} px-6 py-4">
+                                        <h3 class="text-lg font-semibold text-white">${course.code}</h3>
+                                        <p class="text-white/80 text-sm">${course.title}</p>
+                                    </div>
+                                    <div class="p-6">
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Semester</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.semester}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Students</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.students_count}</span></div>
+                                            <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Projects</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.assignments_count || 0}</span></div>
+                                        </div>
+                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">📋 View Details</button>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <!-- Create Assignment Modal -->
+                <div id="createAssignmentModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+                    <div class="bg-white dark:bg-[#132424] rounded-2xl shadow-2xl max-w-lg w-full p-6 relative">
+                        <button onclick="closeAssignmentModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl">&times;</button>
+                        <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">📋 Create Project Assignment</h3>
+                        <form id="createAssignmentForm" class="space-y-4">
+                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Course</label>
+                                <select id="assignmentCourse" class="input-teal" required>
+                                    <option value="">Select a course</option>
+                                    ${professorData.courses.map(c => `<option value="${c.id}">${c.code} - ${c.title}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Project Title</label>
+                                <input type="text" id="assignmentTitle" placeholder="e.g., Final Project" class="input-teal" required />
+                            </div>
+                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                                <textarea id="assignmentDescription" rows="3" placeholder="Project description..." class="textarea-teal"></textarea>
+                            </div>
+                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Deadline</label>
+                                <input type="datetime-local" id="assignmentDeadline" class="input-teal" required />
+                            </div>
+                            <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contribution Weightage</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Commits</label><input type="number" id="weightCommits" value="40" min="0" max="100" class="input-teal" /></div>
+                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Attendance</label><input type="number" id="weightAttendance" value="20" min="0" max="100" class="input-teal" /></div>
+                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Peer Reviews</label><input type="number" id="weightPeerReviews" value="20" min="0" max="100" class="input-teal" /></div>
+                                    <div><label class="text-xs text-gray-500 dark:text-gray-400">Working Hours</label><input type="number" id="weightWorkingHours" value="20" min="0" max="100" class="input-teal" /></div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-1">Total must equal 100%</p>
+                            </div>
+                            <div class="flex gap-3 pt-2">
+                                <button type="submit" class="btn-teal flex-1">Create Project</button>
+                                <button type="button" onclick="closeAssignmentModal()" class="btn-teal-outline flex-1">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('createCourseBtn').addEventListener('click', function() { window.toast.info('Create course form coming soon!'); });
+            document.getElementById('createAssignmentBtn').addEventListener('click', showAssignmentModal);
+            document.getElementById('createAssignmentForm').addEventListener('submit', handleCreateAssignment);
+        }
+
+        // ----- GROUP ANALYTICS -----
+        function renderGroupAnalytics() {
+            const container = document.getElementById('page-content');
+
+            const totalContributions = professorData.groups.reduce((sum, g) => sum + (g.contribution_percentage || 0), 0);
+            const avgActivity = professorData.groups.length > 0 ? Math.round(totalContributions / professorData.groups.length) : 0;
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📈 Group Analytics</h2>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="stat-card text-center" onclick="showGroupsList()"><p class="text-sm text-gray-500 dark:text-gray-400">Total Groups</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${professorData.groups.length}</p><p class="text-xs text-gray-400">Click to view</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${avgActivity}%</p></div>
+                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1">${professorData.groups.reduce((sum, g) => sum + (g.members_count || 0), 0)}</p></div>
+                    </div>
+
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Performance</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 dark:bg-gray-800">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Group</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Members</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${professorData.groups.map(function(g) {
+                                        return `<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 cursor-pointer" onclick="window.toast.info('Viewing ${g.name}')">
+                                            <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${g.name}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.course_name || 'N/A'}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.members_count}</td>
+                                            <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">${g.contribution_percentage}%</td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ----- STUDENT EVALUATION -----
+        function renderEvaluation() {
+            const container = document.getElementById('page-content');
+
+            const activeCount = professorData.students.filter(s => s.classification === 'Active').length;
+            const moderateCount = professorData.students.filter(s => s.classification === 'Moderate').length;
+            const atRiskCount = professorData.students.filter(s => s.classification === 'Passive' || s.classification === 'Free Rider').length;
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🎓 Student Evaluation</h2>
+
+                    <div class="grid grid-cols-4 gap-4">
+                        <div class="stat-card text-center" onclick="window.toast.info('Total Students: ${professorData.students.length}')"><p class="text-2xl font-bold text-[#3AAFA9]">${professorData.students.length}</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p></div>
+                        <div class="stat-card text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">${activeCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Active</p></div>
+                        <div class="stat-card text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${moderateCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Moderate</p></div>
+                        <div class="stat-card text-center" onclick="showFreeRidersList()"><p class="text-2xl font-bold text-red-600 dark:text-red-400">${atRiskCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">At Risk</p><p class="text-xs text-gray-400">Click to view</p></div>
+                    </div>
+
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Performance</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 dark:bg-gray-800">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity Score</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${professorData.students.map(function(s) {
+                                        return `<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                            <td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">${s.name}</td>
+                                            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getClassificationClass(s.classification)}">${s.classification}</span></td>
+                                            <td class="px-4 py-2">
+                                                <div class="flex items-center"><div class="w-16 bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${s.activity_score}%"></div></div><span class="text-sm text-gray-600 dark:text-gray-400">${s.activity_score}%</span></div>
+                                            </td>
+                                            <td class="px-4 py-2">
+                                                <button onclick="window.toast.info('Viewing ${s.name}')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">View</button>
+                                            </td>
+                                        </tr>`;
+                                    }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+<<<<<<< HEAD
+        // ----- PDF REPORTS -----
+        function renderReports() {
+            const container = document.getElementById('page-content');
+=======
+        // ============================================
+        // PAGE: REPORTS (unchanged)
+        // ============================================
+        
+                       function renderReports() {
+    const container = document.getElementById('page-content');
+    const data = loadProfessorData();
+>>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
+
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 Generate Reports</h2>
+
+<<<<<<< HEAD
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="card-glass p-6 text-center">
+                            <div class="text-5xl mb-4">👨‍🎓</div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
+                            <div class="mt-4"><select id="studentReportSelect" class="input-teal"><option value="">Select Student</option>${professorData.students.map(function(s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('')}</select></div>
+                            <button onclick="generateReport('student')" class="btn-teal mt-4 w-full">Generate PDF</button>
+                        </div>
+                        <div class="card-glass p-6 text-center">
+                            <div class="text-5xl mb-4">👥</div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
+                            <div class="mt-4"><select id="groupReportSelect" class="input-teal"><option value="">Select Group</option>${professorData.groups.map(function(g) { return '<option value="' + g.id + '">' + g.name + '</option>'; }).join('')}</select></div>
+                            <button onclick="generateReport('group')" class="btn-teal mt-4 w-full">Generate PDF</button>
+                        </div>
+                        <div class="card-glass p-6 text-center">
+                            <div class="text-5xl mb-4">📚</div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
+                            <div class="mt-4"><select id="courseReportSelect" class="input-teal"><option value="">Select Course</option>${professorData.courses.map(function(c) { return '<option value="' + c.id + '">' + c.code + '</option>'; }).join('')}</select></div>
+                            <button onclick="generateReport('course')" class="btn-teal mt-4 w-full">Generate PDF</button>
+                        </div>
+=======
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Student Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">👨‍🎓</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
+                    <div class="mt-4">
+                        <select id="studentReportSelect" class="input-teal">
+                            <option value="">Select Student</option>
+                            ${data.students.map(function(s) {
+                                return '<option value="' + s.id + '">' + s.name + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateStudentReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateStudentReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateStudentReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+>>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
+                    </div>
+                </div>
+
+                <!-- Group Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">👥</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
+                    <div class="mt-4">
+                        <select id="groupReportSelect" class="input-teal">
+                            <option value="">Select Group</option>
+                            ${data.groups.map(function(g) {
+                                return '<option value="' + g.id + '">' + g.name + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateGroupReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateGroupReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateGroupReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+                    </div>
+                </div>
+
+                <!-- Course Report -->
+                <div class="card-glass p-6 text-center">
+                    <div class="text-5xl mb-4">📚</div>
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
+                    <div class="mt-4">
+                        <select id="courseReportSelect" class="input-teal">
+                            <option value="">Select Course</option>
+                            ${data.courses.map(function(c) {
+                                return '<option value="' + c.id + '">' + c.code + ' - ' + c.title + '</option>';
+                            }).join('')}
+                        </select>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <button onclick="generateCourseReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
+                        <button onclick="generateCourseReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
+                        <button onclick="generateCourseReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+// ============================================
+// REPORT GENERATION FUNCTIONS (Frontend)
+// ============================================
+
+async function generateStudentReport(format) {
+    const select = document.getElementById('studentReportSelect');
+    const studentId = select.value;
+    if (!studentId) {
+        window.toast.warning('Please select a student first');
+        return;
+    }
+    await generateReport('student', studentId, format);
+}
+
+async function generateGroupReport(format) {
+    const select = document.getElementById('groupReportSelect');
+    const groupId = select.value;
+    if (!groupId) {
+        window.toast.warning('Please select a group first');
+        return;
+    }
+    await generateReport('group', groupId, format);
+}
+
+async function generateCourseReport(format) {
+    const select = document.getElementById('courseReportSelect');
+    const courseId = select.value;
+    if (!courseId) {
+        window.toast.warning('Please select a course first');
+        return;
+    }
+    await generateReport('course', courseId, format);
+}
+
+async function generateReport(type, id, format) {
+    const token = AuthService.getToken();
+    if (!token) {
+        window.toast.error('Please login again');
+        return;
+    }
+
+    window.toast.info('Generating report...');
+
+    try {
+        const response = await fetch('/api/reports/generate', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ type, id, format })
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Failed to generate report');
+        }
+
+        if (format === 'html') {
+            // HTML report - open in new tab
+            const html = await response.text();
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.document.close();
+            window.toast.success('Report opened in new tab!');
+        } else {
+            // CSV or TXT - download as file
+            const blob = await response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}_report_${id}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            window.toast.success('Report downloaded successfully!');
+        }
+    } catch (error) {
+        console.error('Report error:', error);
+        window.toast.error(error.message || 'Failed to generate report');
+    }
+}
+
+        function generateReport(type) {
+            window.toast.info('Generating ' + type + ' report...');
+            setTimeout(() => {
+                window.toast.success(type + ' report generated successfully! ✅');
+            }, 1500);
+        }
+
+        // ----- PROFILE -----
+        function renderProfile() {
+            const user = AuthService.getUser();
+            const container = document.getElementById('page-content');
+            if (!user) {
+                container.innerHTML = '<div class="text-center py-12 text-gray-500">Please log in again.</div>';
+                return;
+            }
+            const extra = ProfileExtra.get();
+            const pic = ProfileExtra.getPic();
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👤 My Profile</h2>
+                    <div class="card-glass p-6">
+                        <div class="flex flex-col md:flex-row gap-8 items-start">
+                            <div class="flex flex-col items-center gap-3 flex-shrink-0">
+                                <img id="profilePicPreview" src="${pic || getUserAvatar(user)}" alt="Profile" class="profile-pic-preview" />
+                                <label class="file-input-label text-sm"><i class="fas fa-camera"></i> Upload Photo<input type="file" id="profilePicInput" accept="image/*" class="hidden" /></label>
+                                <button id="removePicBtn" class="text-xs text-red-400 hover:text-red-300 transition ${pic ? '' : 'hidden'}">Remove Photo</button>
+                            </div>
+                            <div class="flex-1 w-full space-y-4">
+                                <form id="profileForm" class="space-y-4">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label><input type="text" id="profileFirstName" value="${user.first_name || ''}" class="input-teal mt-1" /></div>
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label><input type="text" id="profileLastName" value="${user.last_name || ''}" class="input-teal mt-1" /></div>
+                                    </div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" value="${user.email || ''}" disabled class="input-teal mt-1 bg-gray-100 dark:bg-gray-800 cursor-not-allowed" /><p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed</p></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label><input type="text" id="profileDepartment" value="${user.department || ''}" class="input-teal mt-1" /></div>
+                                    <hr class="border-gray-200 dark:border-gray-700" />
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label><textarea id="profileBio" class="textarea-teal mt-1" placeholder="Tell us about yourself...">${extra.bio || ''}</textarea></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="${extra.skills || ''}" class="input-teal mt-1" placeholder="e.g. JavaScript, Python" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Education</label><input type="text" id="profileEducation" value="${extra.education || ''}" class="input-teal mt-1" placeholder="e.g. Ph.D. in CSE" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label><input type="text" id="profileExperience" value="${extra.experience || ''}" class="input-teal mt-1" placeholder="e.g. 10 years teaching" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub</label><input type="url" id="profileGithub" value="${extra.github || ''}" class="input-teal mt-1" placeholder="https://github.com/yourusername" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label><input type="url" id="profileLinkedin" value="${extra.linkedin || ''}" class="input-teal mt-1" placeholder="https://linkedin.com/in/yourprofile" /></div>
+                                    <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label><input type="url" id="profileWebsite" value="${extra.website || ''}" class="input-teal mt-1" placeholder="https://yourwebsite.com" /></div>
+                                    <div class="flex gap-3 flex-wrap"><button type="submit" class="btn-teal">Update Profile</button><button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button></div>
+                                </form>
+                                <div id="passwordFormContainer" class="mt-6 hidden border-t border-gray-200 dark:border-gray-700 pt-6">
+                                    <h4 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Change Password</h4>
+                                    <form id="passwordForm" class="space-y-4">
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label><input type="password" id="currentPassword" class="input-teal mt-1" placeholder="Enter current password" /></div>
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label><input type="password" id="newPassword" class="input-teal mt-1" placeholder="Enter new password (min 6 chars)" /></div>
+                                        <div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label><input type="password" id="confirmPassword" class="input-teal mt-1" placeholder="Confirm new password" /></div>
+                                        <div class="flex gap-3"><button type="submit" class="btn-teal">Update Password</button><button type="button" id="hidePasswordForm" class="btn-teal-outline">Cancel</button></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Profile pic upload, form submit, password change handlers...
+            const fileInput = document.getElementById('profilePicInput');
+            const preview = document.getElementById('profilePicPreview');
+            const removeBtn = document.getElementById('removePicBtn');
+            fileInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) { const reader = new FileReader();
+                    reader.onload = function(ev) { const base64 = ev.target.result;
+                        preview.src = base64;
+                        ProfileExtra.setPic(base64);
+                        updateSidebarAvatar();
+                        removeBtn.classList.remove('hidden');
+                        window.toast.success('Profile picture updated!'); };
+                    reader.readAsDataURL(file); }
+            });
+            removeBtn.addEventListener('click', function() { ProfileExtra.setPic(null);
+                preview.src = getUserAvatar(user);
+                removeBtn.classList.add('hidden');
+                updateSidebarAvatar();
+                window.toast.info('Profile picture removed.'); });
+            document.getElementById('profileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const firstName = document.getElementById('profileFirstName').value.trim();
+                const lastName = document.getElementById('profileLastName').value.trim();
+                const department = document.getElementById('profileDepartment').value.trim();
+                if (!firstName || !lastName) { window.toast.error('First and last name are required.'); return; }
+                const extraData = { bio: document.getElementById('profileBio').value.trim(), skills: document.getElementById('profileSkills').value.trim(), education: document.getElementById('profileEducation').value.trim(), experience: document.getElementById('profileExperience').value.trim(), github: document.getElementById('profileGithub').value.trim(), linkedin: document.getElementById('profileLinkedin').value.trim(), website: document.getElementById('profileWebsite').value.trim() };
+                ProfileExtra.set(extraData);
+                const payload = { first_name: firstName, last_name: lastName, department };
+                const btn = this.querySelector('button[type="submit"]');
+                const original = btn.textContent;
+                btn.textContent = 'Saving...';
+                btn.disabled = true;
+                try {
+                    const response = await ApiService.put('/auth/profile', payload);
+                    if (response.success) {
+                        const user = AuthService.getUser();
+                        user.first_name = firstName;
+                        user.last_name = lastName;
+                        user.department = department;
+                        AuthService.updateUser(user);
+                        document.getElementById('user-name').textContent = `Prof. ${firstName} ${lastName}`.trim();
+                        updateSidebarAvatar();
+                        window.toast.success('Profile updated successfully!');
+                    } else { window.toast.error(response.message || 'Update failed.'); }
+                } catch (err) { window.toast.error('Error updating profile. Please try again.'); } finally { btn.textContent = original;
+                    btn.disabled = false; }
+            });
+            document.getElementById('showPasswordForm').addEventListener('click', function() { document.getElementById('passwordFormContainer').classList.remove('hidden'); });
+            document.getElementById('hidePasswordForm').addEventListener('click', function() { document.getElementById('passwordFormContainer').classList.add('hidden');
+                document.getElementById('passwordForm').reset(); });
+            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const current = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmPassword').value;
+                if (!current || !newPass || !confirm) { window.toast.error('All password fields are required.'); return; }
+                if (newPass.length < 6) { window.toast.error('New password must be at least 6 characters.'); return; }
+                if (newPass !== confirm) { window.toast.error('Passwords do not match.'); return; }
+                const btn = this.querySelector('button[type="submit"]');
+                const original = btn.textContent;
+                btn.textContent = 'Updating...';
+                btn.disabled = true;
+                try {
+                    const response = await ApiService.post('/auth/change-password', { current_password: current, new_password: newPass, new_password_confirmation: confirm });
+                    if (response.success) { window.toast.success('Password changed successfully!');
+                        document.getElementById('passwordFormContainer').classList.add('hidden');
+                        document.getElementById('passwordForm').reset(); } else { window.toast.error(response.message || 'Password change failed.'); }
+                } catch (err) { window.toast.error('Error changing password. Please try again.'); } finally { btn.textContent = original;
+                    btn.disabled = false; }
+            });
+        }
+
+        // ============================================
+        // NAVIGATION
+        // ============================================
+        function navigate(page) {
+            currentPage = page;
+            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+            document.querySelector(`.nav-link[data-page="${page}"]`)?.classList.add('active');
+            const titles = { dashboard: 'Overview', courses: 'Courses', analytics: 'Analytics', evaluation: 'Evaluation', reports: 'Reports', profile: 'My Profile' };
+            document.getElementById('page-title').textContent = titles[page] || 'Overview';
+            switch (page) {
+<<<<<<< HEAD
+                case 'dashboard': renderDashboard(); break;
+                case 'courses': renderCourses(); break;
+                case 'analytics': renderGroupAnalytics(); break;
+                case 'evaluation': renderEvaluation(); break;
+                case 'reports': renderReports(); break;
+                case 'profile': renderProfile(); break;
+                default: renderDashboard();
+=======
+                case 'dashboard':
+                    renderDashboard();
+                    break;
+                case 'courses':
+                    renderCourses();
+                    break;
+                case 'analytics':
+                    renderGroupAnalytics();
+                    break;
+                case 'evaluation':
+                    renderEvaluation();
+                    break;
+                case 'reports':
+                    renderReports();
+                    break;
+                case 'profile':
+                    renderProfile();
+                    break;
+                    case 'attendance':
+    renderAttendance();
+    break;
+                default:
+                    renderDashboard();
+>>>>>>> 41734411042ba2fa10e5aafcffb47cb64ae2b975
+            }
+        }
+
+        // ============================================
+        // THEME TOGGLE
+        // ============================================
+        (function initTheme() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+            const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+            if (saved === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+            toggle.addEventListener('click', function() {
+                const isDark = html.classList.toggle('dark');
+                if (isDark) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'light');
+                }
+            });
+        })();
+        // ============================================
+// ATTENDANCE MANAGEMENT
+// ============================================
+
+function renderAttendance() {
+    const container = document.getElementById('page-content');
+    const data = loadProfessorData();
+
+    const courseId = data.courses.length > 0 ? data.courses[0].id : null;
+
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Attendance Management</h2>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Mark Attendance</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student</label>
+                        <select id="attendanceStudent" class="input-teal">
+                            ${data.students.map(s => 
+                                `<option value="${s.id}">${s.name}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                        <input type="date" id="attendanceDate" class="input-teal" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="attendanceStatus" class="input-teal">
+                            <option value="1">✅ Present</option>
+                            <option value="0">❌ Absent</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="markAttendance()" class="btn-teal mt-4">Mark Attendance</button>
+            </div>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Attendance Report</h3>
+                <div id="attendanceReport">
+                    <p class="text-gray-500 text-sm">Click "Load Report" to view attendance</p>
+                    <button onclick="loadAttendanceReport()" class="btn-teal mt-2 text-sm">Load Report</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function markAttendance() {
+    const studentId = document.getElementById('attendanceStudent').value;
+    const date = document.getElementById('attendanceDate').value;
+    const present = document.getElementById('attendanceStatus').value === '1';
+
+    const courseId = loadProfessorData().courses[0]?.id;
+
+    if (!courseId) {
+        window.toast.error('No course found');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/attendance/mark', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + AuthService.getToken(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ student_id: studentId, course_id: courseId, date, present })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.toast.success('Attendance marked successfully!');
+            loadAttendanceReport();
+        } else {
+            window.toast.error(data.message || 'Failed to mark attendance');
+        }
+    } catch (error) {
+        window.toast.error('Error marking attendance');
+    }
+}
+
+async function loadAttendanceReport() {
+    const courseId = loadProfessorData().courses[0]?.id;
+    if (!courseId) {
+        window.toast.warning('No course found');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/attendance/course/${courseId}`, {
+            headers: { 'Authorization': 'Bearer ' + AuthService.getToken() }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            renderAttendanceTable(data.attendance);
+        }
+    } catch (error) {
+        window.toast.error('Failed to load attendance report');
+    }
+}
+
+function renderAttendanceTable(attendanceData) {
+    const container = document.getElementById('attendanceReport');
+    if (!attendanceData || attendanceData.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No attendance records found.</p>';
+        return;
+    }
+
+    let html = `
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Present</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Absent</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    attendanceData.forEach(a => {
+        const color = a.attendance_rate >= 80 ? 'text-green-600' : a.attendance_rate >= 50 ? 'text-yellow-600' : 'text-red-600';
+        html += `
+            <tr class="border-t border-gray-100">
+                <td class="px-4 py-2 font-medium">${a.student_name}</td>
+                <td class="px-4 py-2 text-center text-green-600">${a.present_days}</td>
+                <td class="px-4 py-2 text-center text-red-600">${a.absent_days}</td>
+                <td class="px-4 py-2 text-center font-bold ${color}">${a.attendance_rate}%</td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = '/login.html';
+                return;
+            }
+            const user = AuthService.getUser();
+            if (user) {
+                const name = `${user.first_name || 'Professor'} ${user.last_name || ''}`.trim();
+                document.getElementById('user-name').textContent = `Prof. ${name}`;
+                const pic = ProfileExtra.getPic();
+                const avatarEl = document.getElementById('user-avatar');
+                if (pic) {
+                    avatarEl.style.backgroundImage = `url(${pic})`;
+                    avatarEl.style.backgroundSize = 'cover';
+                    avatarEl.textContent = '';
+                } else {
+                    avatarEl.textContent = getInitials(name);
+                }
+                avatarEl.addEventListener('click', function() { navigate('profile'); });
+            }
+            document.getElementById('menuBtn')?.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const page = link.dataset.page;
+                    if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+                    navigate(page);
+                });
+            });
+            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+            loadProfessorData();
+            navigate('dashboard');
+        }
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

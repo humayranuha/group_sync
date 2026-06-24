@@ -1,0 +1,377 @@
+<!-- D:\wamp64\www\gorupSync\group_sync\frontend\pages\student\peer-review.html -->
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peer Reviews - GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        /* Copy styles from dashboard.html */
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
+        .dark body { background: #0b1717; color: #e8edf0; }
+        .dark .bg-white { background-color: #132424 !important; }
+        .dark .bg-gray-50 { background-color: #0b1717 !important; }
+        .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
+        .dark .border-gray-200 { border-color: #1e3a3a !important; }
+        .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
+        
+        .sidebar-teal { background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%); border-right: 1px solid rgba(58,175,169,0.08); }
+        .nav-link { transition: all 0.3s ease; color: rgba(255,255,255,0.55); border-radius: 12px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem; font-weight: 500; font-size: 0.95rem; cursor: pointer; text-decoration: none; }
+        .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
+        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
+        
+        .card-glass { background: rgba(255,255,255,0.80); backdrop-filter: blur(4px); border: 1px solid rgba(58,175,169,0.06); border-radius: 20px; transition: all 0.4s cubic-bezier(0.22,1,0.36,1); }
+        .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        
+        .btn-teal { background: #3AAFA9; color: #fff; transition: all 0.3s ease; box-shadow: 0 4px 14px rgba(58,175,169,0.25); padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer; }
+        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); }
+        .dark .btn-teal { background: #2B7A78; }
+        .btn-teal-outline { background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9; padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-teal-outline:hover { background: #3AAFA9; color: #fff; }
+        
+        .theme-toggle { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer; color: rgba(255,255,255,0.70); font-size: 17px; }
+        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); }
+        
+        .menu-btn { background: rgba(58,175,169,0.90); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); }
+        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
+        
+        .logout-btn { transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px; }
+        .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
+        
+        .input-field { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s ease; color: var(--text); padding: 0.75rem 1rem; border-radius: 12px; width: 100%; font-size: 0.95rem; }
+        .input-field:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); outline: none; }
+        .dark .input-field { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); color: #e8edf0; }
+        
+        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+        
+        .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
+        
+        @media (max-width:768px) { .stat-card { padding:1rem; } }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
+        <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
+            <a href="#" class="text-2xl font-extrabold tracking-tight text-white">Group<span class="text-[#c6f0ee]">Sync</span></a>
+            <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Student</span>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
+            <a href="dashboard.html" class="nav-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="group-details.html" class="nav-link"><span class="icon">👥</span> My Group</a>
+            <a href="repository-connection.html" class="nav-link"><span class="icon">🔗</span> GitHub Connection</a>
+            <a href="contribution-analytics.html" class="nav-link"><span class="icon">📈</span> Analytics</a>
+            <a href="peer-review.html" class="nav-link active"><span class="icon">⭐</span> Peer Reviews</a>
+            <a href="ai-feedback.html" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
+        </nav>
+        <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm">ST</div>
+                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Student</p><p class="text-xs text-white/40 truncate">Student</p></div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Menu -->
+    <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
+
+    <!-- Header -->
+    <header class="fixed top-0 right-0 left-0 md:left-64 z-30 bg-[rgba(43,122,120,0.88)] backdrop-blur-[14px] border-b border-[rgba(58,175,169,0.12)]">
+        <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-white/70 hidden sm:block">Peer Reviews</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" class="theme-toggle"><i id="themeIcon" class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <div id="page-content" class="animate-fade-in">
+            <div class="space-y-6">
+                <div class="flex flex-wrap justify-between items-center gap-4">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⭐ Peer Reviews</h2>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Deadline: May 30, 2026</span>
+                </div>
+
+                <!-- Review Status -->
+                <div class="card-glass p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Review Status</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-2xl font-bold text-[#3AAFA9]" id="total-members">4</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Total Members</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-2xl font-bold text-green-600" id="reviewed-count">3</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Reviewed</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-2xl font-bold text-yellow-600" id="pending-count">1</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Pending</p>
+                        </div>
+                        <div class="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-2xl font-bold text-gray-600 dark:text-gray-400" id="completion">75%</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">Completion</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Members -->
+                <div class="card-glass overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Team Members</h3>
+                    </div>
+                    <div id="members-list" class="divide-y divide-gray-100 dark:divide-gray-800">
+                        <!-- Will be populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Review Form -->
+                <div id="reviewForm" class="card-glass p-6 hidden">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Submit Peer Review</h3>
+                    <form id="peerReviewForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Team Member</label>
+                            <select id="reviewMember" class="input-field">
+                                <option value="">Select a member</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Communication</label>
+                                <select id="ratingComm" class="input-field">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4" selected>4 - Good</option>
+                                    <option value="3">3 - Average</option>
+                                    <option value="2">2 - Below Average</option>
+                                    <option value="1">1 - Poor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reliability</label>
+                                <select id="ratingRel" class="input-field">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4" selected>4 - Good</option>
+                                    <option value="3">3 - Average</option>
+                                    <option value="2">2 - Below Average</option>
+                                    <option value="1">1 - Poor</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Participation</label>
+                                <select id="ratingPart" class="input-field">
+                                    <option value="5">5 - Excellent</option>
+                                    <option value="4">4 - Good</option>
+                                    <option value="3" selected>3 - Average</option>
+                                    <option value="2">2 - Below Average</option>
+                                    <option value="1">1 - Poor</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comments</label>
+                            <textarea id="reviewComment" rows="3" class="input-field" placeholder="Provide constructive feedback..."></textarea>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button type="submit" class="btn-teal">Submit Review</button>
+                            <button type="button" id="cancelReviewBtn" class="btn-teal-outline">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = 'http://127.0.0.1:8000/api';
+        const STORAGE_KEYS = { TOKEN: 'groupsync_auth_token', USER: 'groupsync_user_data', THEME: 'theme' };
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        const AuthService = {
+            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated() { return !!this.getToken(); },
+            logout() {
+                localStorage.removeItem(STORAGE_KEYS.TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER);
+                window.location.href = '/frontend/pages/public/login.html';
+            }
+        };
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function getInitials(name) {
+            if (!name) return 'ST';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-50 border-green-400 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+                error: 'bg-red-50 border-red-400 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
+                info: 'bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+            };
+            toast.className = `fixed bottom-4 right-4 z-50 border-l-4 rounded-xl shadow-xl p-4 max-w-sm ${colors[type]}`;
+            toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70" onclick="this.parentElement.parentElement.remove()">&times;</button></div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        // ============================================
+        // PEER REVIEW LOGIC
+        // ============================================
+        function loadPeerReviews() {
+            // Demo data
+            const members = [
+                { id: 1, name: 'John Doe', reviewed: true, date: 'May 28, 2026' },
+                { id: 2, name: 'Jane Smith', reviewed: true, date: 'May 27, 2026' },
+                { id: 3, name: 'Mike Brown', reviewed: true, date: 'May 26, 2026' },
+                { id: 4, name: 'Lisa Wong', reviewed: false, date: null }
+            ];
+
+            const total = members.length;
+            const reviewed = members.filter(m => m.reviewed).length;
+            const pending = total - reviewed;
+            const completion = Math.round((reviewed / total) * 100);
+
+            document.getElementById('total-members').textContent = total;
+            document.getElementById('reviewed-count').textContent = reviewed;
+            document.getElementById('pending-count').textContent = pending;
+            document.getElementById('completion').textContent = completion + '%';
+
+            // Render members
+            const list = document.getElementById('members-list');
+            list.innerHTML = members.map(m => `
+                <div class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition ${!m.reviewed ? 'bg-yellow-50 dark:bg-yellow-900/10' : ''}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full ${m.reviewed ? 'bg-green-100 text-green-600' : 'bg-yellow-100 text-yellow-600'} flex items-center justify-center text-lg">
+                            ${m.reviewed ? '✓' : '⏳'}
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-900 dark:text-gray-100">${m.name}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400">${m.reviewed ? `Reviewed • ${m.date}` : 'Pending review'}</p>
+                        </div>
+                    </div>
+                    ${!m.reviewed ? `<button onclick="openReviewForm('${m.name}', ${m.id})" class="px-4 py-2 bg-[#3AAFA9] text-white rounded-lg hover:bg-[#2B7A78] text-sm transition">Review Now</button>` : 
+                    `<span class="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full text-xs">Completed</span>`}
+                </div>
+            `).join('');
+
+            // Populate select dropdown
+            const select = document.getElementById('reviewMember');
+            select.innerHTML = '<option value="">Select a member</option>' + 
+                members.filter(m => !m.reviewed).map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+        }
+
+        function openReviewForm(name, id) {
+            document.getElementById('reviewForm').classList.remove('hidden');
+            document.getElementById('reviewMember').value = id;
+            document.getElementById('reviewForm').scrollIntoView({ behavior: 'smooth' });
+            showToast(`Reviewing ${name}`, 'info');
+        }
+
+        // Submit review
+        document.getElementById('peerReviewForm')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const member = document.getElementById('reviewMember');
+            const name = member.options[member.selectedIndex]?.text || 'Team member';
+            
+            // Get ratings
+            const comm = parseInt(document.getElementById('ratingComm').value);
+            const rel = parseInt(document.getElementById('ratingRel').value);
+            const part = parseInt(document.getElementById('ratingPart').value);
+            const comment = document.getElementById('reviewComment').value;
+            
+            const avg = ((comm + rel + part) / 3).toFixed(1);
+            
+            showToast(`✅ Review submitted for ${name} (${avg}⭐)`, 'success');
+            document.getElementById('reviewForm').classList.add('hidden');
+            document.getElementById('reviewForm').reset();
+            
+            // Reload after short delay
+            setTimeout(loadPeerReviews, 1000);
+        });
+
+        document.getElementById('cancelReviewBtn')?.addEventListener('click', function() {
+            document.getElementById('reviewForm').classList.add('hidden');
+            document.getElementById('reviewForm').reset();
+        });
+
+        // ============================================
+        // THEME TOGGLE
+        // ============================================
+        (function initTheme() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+            const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+            
+            if (saved === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+            
+            toggle.addEventListener('click', function() {
+                const isDark = html.classList.toggle('dark');
+                if (isDark) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'light');
+                }
+            });
+        })();
+
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = '/frontend/pages/public/login.html';
+                return;
+            }
+
+            const user = AuthService.getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
+                document.getElementById('user-avatar').textContent = getInitials(`${user.first_name || 'S'} ${user.last_name || 'T'}`);
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+
+            loadPeerReviews();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

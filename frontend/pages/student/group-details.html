@@ -1,0 +1,209 @@
+// Group Details Page
+import { renderStudentLayout, initStudentLayout } from '../../layouts/StudentLayout.js';
+
+export function renderGroupDetails() {
+    const content = `
+        <div class="space-y-6 animate-fade-in">
+            <!-- Group Header -->
+            <div class="bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg shadow-lg p-6 text-white">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 class="text-2xl font-bold" id="group-name">Loading...</h2>
+                        <p class="text-blue-100 mt-1" id="course-name">Course: Loading...</p>
+                    </div>
+                    <span id="member-count" class="px-3 py-1 bg-white/20 rounded-full text-sm">0 Members</span>
+                </div>
+            </div>
+            
+            <!-- Group Stats -->
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-600">Total Contributions</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="total-contributions">0</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-600">Average Activity</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="avg-activity">0%</p>
+                </div>
+                <div class="bg-white rounded-lg shadow p-6">
+                    <p class="text-sm text-gray-600">Team Performance</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-1" id="team-performance">0/100</p>
+                </div>
+            </div>
+            
+            <!-- Team Members -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-800">Team Members</h3>
+                </div>
+                <div id="members-list" class="divide-y divide-gray-200">
+                    <div class="p-6 text-center text-gray-500">Loading team members...</div>
+                </div>
+            </div>
+            
+            <!-- Contribution Distribution -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Contribution Distribution</h3>
+                <canvas id="contributionChart" height="300"></canvas>
+            </div>
+        </div>
+    `;
+    
+    const layout = renderStudentLayout(content, 'group');
+    document.getElementById('app').innerHTML = layout;
+    initStudentLayout();
+    
+    loadGroupDetails();
+}
+
+async function loadGroupDetails() {
+    try {
+        const user = JSON.parse(localStorage.getItem('groupsync_user_data') || '{}');
+        
+        // Get user's group
+        if (window.groupService) {
+            const groups = await window.groupService.getGroups();
+            const userGroup = groups.find(g => g.members?.includes(user.id));
+            
+            if (userGroup) {
+                await loadGroupData(userGroup.id);
+            } else {
+                showNoGroupMessage();
+            }
+        }
+    } catch (error) {
+        console.error('Error loading group:', error);
+        showNoGroupMessage();
+    }
+}
+
+async function loadGroupData(groupId) {
+    try {
+        // Load group details
+        const group = await window.groupService.getGroupById(groupId);
+        document.getElementById('group-name').textContent = group.name;
+        document.getElementById('course-name').textContent = `Course: ${group.course_name || 'N/A'}`;
+        document.getElementById('member-count').textContent = `${group.member_count || 0} Members`;
+        
+        // Load group analytics
+        const analytics = await window.analyticsService.getGroupAnalytics(groupId);
+        updateGroupStats(analytics);
+        
+        // Load members
+        const members = await window.groupService.getGroupMembers(groupId);
+        renderMembersList(members);
+        
+        // Render contribution chart
+        renderContributionChart(members);
+        
+    } catch (error) {
+        console.error('Error loading group data:', error);
+        window.toast?.error('Failed to load group data');
+    }
+}
+
+function updateGroupStats(analytics) {
+    document.getElementById('total-contributions').textContent = analytics.total_contributions || 0;
+    document.getElementById('avg-activity').textContent = `${analytics.avg_activity || 0}%`;
+    document.getElementById('team-performance').textContent = analytics.team_performance || 0;
+}
+
+function renderMembersList(members) {
+    const container = document.getElementById('members-list');
+    
+    if (members && members.length > 0) {
+        container.innerHTML = members.map(member => `
+            <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-center text-white font-semibold">
+                        ${getInitials(member.name)}
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-900">${member.name}</p>
+                        <p class="text-xs text-gray-500">${member.role || 'Student'}</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-gray-900">${member.contribution_percentage || 0}%</p>
+                        <p class="text-xs text-gray-500">Contributions</p>
+                    </div>
+                    <span class="px-2 py-1 rounded-full text-xs font-medium ${getClassificationClass(member.classification)}">
+                        ${member.classification || 'Moderate'}
+                    </span>
+                </div>
+            </div>
+        `).join('');
+    } else {
+        container.innerHTML = '<div class="p-6 text-center text-gray-500">No members found in this group.</div>';
+    }
+}
+
+function renderContributionChart(members) {
+    const ctx = document.getElementById('contributionChart')?.getContext('2d');
+    if (!ctx || !members || members.length === 0) return;
+    
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: members.map(m => m.name),
+            datasets: [{
+                data: members.map(m => m.contribution_percentage || 0),
+                backgroundColor: ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1e3a8a'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: (context) => {
+                            const label = context.label || '';
+                            const value = context.parsed || 0;
+                            return `${label}: ${value}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function getInitials(name) {
+    if (!name) return '?';
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function getClassificationClass(classification) {
+    const classes = {
+        'Active': 'bg-green-100 text-green-800',
+        'Moderate': 'bg-yellow-100 text-yellow-800',
+        'Passive': 'bg-orange-100 text-orange-800',
+        'Free Rider': 'bg-red-100 text-red-800'
+    };
+    return classes[classification] || 'bg-gray-100 text-gray-600';
+}
+
+function showNoGroupMessage() {
+    const container = document.getElementById('members-list');
+    document.getElementById('group-name').textContent = 'No Group Assigned';
+    document.getElementById('course-name').textContent = 'You are not part of any group yet';
+    document.getElementById('member-count').textContent = '0 Members';
+    
+    if (container) {
+        container.innerHTML = `
+            <div class="p-12 text-center">
+                <div class="text-6xl mb-4">👥</div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No Group Assigned</h3>
+                <p class="text-gray-500">You haven't been assigned to any group yet. Wait for your professor to add you to a group.</p>
+            </div>
+        `;
+    }
+}
+
+export default renderGroupDetails;

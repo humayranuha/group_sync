@@ -1,0 +1,526 @@
+<!-- D:\wamp64\www\gorupSync\group_sync\frontend\pages\student\repository-connection.html -->
+<!DOCTYPE html>
+<html lang="bn" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Repository Connection - GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        :root {
+            --primary: #3AAFA9;
+            --primary-dark: #2B7A78;
+            --bg-light: #f0f4f8;
+            --bg-dark: #1a1a2e;
+            --text-light: #1a1a2e;
+            --text-dark: #e2e8f0;
+            --card-light: rgba(255, 255, 255, 0.85);
+            --card-dark: rgba(26, 26, 46, 0.85);
+        }
+        [data-theme="dark"] { --bg: var(--bg-dark); --text: var(--text-dark); --card: var(--card-dark); }
+        [data-theme="light"] { --bg: var(--bg-light); --text: var(--text-light); --card: var(--card-light); }
+        
+        body { background: var(--bg); color: var(--text); transition: all 0.3s; min-height: 100vh; }
+        
+        .glass-card {
+            background: var(--card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(58, 175, 169, 0.15);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+        .glass-card:hover { transform: translateY(-5px); box-shadow: 0 25px 50px rgba(58, 175, 169, 0.15); }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3AAFA9, #2B7A78);
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(58, 175, 169, 0.3); }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid rgba(58, 175, 169, 0.2);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+            transition: all 0.3s;
+            outline: none;
+        }
+        .input-field:focus { border-color: #3AAFA9; box-shadow: 0 0 0 4px rgba(58, 175, 169, 0.1); }
+        
+        .badge-connected { background: #10b981; color: white; padding: 0.25rem 1rem; border-radius: 50px; font-size: 0.875rem; }
+        .badge-disconnected { background: #ef4444; color: white; padding: 0.25rem 1rem; border-radius: 50px; font-size: 0.875rem; }
+        
+        .status-card { background: rgba(58, 175, 169, 0.05); border-radius: 12px; padding: 1rem; }
+        .activity-item { display: flex; align-items: start; gap: 0.75rem; padding: 0.75rem; border-radius: 12px; background: rgba(58, 175, 169, 0.05); transition: all 0.3s; }
+        .activity-item:hover { background: rgba(58, 175, 169, 0.1); }
+        
+        @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-slide-in { animation: slideIn 0.5s ease-out; }
+        
+        .sidebar-teal { background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%); border-right: 1px solid rgba(58,175,169,0.08); }
+        .nav-link { transition: all 0.3s ease; color: rgba(255,255,255,0.55); border-radius: 12px; padding: 0.65rem 1rem; display: flex; align-items: center; gap: 0.75rem; font-weight: 500; font-size: 0.95rem; cursor: pointer; text-decoration: none; }
+        .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
+        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
+        
+        .logout-btn { transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent; border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px; }
+        .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
+        
+        .menu-btn { background: rgba(58,175,169,0.90); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.08); }
+        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
+        
+        .theme-toggle { transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer; color: rgba(255,255,255,0.70); font-size: 17px; }
+        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); }
+        
+        @media (max-width:768px) { .glass-card { padding: 1rem; } }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
+        <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
+            <a href="#" class="text-2xl font-extrabold tracking-tight text-white">Group<span class="text-[#c6f0ee]">Sync</span></a>
+            <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Student</span>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
+            <a href="dashboard.html" class="nav-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="group-details.html" class="nav-link"><span class="icon">👥</span> My Group</a>
+            <a href="repository-connection.html" class="nav-link active"><span class="icon">🔗</span> GitHub Connection</a>
+            <a href="contribution-analytics.html" class="nav-link"><span class="icon">📈</span> Analytics</a>
+            <a href="peer-review.html" class="nav-link"><span class="icon">⭐</span> Peer Reviews</a>
+            <a href="ai-feedback.html" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
+        </nav>
+        <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm">ST</div>
+                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Student</p><p class="text-xs text-white/40 truncate">Student</p></div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Mobile Menu -->
+    <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
+
+    <!-- Header -->
+    <header class="fixed top-0 right-0 left-0 md:left-64 z-30 bg-[rgba(43,122,120,0.88)] backdrop-blur-[14px] border-b border-[rgba(58,175,169,0.12)]">
+        <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-white/70 hidden sm:block">GitHub Connection</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" class="theme-toggle"><i id="themeIcon" class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <div class="max-w-4xl mx-auto">
+            <!-- Main Card -->
+            <div class="glass-card animate-slide-in">
+                <!-- Connection Status -->
+                <div class="status-card mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-semibold text-sm">Connection Status</h3>
+                        <p id="connectionStatus" class="text-sm text-gray-500 mt-1">Checking...</p>
+                    </div>
+                    <div id="statusBadge" class="badge-disconnected text-sm">Disconnected</div>
+                </div>
+
+                <!-- Connection Form -->
+                <form id="githubForm" class="space-y-6">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-link mr-2 text-[#3AAFA9]"></i>
+                            GitHub Repository URL
+                        </label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <input type="url" id="repoUrl" class="input-field" 
+                                   placeholder="https://github.com/username/repository" required>
+                            <button type="submit" id="connectBtn" class="btn-primary whitespace-nowrap">
+                                <i class="fas fa-link mr-2"></i> Connect
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-info-circle mr-1"></i> 
+                            Enter your public or private repository URL
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            <i class="fas fa-key mr-2 text-[#3AAFA9]"></i>
+                            Personal Access Token 
+                            <span class="text-gray-400 text-xs">(Required for private repos)</span>
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="githubToken" class="input-field pr-12" 
+                                   placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                            <button type="button" onclick="toggleTokenVisibility()" 
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-eye" id="tokenEye"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i class="fas fa-shield-alt mr-1"></i> 
+                            Token is stored securely and never exposed.
+                            <a href="https://github.com/settings/tokens" target="_blank" 
+                               class="text-[#3AAFA9] hover:underline font-medium">
+                                Generate token →
+                            </a>
+                        </p>
+                    </div>
+                </form>
+
+                <!-- Connected Repository Info -->
+                <div id="repoInfo" class="mt-6 p-4 rounded-xl bg-green-50 dark:bg-green-900/20 hidden">
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                        <div class="flex items-start gap-3">
+                            <i class="fas fa-check-circle text-green-500 text-xl mt-1"></i>
+                            <div>
+                                <h4 class="font-semibold">Connected Repository</h4>
+                                <p id="connectedRepo" class="text-sm text-gray-600 dark:text-gray-300 mt-1 break-all">Loading...</p>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="viewRepo()" class="text-sm text-[#3AAFA9] hover:underline">
+                                <i class="fas fa-external-link-alt mr-1"></i> View
+                            </button>
+                            <button onclick="disconnectRepo()" class="text-sm text-red-500 hover:underline">
+                                <i class="fas fa-unlink mr-1"></i> Disconnect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                <div class="glass-card p-4 text-center">
+                    <div class="flex items-center justify-center gap-2 text-[#3AAFA9] text-2xl mb-2">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <p class="text-sm text-gray-500">Total Commits</p>
+                    <p id="totalCommits" class="text-2xl font-bold">0</p>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <div class="flex items-center justify-center gap-2 text-[#3AAFA9] text-2xl mb-2">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <p class="text-sm text-gray-500">Contributors</p>
+                    <p id="contributors" class="text-2xl font-bold">0</p>
+                </div>
+                <div class="glass-card p-4 text-center">
+                    <div class="flex items-center justify-center gap-2 text-[#3AAFA9] text-2xl mb-2">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <p class="text-sm text-gray-500">Last Synced</p>
+                    <p id="lastSynced" class="text-sm font-semibold">Never</p>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="glass-card mt-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <i class="fas fa-history text-[#3AAFA9]"></i>
+                        Recent Activity
+                    </h3>
+                    <button onclick="fetchActivity()" class="text-sm text-[#3AAFA9] hover:underline">
+                        <i class="fas fa-sync-alt mr-1"></i> Refresh
+                    </button>
+                </div>
+                <div id="activityLog" class="space-y-3 max-h-60 overflow-y-auto">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-inbox text-4xl mb-2 opacity-30"></i>
+                        <p>No activity yet. Connect your repository to start tracking.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = 'http://127.0.0.1:8000/api';
+        const STORAGE_KEYS = { TOKEN: 'groupsync_auth_token', USER: 'groupsync_user_data', THEME: 'theme' };
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        const AuthService = {
+            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated() { return !!this.getToken(); },
+            logout() {
+                localStorage.removeItem(STORAGE_KEYS.TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER);
+                window.location.href = '/frontend/pages/public/login.html';
+            }
+        };
+
+        // ============================================
+        // HELPERS
+        // ============================================
+        function getInitials(name) {
+            if (!name) return 'ST';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-50 border-green-400 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+                error: 'bg-red-50 border-red-400 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
+                info: 'bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+            };
+            toast.className = `fixed bottom-4 right-4 z-50 border-l-4 rounded-xl shadow-xl p-4 max-w-sm ${colors[type]}`;
+            toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70" onclick="this.parentElement.parentElement.remove()">&times;</button></div>`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+
+        function toggleTokenVisibility() {
+            const input = document.getElementById('githubToken');
+            const eye = document.getElementById('tokenEye');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.className = 'fas fa-eye-slash';
+            } else {
+                input.type = 'password';
+                eye.className = 'fas fa-eye';
+            }
+        }
+
+        // ============================================
+        // GITHUB CONNECTION LOGIC
+        // ============================================
+        const token = AuthService.getToken();
+
+        async function checkConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/github/status`, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.connected) {
+                    document.getElementById('statusBadge').className = 'badge-connected';
+                    document.getElementById('statusBadge').textContent = 'Connected';
+                    document.getElementById('connectionStatus').textContent = `Connected to ${data.repo_url || 'repository'}`;
+                    document.getElementById('repoInfo').classList.remove('hidden');
+                    document.getElementById('connectedRepo').textContent = data.repo_url || 'Repository';
+                    document.getElementById('repoUrl').value = data.repo_url || '';
+                    if (data.stats) updateStats(data.stats);
+                } else {
+                    document.getElementById('statusBadge').className = 'badge-disconnected';
+                    document.getElementById('statusBadge').textContent = 'Disconnected';
+                    document.getElementById('connectionStatus').textContent = 'No repository connected';
+                    document.getElementById('repoInfo').classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Error checking connection:', error);
+                document.getElementById('connectionStatus').textContent = 'Error checking status';
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalCommits').textContent = stats.total_commits || 0;
+            document.getElementById('contributors').textContent = stats.contributors || 0;
+            document.getElementById('lastSynced').textContent = stats.last_synced || 'Never';
+        }
+
+        // Connect GitHub Repository
+        document.getElementById('githubForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const repoUrl = document.getElementById('repoUrl').value.trim();
+            const githubToken = document.getElementById('githubToken').value.trim();
+            const connectBtn = document.getElementById('connectBtn');
+
+            if (!repoUrl) {
+                showToast('Please enter a GitHub repository URL', 'warning');
+                return;
+            }
+
+            if (!repoUrl.match(/^https?:\/\/github\.com\/[\w-]+\/[\w-]+/)) {
+                showToast('Invalid GitHub repository URL format', 'error');
+                return;
+            }
+
+            connectBtn.disabled = true;
+            connectBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Connecting...';
+
+            try {
+                const response = await fetch(`${API_BASE}/github/connect`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ repo_url: repoUrl, github_token: githubToken || null })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    showToast('✅ Repository connected successfully!', 'success');
+                    checkConnection();
+                    fetchActivity();
+                    setTimeout(() => checkConnection(), 1000);
+                } else {
+                    showToast('❌ ' + (data.message || 'Connection failed'), 'error');
+                }
+            } catch (error) {
+                showToast('❌ Network error. Please try again.', 'error');
+            } finally {
+                connectBtn.disabled = false;
+                connectBtn.innerHTML = '<i class="fas fa-link mr-2"></i> Connect';
+            }
+        });
+
+        // Disconnect Repository
+        async function disconnectRepo() {
+            if (!confirm('Are you sure you want to disconnect this repository?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/github/disconnect`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    showToast('✅ Repository disconnected successfully', 'success');
+                    checkConnection();
+                    document.getElementById('activityLog').innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-inbox text-4xl mb-2 opacity-30"></i>
+                            <p>No activity yet. Connect your repository to start tracking.</p>
+                        </div>
+                    `;
+                } else {
+                    showToast('❌ ' + (data.message || 'Disconnection failed'), 'error');
+                }
+            } catch (error) {
+                showToast('❌ Network error. Please try again.', 'error');
+            }
+        }
+
+        function viewRepo() {
+            const repoUrl = document.getElementById('connectedRepo').textContent;
+            if (repoUrl && repoUrl !== 'Loading...') {
+                window.open(repoUrl, '_blank');
+            }
+        }
+
+        async function fetchActivity() {
+            try {
+                const response = await fetch(`${API_BASE}/github/activity`, {
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                
+                if (data.success && data.activities && data.activities.length > 0) {
+                    const html = data.activities.map(activity => `
+                        <div class="activity-item">
+                            <i class="fas fa-code-commit text-[#3AAFA9] mt-1"></i>
+                            <div class="flex-1">
+                                <p class="font-medium text-sm">${activity.message || 'Commit activity'}</p>
+                                <div class="flex items-center gap-3 mt-1">
+                                    <span class="text-xs text-gray-500">${activity.author || 'Unknown'}</span>
+                                    <span class="text-xs text-gray-400">${new Date(activity.date).toLocaleString()}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('');
+                    document.getElementById('activityLog').innerHTML = html;
+                } else {
+                    document.getElementById('activityLog').innerHTML = `
+                        <div class="text-center text-gray-500 py-8">
+                            <i class="fas fa-inbox text-4xl mb-2 opacity-30"></i>
+                            <p>No recent activity found</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error fetching activity:', error);
+            }
+        }
+
+        // ============================================
+        // THEME TOGGLE
+        // ============================================
+        (function initTheme() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+            const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+            
+            if (saved === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+            
+            toggle.addEventListener('click', function() {
+                const isDark = html.classList.toggle('dark');
+                if (isDark) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'light');
+                }
+            });
+        })();
+
+        // ============================================
+        // INIT
+        // ============================================
+        function init() {
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = '/frontend/pages/public/login.html';
+                return;
+            }
+
+            const user = AuthService.getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
+                document.getElementById('user-avatar').textContent = getInitials(`${user.first_name || 'S'} ${user.last_name || 'T'}`);
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+
+            if (token) {
+                checkConnection();
+                fetchActivity();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

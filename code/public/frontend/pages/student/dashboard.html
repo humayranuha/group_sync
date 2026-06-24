@@ -1,0 +1,902 @@
+<!-- D:\wamp64\www\gorupSync\group_sync\frontend\pages\student\dashboard.html -->
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard — GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+    <style>
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
+        .dark body { background: #0b1717; color: #e8edf0; }
+        html { scroll-behavior: smooth; }
+
+        .dark .bg-white { background-color: #132424 !important; }
+        .dark .bg-gray-50 { background-color: #0b1717 !important; }
+        .dark .bg-gray-100 { background-color: #1a2d2d !important; }
+        .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .border-gray-200 { border-color: #1e3a3a !important; }
+        .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important; }
+        .dark .divide-gray-200>* { border-color: #1e3a3a !important; }
+
+        .sidebar-teal {
+            background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
+            border-right: 1px solid rgba(58,175,169,0.08);
+        }
+        .dark .sidebar-teal { background: linear-gradient(180deg, #071010 0%, #0f2624 100%); }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.55);
+            border-radius: 12px;
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
+        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
+
+        .card-glass {
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(58,175,169,0.06);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        .card-glass:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 20px 40px -12px rgba(58,175,169,0.12); }
+        .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+
+        .stat-card {
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+            border: 1px solid rgba(58,175,169,0.06);
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+        }
+        .stat-card:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 16px 32px -12px rgba(58,175,169,0.12); }
+        .dark .stat-card { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+
+        .stat-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 48px; height: 48px; border-radius: 14px; font-size: 1.3rem;
+        }
+        .stat-icon.teal-bg { background: rgba(58,175,169,0.10); color: #3AAFA9; }
+
+        .btn-teal {
+            background: #3AAFA9; color: #fff; transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(58,175,169,0.25);
+            padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
+        }
+        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); }
+        .dark .btn-teal { background: #2B7A78; }
+
+        .badge-active { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .badge-moderate { background: rgba(58,175,169,0.10); color: #7ccfca; }
+        .badge-passive { background: rgba(58,175,169,0.08); color: #94a3b8; }
+        .badge-free-rider { background: rgba(58,175,169,0.06); color: #64748b; }
+        .badge-not-started { background: rgba(148,163,184,0.15); color: #94a3b8; }
+
+        .theme-toggle {
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer;
+            color: rgba(255,255,255,0.70); font-size: 17px;
+        }
+        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); }
+
+        .menu-btn {
+            background: rgba(58,175,169,0.90); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
+
+        .logout-btn {
+            transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent;
+            border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px;
+        }
+        .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
+
+        .progress-teal { background: rgba(58,175,169,0.10); border-radius: 999px; overflow: hidden; height: 8px; }
+        .progress-teal .bar { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #2B7A78, #3AAFA9); transition: width 0.6s ease; }
+
+        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.5s ease forwards; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
+
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-box {
+            background: white; border-radius: 24px; max-width: 700px; width: 95%;
+            max-height: 85vh; overflow-y: auto; padding: 30px;
+            position: relative; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .dark .modal-box { background: #132424; }
+        .modal-close {
+            position: absolute; top: 16px; right: 20px; font-size: 28px;
+            cursor: pointer; color: #999; transition: color 0.2s;
+        }
+        .modal-close:hover { color: #333; }
+        .dark .modal-close { color: #666; }
+        .dark .modal-close:hover { color: #ccc; }
+
+        @media (max-width:768px) { .stat-card { padding:1rem; } .stat-icon { width:40px; height:40px; font-size:1.1rem; } }
+    </style>
+</head>
+<body>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
+        <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
+            <a href="#" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
+                Group<span class="text-[#c6f0ee]">Sync</span>
+            </a>
+            <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Student</span>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
+            <a href="dashboard.html" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
+            <a href="group-details.html" data-page="group" class="nav-link"><span class="icon">👥</span> My Group</a>
+            <a href="repository-connection.html" data-page="repository" class="nav-link"><span class="icon">🔗</span> GitHub Connection</a>
+            <a href="contribution-analytics.html" data-page="analytics" class="nav-link"><span class="icon">📈</span> Analytics</a>
+            <a href="peer-review.html" data-page="peer-review" class="nav-link"><span class="icon">⭐</span> Peer Reviews</a>
+            <a href="ai-feedback.html" data-page="ai-feedback" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
+            <a href="#" data-page="profile" class="nav-link" onclick="showProfileModal()"><span class="icon">👤</span> Profile</a>
+        </nav>
+        <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20">ST</div>
+                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Student</p><p class="text-xs text-white/40 truncate">Student</p></div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== MOBILE MENU ===== -->
+    <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
+
+    <!-- ===== HEADER ===== -->
+    <header class="fixed top-0 right-0 left-0 md:left-64 z-30 bg-[rgba(43,122,120,0.88)] backdrop-blur-[14px] border-b border-[rgba(58,175,169,0.12)] transition-colors">
+        <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-white/70 hidden sm:block">Student Dashboard</span>
+                <span class="h-4 w-px bg-white/10 hidden sm:block"></span>
+                <span id="page-title" class="text-sm font-medium text-white/50">Overview</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme"><i id="themeIcon" class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <div id="page-content" class="animate-fade-in">
+            <!-- Content loaded dynamically -->
+        </div>
+    </main>
+
+    <script>
+        // ============================================
+        // COMPLETE RESET - NO DEMO DATA EVER!
+        // ============================================
+        
+        // Clear everything on page load
+        (function resetAllData() {
+            // Clear session storage
+            sessionStorage.clear();
+            
+            // Remove any demo data flags
+            localStorage.removeItem('demo_data_loaded');
+            localStorage.removeItem('dashboard_demo_data');
+            
+            console.log('🧹 All demo data cleared!');
+        })();
+
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = 'http://127.0.0.1:8000/api';
+        const STORAGE_KEYS = {
+            TOKEN: 'groupsync_auth_token',
+            USER: 'groupsync_user_data',
+            THEME: 'theme'
+        };
+
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toast-container') || (() => {
+                const c = document.createElement('div');
+                c.id = 'toast-container';
+                c.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
+                document.body.appendChild(c);
+                return c;
+            })();
+
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-green-50 border-green-400 text-green-800 dark:bg-green-900/20 dark:text-green-300',
+                error: 'bg-red-50 border-red-400 text-red-800 dark:bg-red-900/20 dark:text-red-300',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-300',
+                info: 'bg-blue-50 border-blue-400 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
+            };
+            const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+            
+            toast.className = `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]}`;
+            toast.innerHTML = `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
+            container.appendChild(toast);
+            
+            requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
+            toast.querySelector('button').onclick = () => toast.remove();
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
+            return toast;
+        }
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        const AuthService = {
+            getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated() { return !!this.getToken(); },
+            logout() {
+                localStorage.removeItem(STORAGE_KEYS.TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER);
+                sessionStorage.clear();
+                window.location.href = '/frontend/pages/public/login.html';
+            },
+            updateUser(userData) {
+                localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+            }
+        };
+
+        // ============================================
+        // API SERVICE - RETURNS NULL ON ERROR (NO DEMO DATA)
+        // ============================================
+        const ApiService = {
+            async request(endpoint, options = {}) {
+                const token = AuthService.getToken();
+                const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+                
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+                    
+                    // If response is not ok, return null (no demo data)
+                    if (!response.ok) {
+                        console.warn(`API Error: ${response.status} - ${response.statusText}`);
+                        return null;
+                    }
+                    
+                    const data = await response.json();
+                    return data;
+                } catch (error) {
+                    console.error('API Request failed:', error);
+                    return null; // NEVER return demo data!
+                }
+            },
+            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
+            put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); }
+        };
+
+        // ============================================
+        // GLOBALS
+        // ============================================
+        let charts = {};
+        let currentStudentData = null;
+
+        function getInitials(name) {
+            if (!name) return 'ST';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function getClassificationClass(classification) {
+            const map = { 
+                'Active': 'badge-active', 
+                'Moderate': 'badge-moderate', 
+                'Passive': 'badge-passive', 
+                'Free Rider': 'badge-free-rider',
+                'Not Started': 'badge-not-started'
+            };
+            return map[classification] || 'badge-not-started';
+        }
+
+        // ============================================
+        // EMPTY DATA OBJECT (ALWAYS ZERO)
+        // ============================================
+        const EMPTY_DATA = {
+            total_commits: 0,
+            total_prs: 0,
+            activity_consistency_score: 0,
+            team_rank: 0,
+            weekly_data: [],
+            daily_activity: [0, 0, 0, 0, 0, 0, 0],
+            peer_breakdown: [],
+            team_ranking: [],
+            score_breakdown: { github: 0, attendance: 0, peer_reviews: 0, working_hours: 0 }
+        };
+
+        // ============================================
+        // MODAL SYSTEM
+        // ============================================
+        function showModal(title, contentHtml) {
+            const oldModal = document.getElementById('dynamicModal');
+            if (oldModal) oldModal.remove();
+            
+            const modalHtml = `
+                <div id="dynamicModal" class="modal-overlay" onclick="if(event.target===this) closeModal()">
+                    <div class="modal-box">
+                        <span class="modal-close" onclick="closeModal()">&times;</span>
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">${title}</h2>
+                        ${contentHtml}
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('dynamicModal');
+            if (modal) modal.remove();
+        }
+
+        // ============================================
+        // PROFILE MODAL
+        // ============================================
+        function showProfileModal() {
+            const user = AuthService.getUser();
+            if (!user) {
+                showToast('Please login first', 'error');
+                return;
+            }
+            
+            showModal('👤 My Profile', `
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-20 h-20 rounded-full bg-gradient-to-r from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white text-2xl font-bold">
+                            ${getInitials((user.first_name || 'S') + ' ' + (user.last_name || 'T'))}
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100">${user.first_name || 'Student'} ${user.last_name || ''}</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">${user.email || ''}</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">${user.role || 'Student'}</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Department</p>
+                            <p class="font-medium text-gray-800 dark:text-gray-100">${user.department || 'N/A'}</p>
+                        </div>
+                        <div class="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Joined</p>
+                            <p class="font-medium text-gray-800 dark:text-gray-100">${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</p>
+                        </div>
+                    </div>
+                    <hr class="border-gray-200 dark:border-gray-700">
+                    <div class="space-y-3">
+                        <button onclick="closeModal(); showChangePassword()" class="btn-teal w-full">Change Password</button>
+                        <button onclick="closeModal()" class="btn-teal-outline w-full">Close</button>
+                    </div>
+                </div>
+            `);
+        }
+
+        function showChangePassword() {
+            showModal('🔑 Change Password', `
+                <form id="passwordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+                        <input type="password" id="currentPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Enter current password" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+                        <input type="password" id="newPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Enter new password (min 6 chars)" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-transparent" placeholder="Confirm new password" required>
+                    </div>
+                    <div class="flex gap-3">
+                        <button type="submit" class="btn-teal flex-1">Update Password</button>
+                        <button type="button" onclick="closeModal()" class="btn-teal-outline flex-1">Cancel</button>
+                    </div>
+                </form>
+            `);
+
+            document.getElementById('passwordForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const current = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmPassword').value;
+
+                if (!current || !newPass || !confirm) {
+                    showToast('All fields are required', 'error');
+                    return;
+                }
+                if (newPass.length < 6) {
+                    showToast('New password must be at least 6 characters', 'error');
+                    return;
+                }
+                if (newPass !== confirm) {
+                    showToast('Passwords do not match', 'error');
+                    return;
+                }
+
+                try {
+                    const response = await ApiService.post('/auth/change-password', {
+                        current_password: current,
+                        new_password: newPass,
+                        new_password_confirmation: confirm
+                    });
+                    if (response && response.success) {
+                        showToast('✅ Password changed successfully!', 'success');
+                        closeModal();
+                    } else {
+                        showToast('❌ ' + (response?.message || 'Failed to change password'), 'error');
+                    }
+                } catch (error) {
+                    showToast('❌ Error: ' + error.message, 'error');
+                }
+            });
+        }
+
+        // ============================================
+        // DETAIL FUNCTIONS (stat card clicks)
+        // ============================================
+        function showCommitDetails() {
+            const data = currentStudentData || EMPTY_DATA;
+            if (!data.weekly_data || data.weekly_data.length === 0) {
+                showModal('📊 Commit Details', `
+                    <div class="text-center py-8">
+                        <i class="fas fa-inbox text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No commit data available yet.</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Start contributing to see your commit history.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            let rows = data.weekly_data.map(w => `
+                <tr class="border-t border-gray-100 dark:border-gray-800">
+                    <td class="px-4 py-2">Week ${w.week}</td>
+                    <td class="px-4 py-2 text-center">${w.commits}</td>
+                    <td class="px-4 py-2"><div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${Math.min((w.commits / 30) * 100, 100)}%"></div></div></td>
+                </tr>
+            `).join('');
+            const total = data.weekly_data.reduce((sum, w) => sum + w.commits, 0);
+            
+            showModal('📊 Commit Breakdown', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Week</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Distribution</th></tr></thead><tbody>${rows}</tbody><tfoot class="bg-gray-50 dark:bg-gray-800 font-bold"><tr><td class="px-4 py-2">Total</td><td class="px-4 py-2 text-center text-[#3AAFA9]">${total}</td><td></td></tr></tfoot></table></div>
+                <p class="text-xs text-gray-400 mt-2">Showing last ${data.weekly_data.length} weeks.</p>
+            `);
+        }
+
+        function showPeerReviewDetails() {
+            const reviews = currentStudentData?.peer_breakdown || [];
+            if (reviews.length === 0) {
+                showModal('⭐ Peer Reviews', `
+                    <div class="text-center py-8">
+                        <i class="fas fa-star text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No peer reviews yet.</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Complete peer reviews for your team members to see feedback here.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            let rows = reviews.map(r => `
+                <tr class="border-t border-gray-100 dark:border-gray-800">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${r.reviewer}</td>
+                    <td class="px-4 py-2 text-center"><span class="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">${r.rating} ⭐</span></td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400 italic">${r.comment || 'No comment'}</td>
+                </tr>
+            `).join('');
+            
+            showModal('⭐ Peer Reviews', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Reviewer</th><th class="px-4 py-2 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rating</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Comment</th></tr></thead><tbody>${rows}</tbody></table></div>
+                <p class="text-xs text-gray-400 mt-2">Reviews received from team members.</p>
+            `);
+        }
+
+        function showActivityDetails() {
+            const data = currentStudentData || EMPTY_DATA;
+            const breakdown = data.score_breakdown || { github: 0, attendance: 0, peer_reviews: 0, working_hours: 0 };
+            const total = data.activity_consistency_score || 0;
+            
+            const items = [
+                { label: 'GitHub Activity', value: breakdown.github || 0, color: '#3AAFA9' },
+                { label: 'Attendance', value: breakdown.attendance || 0, color: '#2B7A78' },
+                { label: 'Peer Reviews', value: breakdown.peer_reviews || 0, color: '#5ccbc5' },
+                { label: 'Working Hours', value: breakdown.working_hours || 0, color: '#a0d6d3' }
+            ];
+            
+            let rows = items.map(item => `
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-sm text-gray-600 dark:text-gray-400">${item.label}</span>
+                    <div class="flex items-center gap-2"><div class="w-32 bg-gray-200 dark:bg-gray-700 h-2 rounded-full"><div class="h-2 rounded-full" style="width: ${item.value}%; background: ${item.color};"></div></div><span class="text-sm font-medium text-gray-800 dark:text-gray-100">${item.value}%</span></div>
+                </div>
+            `).join('');
+            
+            showModal('📈 Activity Score Breakdown', `
+                <div class="space-y-2">${rows}<div class="mt-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-lg flex justify-between"><span class="font-semibold text-gray-800 dark:text-gray-100">Overall Activity Score</span><span class="font-bold text-[#3AAFA9] text-xl">${total}%</span></div></div>
+            `);
+        }
+
+        function showTeamRankDetails() {
+            const data = currentStudentData || EMPTY_DATA;
+            const rankings = data.team_ranking || [];
+            
+            if (rankings.length === 0) {
+                showModal('🏆 Team Rankings', `
+                    <div class="text-center py-8">
+                        <i class="fas fa-trophy text-4xl text-gray-300 dark:text-gray-600 mb-4"></i>
+                        <p class="text-gray-500 dark:text-gray-400">No team rankings available yet.</p>
+                        <p class="text-sm text-gray-400 dark:text-gray-500 mt-2">Join a group to see team rankings.</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            let rows = rankings.map((r, index) => {
+                const isUser = r.isUser || index === 0;
+                return `<tr class="border-t border-gray-100 dark:border-gray-800 ${isUser ? 'bg-[#3AAFA9]/10 dark:bg-[#3AAFA9]/20' : ''}"><td class="px-4 py-2 font-medium ${isUser ? 'text-[#3AAFA9] dark:text-[#5ccbc5]' : 'text-gray-900 dark:text-gray-100'}">#${r.rank || index + 1}</td><td class="px-4 py-2 ${isUser ? 'font-semibold' : ''}">${r.team || 'Team ' + (index + 1)} ${isUser ? '👈 (You)' : ''}</td><td class="px-4 py-2 text-right">${r.score || 0}%</td></tr>`;
+            }).join('');
+            
+            showModal('🏆 Team Rankings', `
+                <div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Rank</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Team</th><th class="px-4 py-2 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Score</th></tr></thead><tbody>${rows}</tbody></table></div>
+                <p class="text-xs text-gray-400 mt-2">Your team is highlighted.</p>
+            `);
+        }
+
+        // ============================================
+        // RENDER DASHBOARD
+        // ============================================
+        async function renderDashboard() {
+            const user = AuthService.getUser();
+            const container = document.getElementById('page-content');
+            
+            // Show loading state
+            container.innerHTML = `
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading your data...</p>
+                    </div>
+                </div>
+            `;
+
+            // Load data from API ONLY - NO DEMO DATA
+            await loadStudentData();
+            
+            // Render UI with data (all zeros if API failed)
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                        <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Student'}! 👋</h2>
+                        <p class="text-white/80 mt-1 text-sm">Here's your academic performance overview</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="stat-card" onclick="showCommitDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="total-commits">${currentStudentData?.total_commits ?? 0}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-code"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for details</p>
+                        </div>
+                        <div class="stat-card" onclick="showPeerReviewDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Peer Reviews</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="peer-reviews">${currentStudentData?.total_prs ?? 0}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-star"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for details</p>
+                        </div>
+                        <div class="stat-card" onclick="showActivityDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="activity-score">${currentStudentData?.activity_consistency_score ?? 0}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-chart-line"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for breakdown</p>
+                        </div>
+                        <div class="stat-card" onclick="showTeamRankDetails()">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Team Rank</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="team-rank">${currentStudentData?.team_rank ? '#' + currentStudentData.team_rank : '#0'}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-trophy"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for rankings</p>
+                        </div>
+                    </div>
+
+                    <!-- GitHub Connection Card -->
+                    <div class="card-glass p-6 hover:shadow-xl transition-all cursor-pointer" onclick="window.location.href='repository-connection.html'">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">GitHub</p>
+                                <p class="text-lg font-bold text-gray-800 dark:text-gray-100 mt-1">Connect Repository</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-full bg-[#3AAFA9]/10 flex items-center justify-center text-[#3AAFA9]">
+                                <i class="fab fa-github text-2xl"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Commit Trends</h3><canvas id="commitTrendChart" height="220"></canvas></div>
+                        <div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Weekly Activity</h3><canvas id="weeklyActivityChart" height="220"></canvas></div>
+                    </div>
+
+                    <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                            <div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">AI Performance Classification</h3><p class="text-sm text-gray-500 dark:text-gray-400">Powered by machine learning</p></div>
+                            <span id="classification-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold badge-not-started">Not Started</span>
+                        </div>
+                        <div class="progress-teal mb-3"><div id="performance-bar" class="bar" style="width:0%"></div></div>
+                        <p id="ai-feedback-text" class="text-gray-600 dark:text-gray-300 text-sm">Start contributing to get AI-powered feedback on your performance.</p>
+                    </div>
+
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Activity</h3></div>
+                        <div id="recent-activity" class="divide-y divide-gray-100 dark:divide-gray-800"><div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div></div>
+                    </div>
+                </div>
+            `;
+
+            // Render charts
+            renderCharts(currentStudentData);
+            await loadAIEvaluation();
+        }
+
+        // ============================================
+        // LOAD STUDENT DATA - API ONLY, NO DEMO!
+        // ============================================
+        async function loadStudentData() {
+            try {
+                const user = AuthService.getUser();
+                if (!user) {
+                    currentStudentData = { ...EMPTY_DATA };
+                    return;
+                }
+                
+                const response = await ApiService.get(`/analytics/student/${user.id}`);
+                
+                // If API returned valid data, use it
+                if (response && response.success && response.data) {
+                    currentStudentData = response.data;
+                    console.log('✅ Data loaded from API:', currentStudentData);
+                } else {
+                    // API failed or returned no data - use EMPTY_DATA (all zeros)
+                    console.warn('⚠️ No data from API, using empty data');
+                    currentStudentData = { ...EMPTY_DATA };
+                }
+            } catch (error) {
+                console.error('❌ Error loading student data:', error);
+                currentStudentData = { ...EMPTY_DATA };
+            }
+        }
+
+        // ============================================
+        // RENDER CHARTS - WITH EMPTY DATA HANDLING
+        // ============================================
+        function renderCharts(data) {
+            const hasCommitData = data?.weekly_data && data.weekly_data.length > 0 && data.weekly_data.some(w => w.commits > 0);
+            
+            // Commit Trends Chart
+            const commitCtx = document.getElementById('commitTrendChart')?.getContext('2d');
+            if (commitCtx) {
+                if (charts.commit) charts.commit.destroy();
+                
+                const labels = hasCommitData ? data.weekly_data.map(w => `W${w.week}`) : ['No Data'];
+                const values = hasCommitData ? data.weekly_data.map(w => w.commits) : [0];
+                
+                charts.commit = new Chart(commitCtx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Commits',
+                            data: values,
+                            borderColor: hasCommitData ? '#3AAFA9' : '#94a3b8',
+                            backgroundColor: hasCommitData ? 'rgba(58,175,169,0.08)' : 'rgba(148,163,184,0.08)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: hasCommitData ? '#3AAFA9' : '#94a3b8',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: hasCommitData ? 4 : 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' commits';
+                                    }
+                                }
+                            }
+                        },
+                        scales: { 
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, 
+                            x: { grid: { display: false } } 
+                        }
+                    }
+                });
+            }
+
+            // Weekly Activity Chart
+            const activityCtx = document.getElementById('weeklyActivityChart')?.getContext('2d');
+            if (activityCtx) {
+                if (charts.activity) charts.activity.destroy();
+                
+                const hasActivityData = data?.daily_activity && data.daily_activity.some(v => v > 0);
+                const values = data?.daily_activity || [0, 0, 0, 0, 0, 0, 0];
+                
+                charts.activity = new Chart(activityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Contributions',
+                            data: values,
+                            backgroundColor: hasActivityData ? 'rgba(58,175,169,0.50)' : 'rgba(148,163,184,0.30)',
+                            borderColor: hasActivityData ? '#3AAFA9' : '#94a3b8',
+                            borderWidth: 2,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' contributions';
+                                    }
+                                }
+                            }
+                        },
+                        scales: { 
+                            y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, 
+                            x: { grid: { display: false } } 
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // LOAD AI EVALUATION
+        // ============================================
+        async function loadAIEvaluation() {
+            try {
+                const user = AuthService.getUser();
+                if (!user) {
+                    updateAICard({
+                        classification: 'Not Started',
+                        overall_score: 0,
+                        feedback: 'Start contributing to get AI-powered feedback on your performance.'
+                    });
+                    return;
+                }
+                
+                const response = await ApiService.get(`/ai/evaluate/student/${user.id}`);
+                if (response && response.success && response.data) {
+                    updateAICard(response.data);
+                } else {
+                    updateAICard({
+                        classification: 'Not Started',
+                        overall_score: 0,
+                        feedback: 'Start contributing to get AI-powered feedback on your performance.'
+                    });
+                }
+            } catch (error) {
+                console.warn('No AI data available');
+                updateAICard({
+                    classification: 'Not Started',
+                    overall_score: 0,
+                    feedback: 'Start contributing to get AI-powered feedback on your performance.'
+                });
+            }
+        }
+
+        function updateAICard(aiEval) {
+            const badge = document.getElementById('classification-badge');
+            const bar = document.getElementById('performance-bar');
+            const feedback = document.getElementById('ai-feedback-text');
+            
+            if (!badge || !bar || !feedback) return;
+            
+            const cls = aiEval.classification || 'Not Started';
+            badge.textContent = cls;
+            badge.className = `px-4 py-1.5 rounded-full text-sm font-semibold ${getClassificationClass(cls)}`;
+            bar.style.width = `${Math.min(aiEval.overall_score || 0, 100)}%`;
+            feedback.textContent = aiEval.feedback || 'Start contributing to get AI-powered feedback on your performance.';
+        }
+
+        // ============================================
+        // THEME TOGGLE
+        // ============================================
+        (function initTheme() {
+            const toggle = document.getElementById('themeToggle');
+            const icon = document.getElementById('themeIcon');
+            const html = document.documentElement;
+            const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+            
+            if (saved === 'dark') {
+                html.classList.add('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            }
+            
+            toggle.addEventListener('click', function() {
+                const isDark = html.classList.toggle('dark');
+                if (isDark) {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
+                } else {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    localStorage.setItem(STORAGE_KEYS.THEME, 'light');
+                }
+            });
+        })();
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = '/frontend/pages/public/login.html';
+                return;
+            }
+
+            const user = AuthService.getUser();
+            if (user) {
+                const name = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
+                document.getElementById('user-name').textContent = name;
+                document.getElementById('user-avatar').textContent = getInitials(name);
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', () => {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+
+            renderDashboard();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
