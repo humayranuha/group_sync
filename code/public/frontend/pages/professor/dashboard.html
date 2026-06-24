@@ -230,6 +230,64 @@
         .modal-close:hover { color: #333; }
         .dark .modal-close { color: #666; }
         .dark .modal-close:hover { color: #ccc; }
+        .input-teal {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    transition: all 0.3s ease;
+    color: #111827 !important;  /* Black text */
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    width: 100%;
+    font-size: 0.95rem;
+}
+.input-teal:focus {
+    border-color: #3AAFA9;
+    box-shadow: 0 0 0 3px rgba(58,175,169,0.20);
+    outline: none;
+}
+.input-teal::placeholder {
+    color: #9ca3af;
+}
+
+.textarea-teal {
+    background: #ffffff;
+    border: 1px solid #d1d5db;
+    transition: all 0.3s ease;
+    color: #111827 !important;  /* Black text */
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    width: 100%;
+    font-size: 0.95rem;
+    resize: vertical;
+    min-height: 80px;
+}
+.textarea-teal:focus {
+    border-color: #3AAFA9;
+    box-shadow: 0 0 0 3px rgba(58,175,169,0.20);
+    background: rgba(255,255,255,0.06);
+    outline: none;
+}
+.textarea-teal::placeholder {
+    color: #9ca3af;
+}
+
+/* Dark mode override */
+.dark .input-teal {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.08);
+    color: #e2e8f0 !important;  /* White text in dark mode */
+}
+.dark .input-teal::placeholder {
+    color: #94a3b8;
+}
+.dark .textarea-teal {
+    background: #1e293b;
+    border-color: rgba(255,255,255,0.08);
+    color: #e2e8f0 !important;
+}
+.dark .textarea-teal::placeholder {
+    color: #94a3b8;
+}
 
         @media (max-width:768px) { .stat-card { padding:1rem; } .stat-icon { width:40px; height:40px; font-size:1.1rem; } }
     </style>
@@ -251,7 +309,6 @@
             <a href="#" data-page="evaluation" class="nav-link"><span class="icon">🎓</span> Student Evaluation</a>
             <a href="#" data-page="reports" class="nav-link"><span class="icon">📄</span> PDF Reports</a>
             <a href="#" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
-            <a href="#" data-page="attendance" class="nav-link"><span class="icon">📋</span> Attendance</a>
         </nav>
         <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
             <div class="flex items-center gap-3">
@@ -368,49 +425,7 @@
             warning(m) { this.show(m, 'warning'); }
             info(m) { this.show(m, 'info'); }
         }
-function showTotalStudentsBreakdown() {
-    const data = loadProfessorData();
-    if (data.courses.length === 0) {
-        showModal('Total Students', '<p class="text-gray-500">No courses available.</p>');
-        return;
-    }
-    let total = 0;
-    let rows = data.courses.map(c => {
-        total += c.students_count || 0;
-        return `
-            <tr class="border-t border-gray-100 dark:border-gray-800">
-                <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td>
-                <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td>
-                <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td>
-                <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td>
-            </tr>
-        `;
-    }).join('');
 
-    const content = `
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-800">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th>
-                    </tr>
-                </thead>
-                <tbody>${rows}</tbody>
-                <tfoot class="bg-gray-50 dark:bg-gray-800 font-bold">
-                    <tr>
-                        <td colspan="2" class="px-4 py-2 text-right">Total:</td>
-                        <td class="px-4 py-2 text-blue-600 dark:text-blue-400">${total}</td>
-                        <td class="px-4 py-2">${data.courses.reduce((sum, c) => sum + (c.groups_count || 0), 0)}</td>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>
-    `;
-    showModal('Total Students per Course', content);
-}
         // ============================================
         // AUTH SERVICE
         // ============================================
@@ -546,7 +561,6 @@ function showTotalStudentsBreakdown() {
         // MODAL FUNCTIONS
         // ============================================
         function showModal(title, contentHtml) {
-            // Remove any existing modal
             const oldModal = document.getElementById('dynamicModal');
             if (oldModal) oldModal.remove();
 
@@ -565,6 +579,110 @@ function showTotalStudentsBreakdown() {
         function closeModal() {
             const modal = document.getElementById('dynamicModal');
             if (modal) modal.remove();
+        }
+
+        // ============================================
+        // CREATE COURSE FUNCTIONS
+        // ============================================
+        function showCreateCourseModal() {
+    const oldModal = document.getElementById('createCourseModal');
+    if (oldModal) oldModal.remove();
+
+    const modalHtml = `
+        <div id="createCourseModal" class="modal-overlay" onclick="if(event.target===this) closeCreateCourseModal()">
+            <div class="modal-box" onclick="event.stopPropagation()">
+                <span class="modal-close" onclick="closeCreateCourseModal()">&times;</span>
+                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">📚 Create New Course</h2>
+                <form id="createCourseForm" onsubmit="createCourse(event)">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Code</label>
+                            <input type="text" id="courseCode" placeholder="e.g., CS501" class="input-teal mt-1" required style="color: #111827 !important; background: #ffffff;">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Title</label>
+                            <input type="text" id="courseTitle" placeholder="e.g., Advanced Programming" class="input-teal mt-1" required style="color: #111827 !important; background: #ffffff;">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Semester</label>
+                            <select id="courseSemester" class="input-teal mt-1" style="appearance: auto; -webkit-appearance: auto; background: #ffffff; color: #111827 !important; padding: 0.75rem 1rem; border-radius: 12px; border: 1px solid #d1d5db; width: 100%; font-size: 0.95rem;">
+                                <option value="Spring 2024">Spring 2024</option>
+                                <option value="Summer 2024">Summer 2024</option>
+                                <option value="Fall 2024">Fall 2024</option>
+                                <option value="Spring 2025">Spring 2025</option>
+                                <option value="Summer 2025">Summer 2025</option>
+                                <option value="Fall 2025" selected>Fall 2025</option>
+                                <option value="Spring 2026">Spring 2026</option>
+                                <option value="Summer 2026">Summer 2026</option>
+                                <option value="Fall 2026">Fall 2026</option>
+                                <option value="Spring 2027">Spring 2027</option>
+                                <option value="Summer 2027">Summer 2027</option>
+                                <option value="Fall 2027">Fall 2027</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                            <textarea id="courseDescription" rows="3" placeholder="Course description..." class="textarea-teal mt-1" style="color: #111827 !important; background: #ffffff;"></textarea>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="courseActive" checked class="checkbox-teal mr-2">
+                            <label class="text-sm text-gray-700 dark:text-gray-300">Course is active</label>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex gap-3">
+                        <button type="submit" class="btn-teal flex-1">Create Course</button>
+                        <button type="button" onclick="closeCreateCourseModal()" class="btn-teal-outline flex-1">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+        function closeCreateCourseModal() {
+            const modal = document.getElementById('createCourseModal');
+            if (modal) modal.remove();
+        }
+
+        async function createCourse(e) {
+            e.preventDefault();
+            
+            const code = document.getElementById('courseCode').value.trim();
+            const title = document.getElementById('courseTitle').value.trim();
+            const semester = document.getElementById('courseSemester').value;
+            const description = document.getElementById('courseDescription').value.trim();
+            const is_active = document.getElementById('courseActive').checked;
+
+            if (!code || !title) {
+                window.toast.warning('Please fill in all required fields');
+                return;
+            }
+
+            const data = loadProfessorData();
+            const exists = data.courses.some(c => c.code === code);
+            if (exists) {
+                window.toast.error('Course code "' + code + '" already exists!');
+                return;
+            }
+
+            const newCourse = {
+                id: Date.now(),
+                code: code,
+                title: title,
+                semester: semester,
+                description: description || 'No description provided.',
+                students_count: 0,
+                groups_count: 0,
+                is_active: is_active
+            };
+
+            data.courses.push(newCourse);
+            saveProfessorData(data);
+            closeCreateCourseModal();
+
+            window.toast.success('Course ' + code + ' created successfully! ✅');
+            renderCourses();
         }
 
         // ============================================
@@ -679,7 +797,50 @@ function showTotalStudentsBreakdown() {
             showModal('Free Riders', content);
         }
 
-        // ----- Existing course details (reuse from earlier) -----
+        function showTotalStudentsBreakdown() {
+            const data = loadProfessorData();
+            if (data.courses.length === 0) {
+                showModal('Total Students', '<p class="text-gray-500">No courses available.</p>');
+                return;
+            }
+            let total = 0;
+            let rows = data.courses.map(c => {
+                total += c.students_count || 0;
+                return `
+                    <tr class="border-t border-gray-100 dark:border-gray-800">
+                        <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${c.code}</td>
+                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.title}</td>
+                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.students_count}</td>
+                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${c.groups_count}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const content = `
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Course</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Title</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Students</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Groups</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                        <tfoot class="bg-gray-50 dark:bg-gray-800 font-bold">
+                            <tr>
+                                <td colspan="2" class="px-4 py-2 text-right">Total:</td>
+                                <td class="px-4 py-2 text-blue-600 dark:text-blue-400">${total}</td>
+                                <td class="px-4 py-2">${data.courses.reduce((sum, c) => sum + (c.groups_count || 0), 0)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            `;
+            showModal('Total Students per Course', content);
+        }
+
         function showCourseDetails(courseId) {
             const data = loadProfessorData();
             const course = data.courses.find(c => c.id === courseId);
@@ -687,7 +848,6 @@ function showTotalStudentsBreakdown() {
                 window.toast.error('Course not found');
                 return;
             }
-            // Build modal content
             let studentsHtml = data.students.slice(0, course.students_count).map(s => `
                 <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
                     <span class="text-sm">${s.name}</span>
@@ -774,7 +934,7 @@ function showTotalStudentsBreakdown() {
                                 <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalStudents}</p></div>
                                 <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
                             </div>
-                            <p class="text-xs text-gray-400 mt-1">Click for count</p>
+                            <p class="text-xs text-gray-400 mt-1">Click to view breakdown</p>
                         </div>
                     </div>
 
@@ -801,7 +961,7 @@ function showTotalStudentsBreakdown() {
                         </div>
                     </div>
 
-                    <!-- Courses Grid (existing) -->
+                    <!-- Courses Grid -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         ${data.courses.filter(c => c.is_active).map(function(course) {
                             var gradient = course.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
@@ -862,7 +1022,7 @@ function showTotalStudentsBreakdown() {
         }
 
         // ============================================
-        // PAGE: COURSES (unchanged)
+        // PAGE: COURSES
         // ============================================
         function renderCourses() {
             const container = document.getElementById('page-content');
@@ -872,11 +1032,17 @@ function showTotalStudentsBreakdown() {
                 <div class="space-y-6">
                     <div class="flex justify-between items-center">
                         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📚 Course Management</h2>
-                        <button id="createCourseBtn" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
+                        <button onclick="showCreateCourseModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Course</button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        ${data.courses.map(function(course) {
+                        ${data.courses.length === 0 ? `
+                            <div class="col-span-full text-center py-12">
+                                <div class="text-6xl mb-4">📖</div>
+                                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Courses Created</h3>
+                                <p class="text-gray-500 dark:text-gray-400 mt-2">Click "New Course" to create your first course.</p>
+                            </div>
+                        ` : data.courses.map(function(course) {
                             var statusColor = course.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
                             var statusText = course.is_active ? 'Active' : 'Inactive';
                             var gradient = course.is_active ? 'from-[#2B7A78] to-[#3AAFA9]' : 'from-gray-500 to-gray-600';
@@ -893,7 +1059,7 @@ function showTotalStudentsBreakdown() {
                                             <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Groups</span><span class="font-medium text-gray-800 dark:text-gray-100">${course.groups_count}</span></div>
                                             <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Status</span><span class="px-2 py-0.5 rounded-full text-xs ${statusColor}">${statusText}</span></div>
                                         </div>
-                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">View Details</button>
+                                        <button onclick="showCourseDetails(${course.id})" class="mt-4 w-full btn-teal text-sm">📋 View Details</button>
                                     </div>
                                 </div>
                             `;
@@ -901,14 +1067,10 @@ function showTotalStudentsBreakdown() {
                     </div>
                 </div>
             `;
-
-            document.getElementById('createCourseBtn')?.addEventListener('click', function() {
-                window.toast.info('Create course form coming soon!');
-            });
         }
 
         // ============================================
-        // PAGE: GROUP ANALYTICS (unchanged)
+        // PAGE: GROUP ANALYTICS
         // ============================================
         function renderGroupAnalytics() {
             const container = document.getElementById('page-content');
@@ -961,7 +1123,7 @@ function showTotalStudentsBreakdown() {
         }
 
         // ============================================
-        // PAGE: STUDENT EVALUATION (unchanged)
+        // PAGE: STUDENT EVALUATION
         // ============================================
         function renderEvaluation() {
             const container = document.getElementById('page-content');
@@ -1021,164 +1183,42 @@ function showTotalStudentsBreakdown() {
         }
 
         // ============================================
-        // PAGE: REPORTS (unchanged)
+        // PAGE: REPORTS
         // ============================================
-        
-                       function renderReports() {
-    const container = document.getElementById('page-content');
-    const data = loadProfessorData();
+        function renderReports() {
+            const container = document.getElementById('page-content');
+            const data = loadProfessorData();
 
-    container.innerHTML = `
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 Generate Reports</h2>
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 PDF Reports</h2>
 
-            <div class="grid md:grid-cols-3 gap-6">
-                <!-- Student Report -->
-                <div class="card-glass p-6 text-center">
-                    <div class="text-5xl mb-4">👨‍🎓</div>
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
-                    <div class="mt-4">
-                        <select id="studentReportSelect" class="input-teal">
-                            <option value="">Select Student</option>
-                            ${data.students.map(function(s) {
-                                return '<option value="' + s.id + '">' + s.name + '</option>';
-                            }).join('')}
-                        </select>
-                    </div>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <button onclick="generateStudentReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
-                        <button onclick="generateStudentReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
-                        <button onclick="generateStudentReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
-                    </div>
-                </div>
-
-                <!-- Group Report -->
-                <div class="card-glass p-6 text-center">
-                    <div class="text-5xl mb-4">👥</div>
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
-                    <div class="mt-4">
-                        <select id="groupReportSelect" class="input-teal">
-                            <option value="">Select Group</option>
-                            ${data.groups.map(function(g) {
-                                return '<option value="' + g.id + '">' + g.name + '</option>';
-                            }).join('')}
-                        </select>
-                    </div>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <button onclick="generateGroupReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
-                        <button onclick="generateGroupReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
-                        <button onclick="generateGroupReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="card-glass p-6 text-center">
+                            <div class="text-5xl mb-4">👨‍🎓</div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p>
+                            <div class="mt-4"><select id="studentReportSelect" class="input-teal"><option value="">Select Student</option>${data.students.map(function(s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('')}</select></div>
+                            <button onclick="generateReport('student')" class="btn-teal mt-4 w-full">Generate PDF</button>
+                        </div>
+                        <div class="card-glass p-6 text-center">
+                            <div class="text-5xl mb-4">👥</div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p>
+                            <div class="mt-4"><select id="groupReportSelect" class="input-teal"><option value="">Select Group</option>${data.groups.map(function(g) { return '<option value="' + g.id + '">' + g.name + '</option>'; }).join('')}</select></div>
+                            <button onclick="generateReport('group')" class="btn-teal mt-4 w-full">Generate PDF</button>
+                        </div>
+                        <div class="card-glass p-6 text-center">
+                            <div class="text-5xl mb-4">📚</div>
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
+                            <div class="mt-4"><select id="courseReportSelect" class="input-teal"><option value="">Select Course</option>${data.courses.map(function(c) { return '<option value="' + c.id + '">' + c.code + '</option>'; }).join('')}</select></div>
+                            <button onclick="generateReport('course')" class="btn-teal mt-4 w-full">Generate PDF</button>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Course Report -->
-                <div class="card-glass p-6 text-center">
-                    <div class="text-5xl mb-4">📚</div>
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p>
-                    <div class="mt-4">
-                        <select id="courseReportSelect" class="input-teal">
-                            <option value="">Select Course</option>
-                            ${data.courses.map(function(c) {
-                                return '<option value="' + c.id + '">' + c.code + ' - ' + c.title + '</option>';
-                            }).join('')}
-                        </select>
-                    </div>
-                    <div class="mt-2 flex flex-wrap gap-2">
-                        <button onclick="generateCourseReport('html')" class="btn-teal flex-1 text-sm">📄 HTML</button>
-                        <button onclick="generateCourseReport('csv')" class="btn-teal flex-1 text-sm">📊 CSV</button>
-                        <button onclick="generateCourseReport('txt')" class="btn-teal flex-1 text-sm">📝 TXT</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-}
-// ============================================
-// REPORT GENERATION FUNCTIONS (Frontend)
-// ============================================
-
-async function generateStudentReport(format) {
-    const select = document.getElementById('studentReportSelect');
-    const studentId = select.value;
-    if (!studentId) {
-        window.toast.warning('Please select a student first');
-        return;
-    }
-    await generateReport('student', studentId, format);
-}
-
-async function generateGroupReport(format) {
-    const select = document.getElementById('groupReportSelect');
-    const groupId = select.value;
-    if (!groupId) {
-        window.toast.warning('Please select a group first');
-        return;
-    }
-    await generateReport('group', groupId, format);
-}
-
-async function generateCourseReport(format) {
-    const select = document.getElementById('courseReportSelect');
-    const courseId = select.value;
-    if (!courseId) {
-        window.toast.warning('Please select a course first');
-        return;
-    }
-    await generateReport('course', courseId, format);
-}
-
-async function generateReport(type, id, format) {
-    const token = AuthService.getToken();
-    if (!token) {
-        window.toast.error('Please login again');
-        return;
-    }
-
-    window.toast.info('Generating report...');
-
-    try {
-        const response = await fetch('/api/reports/generate', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + token,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ type, id, format })
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Failed to generate report');
+            `;
         }
-
-        if (format === 'html') {
-            // HTML report - open in new tab
-            const html = await response.text();
-            const win = window.open('', '_blank');
-            win.document.write(html);
-            win.document.close();
-            window.toast.success('Report opened in new tab!');
-        } else {
-            // CSV or TXT - download as file
-            const blob = await response.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${type}_report_${id}.${format}`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            window.toast.success('Report downloaded successfully!');
-        }
-    } catch (error) {
-        console.error('Report error:', error);
-        window.toast.error(error.message || 'Failed to generate report');
-    }
-}
 
         function generateReport(type) {
             window.toast.info('Generating ' + type + ' report...');
@@ -1188,7 +1228,7 @@ async function generateReport(type, id, format) {
         }
 
         // ============================================
-        // PAGE: PROFILE (matches student dashboard)
+        // PAGE: PROFILE
         // ============================================
         function renderProfile() {
             const user = AuthService.getUser();
@@ -1401,9 +1441,6 @@ async function generateReport(type, id, format) {
                 case 'profile':
                     renderProfile();
                     break;
-                    case 'attendance':
-    renderAttendance();
-    break;
                 default:
                     renderDashboard();
             }
@@ -1435,148 +1472,6 @@ async function generateReport(type, id, format) {
                 }
             });
         })();
-        // ============================================
-// ATTENDANCE MANAGEMENT
-// ============================================
-
-function renderAttendance() {
-    const container = document.getElementById('page-content');
-    const data = loadProfessorData();
-
-    const courseId = data.courses.length > 0 ? data.courses[0].id : null;
-
-    container.innerHTML = `
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Attendance Management</h2>
-
-            <div class="card-glass p-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Mark Attendance</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student</label>
-                        <select id="attendanceStudent" class="input-teal">
-                            ${data.students.map(s => 
-                                `<option value="${s.id}">${s.name}</option>`
-                            ).join('')}
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-                        <input type="date" id="attendanceDate" class="input-teal" value="${new Date().toISOString().split('T')[0]}">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
-                        <select id="attendanceStatus" class="input-teal">
-                            <option value="1">✅ Present</option>
-                            <option value="0">❌ Absent</option>
-                        </select>
-                    </div>
-                </div>
-                <button onclick="markAttendance()" class="btn-teal mt-4">Mark Attendance</button>
-            </div>
-
-            <div class="card-glass p-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Attendance Report</h3>
-                <div id="attendanceReport">
-                    <p class="text-gray-500 text-sm">Click "Load Report" to view attendance</p>
-                    <button onclick="loadAttendanceReport()" class="btn-teal mt-2 text-sm">Load Report</button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-async function markAttendance() {
-    const studentId = document.getElementById('attendanceStudent').value;
-    const date = document.getElementById('attendanceDate').value;
-    const present = document.getElementById('attendanceStatus').value === '1';
-
-    const courseId = loadProfessorData().courses[0]?.id;
-
-    if (!courseId) {
-        window.toast.error('No course found');
-        return;
-    }
-
-    try {
-        const response = await fetch('/api/attendance/mark', {
-            method: 'POST',
-            headers: {
-                'Authorization': 'Bearer ' + AuthService.getToken(),
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ student_id: studentId, course_id: courseId, date, present })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            window.toast.success('Attendance marked successfully!');
-            loadAttendanceReport();
-        } else {
-            window.toast.error(data.message || 'Failed to mark attendance');
-        }
-    } catch (error) {
-        window.toast.error('Error marking attendance');
-    }
-}
-
-async function loadAttendanceReport() {
-    const courseId = loadProfessorData().courses[0]?.id;
-    if (!courseId) {
-        window.toast.warning('No course found');
-        return;
-    }
-
-    try {
-        const response = await fetch(`/api/attendance/course/${courseId}`, {
-            headers: { 'Authorization': 'Bearer ' + AuthService.getToken() }
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            renderAttendanceTable(data.attendance);
-        }
-    } catch (error) {
-        window.toast.error('Failed to load attendance report');
-    }
-}
-
-function renderAttendanceTable(attendanceData) {
-    const container = document.getElementById('attendanceReport');
-    if (!attendanceData || attendanceData.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-sm">No attendance records found.</p>';
-        return;
-    }
-
-    let html = `
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead class="bg-gray-50 dark:bg-gray-800">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
-                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Present</th>
-                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Absent</th>
-                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Rate</th>
-                    </tr>
-                </thead>
-                <tbody>
-    `;
-
-    attendanceData.forEach(a => {
-        const color = a.attendance_rate >= 80 ? 'text-green-600' : a.attendance_rate >= 50 ? 'text-yellow-600' : 'text-red-600';
-        html += `
-            <tr class="border-t border-gray-100">
-                <td class="px-4 py-2 font-medium">${a.student_name}</td>
-                <td class="px-4 py-2 text-center text-green-600">${a.present_days}</td>
-                <td class="px-4 py-2 text-center text-red-600">${a.absent_days}</td>
-                <td class="px-4 py-2 text-center font-bold ${color}">${a.attendance_rate}%</td>
-            </tr>
-        `;
-    });
-
-    html += `</tbody></table></div>`;
-    container.innerHTML = html;
-}
 
         // ============================================
         // INITIALIZATION
