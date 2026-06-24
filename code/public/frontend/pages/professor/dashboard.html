@@ -251,6 +251,7 @@
             <a href="#" data-page="evaluation" class="nav-link"><span class="icon">🎓</span> Student Evaluation</a>
             <a href="#" data-page="reports" class="nav-link"><span class="icon">📄</span> PDF Reports</a>
             <a href="#" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
+            <a href="#" data-page="attendance" class="nav-link"><span class="icon">📋</span> Attendance</a>
         </nav>
         <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
             <div class="flex items-center gap-3">
@@ -1400,6 +1401,9 @@ async function generateReport(type, id, format) {
                 case 'profile':
                     renderProfile();
                     break;
+                    case 'attendance':
+    renderAttendance();
+    break;
                 default:
                     renderDashboard();
             }
@@ -1431,6 +1435,148 @@ async function generateReport(type, id, format) {
                 }
             });
         })();
+        // ============================================
+// ATTENDANCE MANAGEMENT
+// ============================================
+
+function renderAttendance() {
+    const container = document.getElementById('page-content');
+    const data = loadProfessorData();
+
+    const courseId = data.courses.length > 0 ? data.courses[0].id : null;
+
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Attendance Management</h2>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Mark Attendance</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student</label>
+                        <select id="attendanceStudent" class="input-teal">
+                            ${data.students.map(s => 
+                                `<option value="${s.id}">${s.name}</option>`
+                            ).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                        <input type="date" id="attendanceDate" class="input-teal" value="${new Date().toISOString().split('T')[0]}">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="attendanceStatus" class="input-teal">
+                            <option value="1">✅ Present</option>
+                            <option value="0">❌ Absent</option>
+                        </select>
+                    </div>
+                </div>
+                <button onclick="markAttendance()" class="btn-teal mt-4">Mark Attendance</button>
+            </div>
+
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Attendance Report</h3>
+                <div id="attendanceReport">
+                    <p class="text-gray-500 text-sm">Click "Load Report" to view attendance</p>
+                    <button onclick="loadAttendanceReport()" class="btn-teal mt-2 text-sm">Load Report</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+async function markAttendance() {
+    const studentId = document.getElementById('attendanceStudent').value;
+    const date = document.getElementById('attendanceDate').value;
+    const present = document.getElementById('attendanceStatus').value === '1';
+
+    const courseId = loadProfessorData().courses[0]?.id;
+
+    if (!courseId) {
+        window.toast.error('No course found');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/attendance/mark', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + AuthService.getToken(),
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ student_id: studentId, course_id: courseId, date, present })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            window.toast.success('Attendance marked successfully!');
+            loadAttendanceReport();
+        } else {
+            window.toast.error(data.message || 'Failed to mark attendance');
+        }
+    } catch (error) {
+        window.toast.error('Error marking attendance');
+    }
+}
+
+async function loadAttendanceReport() {
+    const courseId = loadProfessorData().courses[0]?.id;
+    if (!courseId) {
+        window.toast.warning('No course found');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/attendance/course/${courseId}`, {
+            headers: { 'Authorization': 'Bearer ' + AuthService.getToken() }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            renderAttendanceTable(data.attendance);
+        }
+    } catch (error) {
+        window.toast.error('Failed to load attendance report');
+    }
+}
+
+function renderAttendanceTable(attendanceData) {
+    const container = document.getElementById('attendanceReport');
+    if (!attendanceData || attendanceData.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-sm">No attendance records found.</p>';
+        return;
+    }
+
+    let html = `
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50 dark:bg-gray-800">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Student</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Present</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Absent</th>
+                        <th class="px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase">Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+
+    attendanceData.forEach(a => {
+        const color = a.attendance_rate >= 80 ? 'text-green-600' : a.attendance_rate >= 50 ? 'text-yellow-600' : 'text-red-600';
+        html += `
+            <tr class="border-t border-gray-100">
+                <td class="px-4 py-2 font-medium">${a.student_name}</td>
+                <td class="px-4 py-2 text-center text-green-600">${a.present_days}</td>
+                <td class="px-4 py-2 text-center text-red-600">${a.absent_days}</td>
+                <td class="px-4 py-2 text-center font-bold ${color}">${a.attendance_rate}%</td>
+            </tr>
+        `;
+    });
+
+    html += `</tbody></table></div>`;
+    container.innerHTML = html;
+}
 
         // ============================================
         // INITIALIZATION
