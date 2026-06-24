@@ -301,61 +301,61 @@
         };
 
         // ============================================
-        // DEMO DATA (used as fallback)
+        // DEMO DATA (used as fallback ONLY)
         // ============================================
         const DEMO_DATA = {
             dashboard: {
-                total_commits: 127,
-                total_prs: 23,
-                activity_consistency_score: 85,
-                team_rank: 3,
+                total_commits: 0,
+                total_prs: 0,
+                activity_consistency_score: 0,
+                activity_score: 0,
+                team_rank: 'N/A',
                 weekly_data: [
-                    { week: 1, commits: 12 },
-                    { week: 2, commits: 19 },
-                    { week: 3, commits: 15 },
-                    { week: 4, commits: 27 }
+                    { week: 1, commits: 0 },
+                    { week: 2, commits: 0 },
+                    { week: 3, commits: 0 },
+                    { week: 4, commits: 0 },
+                    { week: 5, commits: 0 },
+                    { week: 6, commits: 0 },
+                    { week: 7, commits: 0 },
+                    { week: 8, commits: 0 }
                 ],
-                daily_activity: [5, 8, 12, 7, 9, 3, 2],
-                peer_breakdown: [
-                    { reviewer: 'Alice Johnson', rating: 4.5, comment: 'Great collaboration!' },
-                    { reviewer: 'Bob Smith', rating: 4.0, comment: 'Reliable team member' },
-                    { reviewer: 'Charlie Brown', rating: 3.5, comment: 'Good, but could be more active' }
-                ],
-                team_ranking: [
-                    { team: 'Team Alpha', rank: 1, score: 92 },
-                    { team: 'Team Beta', rank: 2, score: 85 },
-                    { team: 'Team Gamma', rank: 3, score: 78 },
-                    { team: 'Team Delta', rank: 4, score: 70 }
-                ],
+                daily_activity: [0, 0, 0, 0, 0, 0, 0],
+                peer_breakdown: [],
+                team_ranking: [],
                 score_breakdown: {
-                    github: 85,
-                    attendance: 80,
-                    peer_reviews: 78,
-                    working_hours: 72
-                }
+                    github: 0,
+                    attendance: 0,
+                    peer_reviews: 0,
+                    working_hours: 0
+                },
+                is_github_connected: false,
+                github_repo_url: null,
+                classification: 'Moderate',
+                feedback: 'Connect your GitHub repository to see AI feedback.',
+                suggestions: ['Connect GitHub', 'Join a group', 'Start contributing'],
+                participation_score: 0,
+                quality_score: 0,
+                consistency_score: 0,
+                overall_score: 0
             },
             group: {
-                id: 1,
-                name: 'Team Alpha',
-                course_name: 'Software Engineering (CS401)',
-                member_count: 4,
-                total_commits: 98,
-                avg_activity: 78,
-                members: [
-                    { id: 1, name: 'Arisha Ridha (You)', role: 'Student', commits: 45, contribution_percentage: 35, classification: 'Active' },
-                    { id: 2, name: 'John Doe', role: 'Student', commits: 32, contribution_percentage: 28, classification: 'Active' },
-                    { id: 3, name: 'Jane Smith', role: 'Student', commits: 18, contribution_percentage: 22, classification: 'Moderate' },
-                    { id: 4, name: 'Mike Brown', role: 'Student', commits: 8, contribution_percentage: 15, classification: 'Passive' }
-                ]
+                id: null,
+                name: null,
+                course_name: null,
+                member_count: 0,
+                total_commits: 0,
+                avg_activity: 0,
+                members: []
             },
             ai: {
-                classification: 'Active',
-                participation_score: 85,
-                quality_score: 78,
-                consistency_score: 92,
-                overall_score: 85,
-                feedback: 'Excellent contribution quality and consistency!',
-                suggestions: ['Increase code review participation', 'Help mentor passive group members', 'Document your code more thoroughly']
+                classification: 'Moderate',
+                participation_score: 0,
+                quality_score: 0,
+                consistency_score: 0,
+                overall_score: 0,
+                feedback: 'Connect your GitHub repository to get AI feedback.',
+                suggestions: ['Connect GitHub', 'Join a group', 'Start contributing']
             }
         };
 
@@ -426,41 +426,14 @@
         };
 
         // ============================================
-        // API SERVICE (with fallback)
-        // ============================================
-        const ApiService = {
-            async request(endpoint, options = {}) {
-                const token = AuthService.getToken();
-                const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json', ...options.headers };
-                if (token) headers['Authorization'] = `Bearer ${token}`;
-                try {
-                    const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
-                    const data = await response.json();
-                    if (!response.ok) {
-                        if (response.status === 401) AuthService.logout();
-                        throw new Error(data.message || 'Request failed');
-                    }
-                    return data;
-                } catch (error) {
-                    console.warn('API failed, using demo data');
-                    if (endpoint.includes('/analytics/student')) return { success: true, ...DEMO_DATA.dashboard };
-                    if (endpoint.includes('/ai/evaluate/student')) return { success: true, ...DEMO_DATA.ai };
-                    throw error;
-                }
-            },
-            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
-        };
-
-        // ============================================
         // GLOBALS
         // ============================================
         window.toast = new ToastManager();
-        window.api = ApiService;
         window.auth = AuthService;
         let currentPage = 'dashboard';
         let charts = {};
         let currentStudentData = null;
+        let isLoading = false;
 
         // ============================================
         // HELPERS
@@ -499,6 +472,45 @@
         }
 
         // ============================================
+        // API SERVICE (Direct fetch with token)
+        // ============================================
+        const ApiService = {
+            async request(endpoint, options = {}) {
+                const token = AuthService.getToken();
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+                
+                const headers = { 
+                    'Content-Type': 'application/json', 
+                    'Accept': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                    ...options.headers 
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+                    const data = await response.json();
+                    
+                    if (!response.ok) {
+                        if (response.status === 401) {
+                            AuthService.logout();
+                            throw new Error('Session expired. Please login again.');
+                        }
+                        throw new Error(data.message || 'Request failed');
+                    }
+                    return data;
+                } catch (error) {
+                    console.error('API Error:', error);
+                    throw error;
+                }
+            },
+            get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+            post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
+            put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); }
+        };
+
+        // ============================================
         // MODAL SYSTEM
         // ============================================
         function showModal(title, contentHtml) {
@@ -526,17 +538,25 @@
         // ============================================
         function showCommitDetails() {
             const data = currentStudentData || DEMO_DATA.dashboard;
-            if (!data.weekly_data) {
-                showModal('Commit Details', '<p class="text-gray-500">No commit data available.</p>');
+            if (!data.weekly_data || data.weekly_data.every(w => w.commits === 0)) {
+                showModal('📊 Commit Details', `
+                    <div class="text-center py-8">
+                        <div class="text-6xl mb-4">📝</div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">No Commits Yet</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mt-2">Connect your GitHub repository to see commit data.</p>
+                        <a href="#" onclick="navigate('repository')" class="btn-teal inline-block mt-4">Connect GitHub</a>
+                    </div>
+                `);
                 return;
             }
+            
             let rows = data.weekly_data.map(w => `
                 <tr class="border-t border-gray-100 dark:border-gray-800">
                     <td class="px-4 py-2">Week ${w.week}</td>
                     <td class="px-4 py-2 text-center">${w.commits}</td>
                     <td class="px-4 py-2">
                         <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
-                            <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${(w.commits / 30) * 100}%"></div>
+                            <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${Math.min((w.commits / 30) * 100, 100)}%"></div>
                         </div>
                     </td>
                 </tr>
@@ -569,16 +589,25 @@
         }
 
         function showPeerReviewDetails() {
-            const reviews = DEMO_DATA.dashboard.peer_breakdown || [];
+            const data = currentStudentData || DEMO_DATA.dashboard;
+            const reviews = data.peer_breakdown || [];
+            
             if (reviews.length === 0) {
-                showModal('Peer Reviews', '<p class="text-gray-500">No peer reviews yet.</p>');
+                showModal('⭐ Peer Reviews', `
+                    <div class="text-center py-8">
+                        <div class="text-6xl mb-4">⭐</div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">No Peer Reviews Yet</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mt-2">You haven't received any peer reviews.</p>
+                    </div>
+                `);
                 return;
             }
+            
             let rows = reviews.map(r => `
                 <tr class="border-t border-gray-100 dark:border-gray-800">
-                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${r.reviewer}</td>
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${r.reviewer || 'Anonymous'}</td>
                     <td class="px-4 py-2 text-center">
-                        <span class="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">${r.rating} ⭐</span>
+                        <span class="px-2 py-0.5 rounded-full text-xs bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">${r.rating || 0} ⭐</span>
                     </td>
                     <td class="px-4 py-2 text-gray-600 dark:text-gray-400 italic">${r.comment || 'No comment'}</td>
                 </tr>
@@ -597,7 +626,6 @@
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
-                <p class="text-xs text-gray-400 mt-2">Reviews received from team members.</p>
             `;
             showModal('⭐ Peer Reviews', content);
         }
@@ -605,12 +633,12 @@
         function showActivityDetails() {
             const data = currentStudentData || DEMO_DATA.dashboard;
             const breakdown = data.score_breakdown || {
-                github: 85,
-                attendance: 80,
-                peer_reviews: 78,
-                working_hours: 72
+                github: 0,
+                attendance: 0,
+                peer_reviews: 0,
+                working_hours: 0
             };
-            const total = data.activity_consistency_score || 85;
+            const total = data.activity_score || 0;
 
             const items = [
                 { label: 'GitHub Activity', value: breakdown.github, color: '#3AAFA9' },
@@ -645,24 +673,27 @@
 
         function showTeamRankDetails() {
             const data = currentStudentData || DEMO_DATA.dashboard;
-            const rankings = data.team_ranking || [
-                { team: 'Team Alpha', rank: 1, score: 92 },
-                { team: 'Team Beta', rank: 2, score: 85 },
-                { team: 'Team Gamma', rank: 3, score: 78 },
-                { team: 'Team Delta', rank: 4, score: 70 }
-            ];
-            const userTeam = 'Team Gamma';
+            const rankings = data.team_ranking || [];
+            
+            if (rankings.length === 0) {
+                showModal('🏆 Team Rankings', `
+                    <div class="text-center py-8">
+                        <div class="text-6xl mb-4">🏆</div>
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">No Team Rankings</h3>
+                        <p class="text-gray-500 dark:text-gray-400 mt-2">Join a group to see team rankings.</p>
+                        <a href="#" onclick="navigate('group')" class="btn-teal inline-block mt-4">View Groups</a>
+                    </div>
+                `);
+                return;
+            }
 
-            let rows = rankings.map(r => {
-                const isUser = r.team === userTeam;
-                return `
-                    <tr class="border-t border-gray-100 dark:border-gray-800 ${isUser ? 'bg-[#3AAFA9]/10 dark:bg-[#3AAFA9]/20' : ''}">
-                        <td class="px-4 py-2 font-medium ${isUser ? 'text-[#3AAFA9] dark:text-[#5ccbc5]' : 'text-gray-900 dark:text-gray-100'}">#${r.rank}</td>
-                        <td class="px-4 py-2 ${isUser ? 'font-semibold' : ''}">${r.team} ${isUser ? '👈 (You)' : ''}</td>
-                        <td class="px-4 py-2 text-right">${r.score}%</td>
-                    </tr>
-                `;
-            }).join('');
+            let rows = rankings.map(r => `
+                <tr class="border-t border-gray-100 dark:border-gray-800">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">#${r.rank}</td>
+                    <td class="px-4 py-2">${r.team}</td>
+                    <td class="px-4 py-2 text-right">${r.score}%</td>
+                </tr>
+            `).join('');
 
             const content = `
                 <div class="overflow-x-auto">
@@ -677,26 +708,474 @@
                         <tbody>${rows}</tbody>
                     </table>
                 </div>
-                <p class="text-xs text-gray-400 mt-2">Your team is highlighted.</p>
             `;
             showModal('🏆 Team Rankings', content);
+        }
+
+        // ============================================
+        // LOAD STUDENT DATA FROM API
+        // ============================================
+        async function loadStudentData() {
+            if (isLoading) return;
+            isLoading = true;
+
+            try {
+                const token = AuthService.getToken();
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                const response = await fetch(`${API_BASE}/student/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    AuthService.logout();
+                    return;
+                }
+
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    currentStudentData = result.data;
+                    return currentStudentData;
+                } else {
+                    throw new Error(result.message || 'Failed to load data');
+                }
+            } catch (error) {
+                console.warn('Error loading student data:', error);
+                // Use demo data as fallback
+                currentStudentData = { ...DEMO_DATA.dashboard };
+                return currentStudentData;
+            } finally {
+                isLoading = false;
+            }
+        }
+
+        // ============================================
+        // UPDATE UI FUNCTIONS
+        // ============================================
+        function updateDashboardUI(data) {
+            // Update stat cards
+            const commitsEl = document.getElementById('total-commits');
+            const reviewsEl = document.getElementById('peer-reviews');
+            const scoreEl = document.getElementById('activity-score');
+            const rankEl = document.getElementById('team-rank');
+            
+            if (commitsEl) commitsEl.textContent = data.total_commits || 0;
+            if (reviewsEl) reviewsEl.textContent = data.peer_reviews || 0;
+            if (scoreEl) scoreEl.textContent = data.activity_score || 0;
+            if (rankEl) rankEl.textContent = data.team_rank ? `#${data.team_rank}` : 'N/A';
+        }
+
+        function updateCharts(data) {
+            // Update commit trend chart
+            const commitCtx = document.getElementById('commitTrendChart')?.getContext('2d');
+            if (commitCtx && data.weekly_data && data.weekly_data.length > 0) {
+                if (charts.commit) charts.commit.destroy();
+                
+                const hasData = data.weekly_data.some(w => w.commits > 0);
+                
+                charts.commit = new Chart(commitCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.weekly_data.map(w => `W${w.week}`),
+                        datasets: [{
+                            label: 'Commits',
+                            data: data.weekly_data.map(w => w.commits),
+                            borderColor: '#3AAFA9',
+                            backgroundColor: hasData ? 'rgba(58,175,169,0.08)' : 'rgba(200,200,200,0.08)',
+                            tension: 0.4,
+                            fill: true,
+                            pointBackgroundColor: hasData ? '#3AAFA9' : '#cccccc',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2,
+                            pointRadius: hasData ? 4 : 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' commits';
+                                    }
+                                }
+                            }
+                        },
+                        scales: { 
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: 'rgba(0,0,0,0.04)' },
+                                ticks: { stepSize: 1 }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+
+            // Update weekly activity chart
+            const activityCtx = document.getElementById('weeklyActivityChart')?.getContext('2d');
+            if (activityCtx && data.daily_activity) {
+                if (charts.activity) charts.activity.destroy();
+                
+                const hasData = data.daily_activity.some(v => v > 0);
+                
+                charts.activity = new Chart(activityCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Contributions',
+                            data: data.daily_activity || [0, 0, 0, 0, 0, 0, 0],
+                            backgroundColor: hasData ? 'rgba(58,175,169,0.50)' : 'rgba(200,200,200,0.30)',
+                            borderColor: hasData ? '#3AAFA9' : '#cccccc',
+                            borderWidth: 2,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.parsed.y + ' contributions';
+                                    }
+                                }
+                            }
+                        },
+                        scales: { 
+                            y: { 
+                                beginAtZero: true, 
+                                grid: { color: 'rgba(0,0,0,0.04)' },
+                                ticks: { stepSize: 1 }
+                            },
+                            x: { grid: { display: false } }
+                        }
+                    }
+                });
+            }
+        }
+
+        function updateAIFeedback(data) {
+            const badge = document.getElementById('classification-badge');
+            const bar = document.getElementById('performance-bar');
+            const feedbackText = document.getElementById('ai-feedback-text');
+
+            if (badge) {
+                const classification = data.classification || 'Moderate';
+                badge.textContent = classification;
+                badge.className = `px-4 py-1.5 rounded-full text-sm font-semibold ${getClassificationClass(classification)}`;
+            }
+
+            if (bar) {
+                const score = data.overall_score || data.activity_score || 0;
+                bar.style.width = `${Math.min(score, 100)}%`;
+            }
+
+            if (feedbackText) {
+                feedbackText.textContent = data.feedback || 'Connect your GitHub repository to see AI feedback.';
+            }
+        }
+
+        function showGitHubPrompt() {
+            const container = document.getElementById('page-content');
+            const existingPrompt = document.querySelector('.github-prompt');
+
+            if (!existingPrompt) {
+                const welcomeCard = container.querySelector('.card-glass:first-child');
+                if (welcomeCard) {
+                    const banner = document.createElement('div');
+                    banner.className = 'card-glass p-6 bg-gradient-to-r from-[#0b1717] to-[#1a3a38] border-none shadow-xl mb-6 github-prompt';
+                    banner.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-4 text-white">
+                            <div class="flex items-center gap-4">
+                                <div class="text-4xl">🐙</div>
+                                <div>
+                                    <h3 class="text-xl font-semibold">Connect Your GitHub Repository</h3>
+                                    <p class="text-white/60 text-sm">Connect to see your real contribution data and get AI feedback</p>
+                                </div>
+                            </div>
+                            <a href="#" onclick="navigate('repository')" class="btn-teal bg-white text-[#2B7A78] hover:bg-gray-100 shadow-lg">
+                                <i class="fab fa-github mr-2"></i> Connect GitHub
+                            </a>
+                        </div>
+                    `;
+                    welcomeCard.parentNode.insertBefore(banner, welcomeCard.nextSibling);
+                }
+            }
+        }
+
+        function removeGitHubPrompt() {
+            const prompt = document.querySelector('.github-prompt');
+            if (prompt) prompt.remove();
+        }
+
+        function renderActivity(weeklyData) {
+            const container = document.getElementById('recent-activity');
+            if (!weeklyData || weeklyData.length === 0 || weeklyData.every(w => w.commits === 0)) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="text-4xl mb-3">📝</div>
+                        <p class="text-sm">No recent activity</p>
+                        <p class="text-xs mt-1">Connect GitHub to see your commits</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const recentData = weeklyData.filter(w => w.commits > 0).slice(-5);
+            if (recentData.length === 0) {
+                container.innerHTML = `
+                    <div class="p-8 text-center text-gray-500 dark:text-gray-400">
+                        <div class="text-4xl mb-3">📝</div>
+                        <p class="text-sm">No recent activity</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = recentData.map(w =>
+                `<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-lg">📝</div>
+                    <div class="ml-4 flex-1">
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100">${w.commits} commits in Week ${w.week}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Repository activity</p>
+                    </div>
+                    <span class="text-xs text-gray-400">${w.commits > 5 ? '🔥 Active' : '📊'}</span>
+                </div>`
+            ).join('');
+        }
+
+        // ============================================
+        // PAGE: DASHBOARD (MAIN)
+        // ============================================
+        async function renderDashboard() {
+            const user = AuthService.getUser();
+            const container = document.getElementById('page-content');
+
+            // Show loading state
+            container.innerHTML = `
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading your dashboard...</p>
+                    </div>
+                </div>
+            `;
+
+            // Load data
+            const data = await loadStudentData();
+            
+            if (!data) {
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="card-glass p-6 text-center">
+                            <div class="text-6xl mb-4">⚠️</div>
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Failed to Load Data</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mt-2">Please try refreshing the page.</p>
+                            <button onclick="renderDashboard()" class="btn-teal mt-4">Retry</button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Render dashboard HTML
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                        <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Student'}! 👋</h2>
+                        <p class="text-white/80 mt-1 text-sm">Here's your academic performance overview</p>
+                        ${data.is_github_connected ? `<p class="text-white/60 text-xs mt-2">🔗 GitHub: ${data.github_repo_url || 'Connected'}</p>` : ''}
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="stat-card" onclick="showCommitDetails()">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p>
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="total-commits">${data.total_commits || 0}</p>
+                                </div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-code"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for details</p>
+                        </div>
+                        <div class="stat-card" onclick="showPeerReviewDetails()">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Peer Reviews</p>
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="peer-reviews">${data.peer_reviews || 0}</p>
+                                </div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-star"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for details</p>
+                        </div>
+                        <div class="stat-card" onclick="showActivityDetails()">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p>
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="activity-score">${data.activity_score || 0}</p>
+                                </div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-chart-line"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for breakdown</p>
+                        </div>
+                        <div class="stat-card" onclick="showTeamRankDetails()">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">Team Rank</p>
+                                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="team-rank">${data.team_rank ? `#${data.team_rank}` : 'N/A'}</p>
+                                </div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-trophy"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click for rankings</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <div class="card-glass p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Commit Trends</h3>
+                            <canvas id="commitTrendChart" height="220"></canvas>
+                        </div>
+                        <div class="card-glass p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Weekly Activity</h3>
+                            <canvas id="weeklyActivityChart" height="220"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
+                        <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">AI Performance Classification</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Powered by machine learning</p>
+                            </div>
+                            <span id="classification-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold ${getClassificationClass(data.classification || 'Moderate')}">${data.classification || 'Moderate'}</span>
+                        </div>
+                        <div class="progress-teal mb-3">
+                            <div id="performance-bar" class="bar" style="width: ${Math.min(data.overall_score || data.activity_score || 0, 100)}%"></div>
+                        </div>
+                        <p id="ai-feedback-text" class="text-gray-600 dark:text-gray-300 text-sm">${data.feedback || 'Connect your GitHub repository to see AI feedback.'}</p>
+                    </div>
+
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Activity</h3>
+                        </div>
+                        <div id="recent-activity" class="divide-y divide-gray-100 dark:divide-gray-800"></div>
+                    </div>
+                </div>
+            `;
+
+            // Update UI with data
+            updateDashboardUI(data);
+            updateCharts(data);
+            updateAIFeedback(data);
+            renderActivity(data.weekly_data || []);
+
+            // Show/hide GitHub prompt
+            if (!data.is_github_connected) {
+                showGitHubPrompt();
+            } else {
+                removeGitHubPrompt();
+            }
         }
 
         // ============================================
         // GROUP FUNCTIONS
         // ============================================
         async function loadGroupData() {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve(DEMO_DATA.group || null);
-                }, 300);
-            });
+            try {
+                const token = AuthService.getToken();
+                if (!token) return null;
+
+                const response = await fetch(`${API_BASE}/user/groups`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success && result.groups && result.groups.length > 0) {
+                        const group = result.groups[0];
+                        // Get members with contribution data
+                        const membersResponse = await fetch(`${API_BASE}/groups/${group.id}/members`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Accept': 'application/json'
+                            }
+                        });
+                        
+                        if (membersResponse.ok) {
+                            const membersResult = await membersResponse.json();
+                            if (membersResult.success) {
+                                return {
+                                    id: group.id,
+                                    name: group.name,
+                                    course_name: group.course?.title || 'Unknown Course',
+                                    member_count: group.members?.length || 0,
+                                    total_commits: group.members?.reduce((sum, m) => sum + (m.commits || 0), 0) || 0,
+                                    avg_activity: group.members?.reduce((sum, m) => sum + (m.contribution_percentage || 0), 0) / (group.members?.length || 1) || 0,
+                                    members: group.members?.map(m => ({
+                                        id: m.id,
+                                        name: m.name || m.first_name + ' ' + m.last_name,
+                                        role: m.pivot?.role || 'member',
+                                        commits: m.commits || 0,
+                                        contribution_percentage: m.contribution_percentage || 0,
+                                        classification: m.classification || 'Moderate'
+                                    })) || []
+                                };
+                            }
+                        }
+                    }
+                }
+                return null;
+            } catch (error) {
+                console.warn('Error loading group data:', error);
+                return null;
+            }
         }
 
         function renderGroupChart(members) {
             const ctx = document.getElementById('groupContributionChart')?.getContext('2d');
             if (!ctx) return;
             if (charts.group) charts.group.destroy();
+
+            if (!members || members.length === 0 || members.every(m => m.contribution_percentage === 0)) {
+                charts.group = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['No Data'],
+                        datasets: [{
+                            data: [1],
+                            backgroundColor: ['#e5e7eb'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: { enabled: false }
+                        }
+                    }
+                });
+                return;
+            }
 
             const labels = members.map(m => m.name);
             const data = members.map(m => m.contribution_percentage);
@@ -730,202 +1209,9 @@
         }
 
         // ============================================
-        // PAGE: DASHBOARD
+        // PAGE: MY GROUP
         // ============================================
-        function renderDashboard() {
-            const user = AuthService.getUser();
-            const container = document.getElementById('page-content');
-
-            loadStudentData().then(() => {
-                const data = currentStudentData || DEMO_DATA.dashboard;
-
-                container.innerHTML = `
-                    <div class="space-y-6">
-                        <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
-                            <h2 class="text-2xl font-bold">Welcome back, ${user?.first_name || 'Student'}! 👋</h2>
-                            <p class="text-white/80 mt-1 text-sm">Here's your academic performance overview</p>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                            <div class="stat-card" onclick="showCommitDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="total-commits">${data.total_commits}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-code"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for details</p>
-                            </div>
-                            <div class="stat-card" onclick="showPeerReviewDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Peer Reviews</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="peer-reviews">${data.total_prs}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-star"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for details</p>
-                            </div>
-                            <div class="stat-card" onclick="showActivityDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="activity-score">${data.activity_consistency_score}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-chart-line"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for breakdown</p>
-                            </div>
-                            <div class="stat-card" onclick="showTeamRankDetails()">
-                                <div class="flex items-center justify-between">
-                                    <div><p class="text-sm text-gray-500 dark:text-gray-400">Team Rank</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="team-rank">#${data.team_rank}</p></div>
-                                    <div class="stat-icon teal-bg"><i class="fas fa-trophy"></i></div>
-                                </div>
-                                <p class="text-xs text-gray-400 mt-1">Click for rankings</p>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                            <div class="card-glass p-6">
-                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Commit Trends</h3>
-                                <canvas id="commitTrendChart" height="220"></canvas>
-                            </div>
-                            <div class="card-glass p-6">
-                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Weekly Activity</h3>
-                                <canvas id="weeklyActivityChart" height="220"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
-                            <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
-                                <div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">AI Performance Classification</h3><p class="text-sm text-gray-500 dark:text-gray-400">Powered by machine learning</p></div>
-                                <span id="classification-badge" class="px-4 py-1.5 rounded-full text-sm font-semibold badge-moderate">Loading...</span>
-                            </div>
-                            <div class="progress-teal mb-3"><div id="performance-bar" class="bar" style="width:0%"></div></div>
-                            <p id="ai-feedback-text" class="text-gray-600 dark:text-gray-300 text-sm">Loading AI evaluation...</p>
-                        </div>
-
-                        <div class="card-glass p-0 overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Activity</h3></div>
-                            <div id="recent-activity" class="divide-y divide-gray-100 dark:divide-gray-800"><div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div></div>
-                        </div>
-                    </div>
-                `;
-
-                renderCharts(data);
-                loadAIEvaluation();
-                renderActivity(data.weekly_data || []);
-            });
-        }
-
-        async function loadStudentData() {
-            try {
-                const user = AuthService.getUser();
-                if (!user) return;
-                const response = await ApiService.get(`/analytics/student/${user.id}`);
-                if (response.success) {
-                    currentStudentData = response;
-                    DEMO_DATA.dashboard = { ...DEMO_DATA.dashboard, ...currentStudentData };
-                }
-            } catch (e) {
-                console.warn('Using demo data for student');
-                currentStudentData = DEMO_DATA.dashboard;
-            }
-        }
-
-        function renderCharts(data) {
-            const commitCtx = document.getElementById('commitTrendChart')?.getContext('2d');
-            if (commitCtx && data.weekly_data) {
-                if (charts.commit) charts.commit.destroy();
-                charts.commit = new Chart(commitCtx, {
-                    type: 'line',
-                    data: {
-                        labels: data.weekly_data.map(w => `W${w.week}`),
-                        datasets: [{
-                            label: 'Commits',
-                            data: data.weekly_data.map(w => w.commits),
-                            borderColor: '#3AAFA9',
-                            backgroundColor: 'rgba(58,175,169,0.08)',
-                            tension: 0.4,
-                            fill: true,
-                            pointBackgroundColor: '#3AAFA9',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
-                        x: { grid: { display: false } } }
-                    }
-                });
-            }
-            const activityCtx = document.getElementById('weeklyActivityChart')?.getContext('2d');
-            if (activityCtx && data.daily_activity) {
-                if (charts.activity) charts.activity.destroy();
-                charts.activity = new Chart(activityCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                        datasets: [{
-                            label: 'Contributions',
-                            data: data.daily_activity || [0, 0, 0, 0, 0, 0, 0],
-                            backgroundColor: 'rgba(58,175,169,0.50)',
-                            borderColor: '#3AAFA9',
-                            borderWidth: 2,
-                            borderRadius: 6
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: { legend: { display: false } },
-                        scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } },
-                        x: { grid: { display: false } } }
-                    }
-                });
-            }
-        }
-
-        async function loadAIEvaluation() {
-            try {
-                const user = AuthService.getUser();
-                if (!user) return;
-                const response = await ApiService.get(`/ai/evaluate/student/${user.id}`);
-                if (response.success) {
-                    updateAICard(response);
-                }
-            } catch (e) {
-                console.warn('Using demo AI data');
-                updateAICard(DEMO_DATA.ai);
-            }
-        }
-
-        function updateAICard(aiEval) {
-            const badge = document.getElementById('classification-badge');
-            const bar = document.getElementById('performance-bar');
-            const feedback = document.getElementById('ai-feedback-text');
-            const cls = aiEval.classification || 'Moderate';
-            badge.textContent = cls;
-            badge.className = `px-4 py-1.5 rounded-full text-sm font-semibold ${getClassificationClass(cls)}`;
-            bar.style.width = `${Math.min(aiEval.overall_score || 75, 100)}%`;
-            feedback.textContent = aiEval.feedback || 'Your performance is on track. Keep contributing!';
-        }
-
-        function renderActivity(weeklyData) {
-            const container = document.getElementById('recent-activity');
-            if (!weeklyData || weeklyData.length === 0) {
-                container.innerHTML =
-                '<div class="p-6 text-center text-gray-500 dark:text-gray-400 text-sm">No recent activity</div>';
-                return;
-            }
-            container.innerHTML = weeklyData.map(w =>
-                `<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                    <div class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-lg">📝</div>
-                    <div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">${w.commits} commits in Week ${w.week}</p><p class="text-xs text-gray-500 dark:text-gray-400">Repository activity</p></div>
-                </div>`
-            ).join('');
-        }
-
-        // ============================================
-        // PAGE: MY GROUP (NEW & IMPROVED)
-        // ============================================
-        function renderGroup() {
+        async function renderGroup() {
             const container = document.getElementById('page-content');
             
             container.innerHTML = `
@@ -937,101 +1223,102 @@
                 </div>
             `;
 
-            loadGroupData().then(groupData => {
-                if (!groupData) {
-                    container.innerHTML = `
-                        <div class="space-y-6">
-                            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 My Group</h2>
-                            <div class="card-glass p-8 text-center">
-                                <div class="text-6xl mb-4">👥</div>
-                                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Group Assigned</h3>
-                                <p class="text-gray-500 dark:text-gray-400 mt-2">You haven't been assigned to any group yet.</p>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-
-                const { name, course_name, member_count, total_commits, avg_activity, members } = groupData;
-
-                const memberRows = members.map(m => {
-                    const badgeClass = getClassificationClass(m.classification);
-                    return `
-                        <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                            <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${m.name}</td>
-                            <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${m.role}</td>
-                            <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${m.commits}</td>
-                            <td class="px-4 py-2">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-16 bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
-                                        <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${m.contribution_percentage}%"></div>
-                                    </div>
-                                    <span class="text-sm text-gray-600 dark:text-gray-400">${m.contribution_percentage}%</span>
-                                </div>
-                            </td>
-                            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${badgeClass}">${m.classification}</span></td>
-                        </tr>
-                    `;
-                }).join('');
-
+            const groupData = await loadGroupData();
+            
+            if (!groupData || !groupData.id) {
                 container.innerHTML = `
                     <div class="space-y-6">
                         <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 My Group</h2>
-
-                        <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <h3 class="text-2xl font-bold">${name}</h3>
-                                    <p class="text-white/80 text-sm mt-1">${course_name}</p>
-                                </div>
-                                <span class="px-3 py-1 bg-white/20 rounded-full text-sm">${member_count} Members</span>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                            <div class="stat-card text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${member_count}</p>
-                            </div>
-                            <div class="stat-card text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${total_commits}</p>
-                            </div>
-                            <div class="stat-card text-center">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p>
-                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${avg_activity}%</p>
-                            </div>
-                        </div>
-
-                        <div class="card-glass p-0 overflow-hidden">
-                            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
-                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Team Members</h3>
-                            </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full">
-                                    <thead class="bg-gray-50 dark:bg-gray-800">
-                                        <tr>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Member</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contribution</th>
-                                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>${memberRows}</tbody>
-                                </table>
-                            </div>
-                        </div>
-
-                        <div class="card-glass p-6">
-                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contribution Distribution</h3>
-                            <canvas id="groupContributionChart" height="250"></canvas>
+                        <div class="card-glass p-8 text-center">
+                            <div class="text-6xl mb-4">👥</div>
+                            <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Group Assigned</h3>
+                            <p class="text-gray-500 dark:text-gray-400 mt-2">You haven't been assigned to any group yet.</p>
+                            <p class="text-sm text-gray-400 mt-1">Join a group using an invitation code or create one.</p>
                         </div>
                     </div>
                 `;
+                return;
+            }
 
-                renderGroupChart(members);
-            });
+            const { name, course_name, member_count, total_commits, avg_activity, members } = groupData;
+
+            const memberRows = members && members.length > 0 ? members.map(m => {
+                const badgeClass = getClassificationClass(m.classification);
+                return `
+                    <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                        <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${m.name}</td>
+                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${m.role || 'member'}</td>
+                        <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${m.commits || 0}</td>
+                        <td class="px-4 py-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-16 bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
+                                    <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${Math.min(m.contribution_percentage || 0, 100)}%"></div>
+                                </div>
+                                <span class="text-sm text-gray-600 dark:text-gray-400">${m.contribution_percentage || 0}%</span>
+                            </div>
+                        </td>
+                        <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${badgeClass}">${m.classification || 'Moderate'}</span></td>
+                    </tr>
+                `;
+            }).join('') : '';
+
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 My Group</h2>
+
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-2xl font-bold">${name || 'Unnamed Group'}</h3>
+                                <p class="text-white/80 text-sm mt-1">${course_name || 'Unknown Course'}</p>
+                            </div>
+                            <span class="px-3 py-1 bg-white/20 rounded-full text-sm">${member_count || 0} Members</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                        <div class="stat-card text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
+                            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${member_count || 0}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p>
+                            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${total_commits || 0}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Average Activity</p>
+                            <p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${avg_activity || 0}%</p>
+                        </div>
+                    </div>
+
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                            <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Team Members</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 dark:bg-gray-800">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Member</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Contribution</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${memberRows || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">No members found</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-glass p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Contribution Distribution</h3>
+                        <canvas id="groupContributionChart" height="250"></canvas>
+                    </div>
+                </div>
+            `;
+
+            renderGroupChart(members || []);
         }
 
         // ============================================
@@ -1039,42 +1326,132 @@
         // ============================================
         function renderRepository() {
             const container = document.getElementById('page-content');
+            const user = AuthService.getUser();
+            const isConnected = currentStudentData?.is_github_connected || false;
+            const repoUrl = currentStudentData?.github_repo_url || '';
+
             container.innerHTML = `
                 <div class="space-y-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🔗 GitHub Connection</h2>
+                    
                     <div class="card-glass p-6 bg-gradient-to-r from-[#0b1717] to-[#1a3a38] border-none shadow-xl">
                         <div class="flex flex-wrap items-center justify-between gap-4 text-white">
                             <div class="flex items-center gap-4">
                                 <div class="text-4xl">🐙</div>
-                                <div><h3 class="text-xl font-semibold">Connect GitHub Repository</h3><p class="text-white/60 text-sm">Connect your repository to start tracking contributions</p></div>
+                                <div>
+                                    <h3 class="text-xl font-semibold">${isConnected ? 'Repository Connected' : 'Connect GitHub Repository'}</h3>
+                                    <p class="text-white/60 text-sm">${isConnected ? repoUrl : 'Connect your repository to start tracking contributions'}</p>
+                                </div>
                             </div>
-                            <button id="githubConnectBtn" class="btn-teal bg-white text-[#2B7A78] hover:bg-gray-100 shadow-lg"><i class="fab fa-github mr-2"></i> Connect GitHub</button>
+                            ${!isConnected ? `
+                                <button id="githubConnectBtn" class="btn-teal bg-white text-[#2B7A78] hover:bg-gray-100 shadow-lg">
+                                    <i class="fab fa-github mr-2"></i> Connect GitHub
+                                </button>
+                            ` : `
+                                <button id="githubDisconnectBtn" class="btn-teal bg-red-500 hover:bg-red-600 shadow-lg">
+                                    <i class="fas fa-unlink mr-2"></i> Disconnect
+                                </button>
+                            `}
                         </div>
                     </div>
+
                     <div class="card-glass p-6">
                         <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Connected Repositories</h3>
-                        <div class="text-center py-8 text-gray-500 dark:text-gray-400 text-sm">No repositories connected</div>
+                        ${isConnected ? `
+                            <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <div>
+                                    <p class="font-medium text-gray-900 dark:text-gray-100">${repoUrl.split('/').pop() || 'Repository'}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">${repoUrl}</p>
+                                </div>
+                                <span class="px-2 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-full text-xs">Connected</span>
+                            </div>
+                        ` : `
+                            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                <div class="text-4xl mb-3">🔗</div>
+                                <p class="text-sm">No repositories connected</p>
+                                <p class="text-xs mt-1">Connect your GitHub repository to start tracking</p>
+                            </div>
+                        `}
                     </div>
                 </div>
             `;
-            document.getElementById('githubConnectBtn')?.addEventListener('click', () => { window.toast.info('GitHub OAuth would redirect here'); });
+
+            const connectBtn = document.getElementById('githubConnectBtn');
+            if (connectBtn) {
+                connectBtn.addEventListener('click', () => {
+                    window.location.href = '/student/repository-connection.html';
+                });
+            }
+
+            const disconnectBtn = document.getElementById('githubDisconnectBtn');
+            if (disconnectBtn) {
+                disconnectBtn.addEventListener('click', async () => {
+                    if (confirm('Are you sure you want to disconnect your GitHub repository?')) {
+                        try {
+                            const token = AuthService.getToken();
+                            const response = await fetch(`${API_BASE}/github/disconnect`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${token}`,
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            if (response.ok) {
+                                window.toast.success('GitHub disconnected successfully');
+                                currentStudentData.is_github_connected = false;
+                                currentStudentData.github_repo_url = null;
+                                renderRepository();
+                            }
+                        } catch (error) {
+                            window.toast.error('Failed to disconnect GitHub');
+                        }
+                    }
+                });
+            }
         }
 
         function renderAnalytics() {
             const container = document.getElementById('page-content');
             const data = currentStudentData || DEMO_DATA.dashboard;
+            
             container.innerHTML = `
                 <div class="space-y-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📈 Contribution Analytics</h2>
+                    
                     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-commits">${data.total_commits}</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Lines Added</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-lines">2,450</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-score">${data.activity_consistency_score}</p></div>
-                        <div class="stat-card text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Consistency</p><p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-consistency">${data.activity_consistency_score}%</p></div>
+                        <div class="stat-card text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Total Commits</p>
+                            <p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-commits">${data.total_commits || 0}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Peer Reviews</p>
+                            <p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-lines">${data.peer_reviews || 0}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Activity Score</p>
+                            <p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-score">${data.activity_score || 0}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Team Rank</p>
+                            <p class="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1" id="a-consistency">${data.team_rank ? `#${data.team_rank}` : 'N/A'}</p>
+                        </div>
                     </div>
-                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Activity Trend</h3><canvas id="analyticsChart" height="220"></canvas></div>
+
+                    <div class="card-glass p-6">
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-4">Activity Trend</h3>
+                        <canvas id="analyticsChart" height="220"></canvas>
+                    </div>
+
+                    ${!data.is_github_connected ? `
+                        <div class="card-glass p-6 text-center bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800">
+                            <p class="text-yellow-800 dark:text-yellow-300">📊 Connect GitHub to see more analytics</p>
+                            <a href="#" onclick="navigate('repository')" class="btn-teal inline-block mt-2">Connect GitHub</a>
+                        </div>
+                    ` : ''}
                 </div>
             `;
+
+            // Render analytics chart
             setTimeout(() => {
                 const ctx = document.getElementById('analyticsChart')?.getContext('2d');
                 if (ctx && data.weekly_data) {
@@ -1096,7 +1473,10 @@
                         options: {
                             responsive: true,
                             plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' } }, x: { grid: { display: false } } }
+                            scales: { 
+                                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { stepSize: 1 } },
+                                x: { grid: { display: false } }
+                            }
                         }
                     });
                 }
@@ -1119,23 +1499,63 @@
 
         function renderAIFeedback() {
             const container = document.getElementById('page-content');
-            const ai = DEMO_DATA.ai;
+            const data = currentStudentData || DEMO_DATA.dashboard;
+            
             container.innerHTML = `
                 <div class="space-y-6">
                     <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🤖 AI Evaluation Feedback</h2>
+                    
                     <div class="card-glass p-6 bg-gradient-to-r from-[#3AAFA9]/5 to-[#2B7A78]/5 border-[#3AAFA9]/10">
                         <div class="flex flex-wrap items-center justify-between gap-4">
-                            <div><h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Your Performance Classification</h3><p class="text-gray-500 dark:text-gray-400 text-sm mt-1">AI-powered evaluation</p></div>
-                            <span id="ai-classification" class="px-4 py-2 rounded-full text-sm font-semibold ${getClassificationClass(ai.classification)}">${ai.classification}</span>
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">Your Performance Classification</h3>
+                                <p class="text-gray-500 dark:text-gray-400 text-sm mt-1">AI-powered evaluation</p>
+                            </div>
+                            <span id="ai-classification" class="px-4 py-2 rounded-full text-sm font-semibold ${getClassificationClass(data.classification || 'Moderate')}">${data.classification || 'Moderate'}</span>
                         </div>
                     </div>
+
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="stat-card text-center"><div class="text-2xl mb-2">📊</div><p class="text-sm text-gray-500 dark:text-gray-400">Participation</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-participation">${ai.participation_score}</p></div>
-                        <div class="stat-card text-center"><div class="text-2xl mb-2">⭐</div><p class="text-sm text-gray-500 dark:text-gray-400">Quality</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-quality">${ai.quality_score}</p></div>
-                        <div class="stat-card text-center"><div class="text-2xl mb-2">📈</div><p class="text-sm text-gray-500 dark:text-gray-400">Consistency</p><p class="text-2xl font-bold text-[#3AAFA9] mt-1" id="ai-consistency">${ai.consistency_score}</p></div>
+                        <div class="stat-card text-center">
+                            <div class="text-2xl mb-2">📊</div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Participation</p>
+                            <p class="text-2xl font-bold text-[#3AAFA9] mt-1">${data.participation_score || data.activity_score || 0}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-2xl mb-2">⭐</div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Quality</p>
+                            <p class="text-2xl font-bold text-[#3AAFA9] mt-1">${data.quality_score || 0}</p>
+                        </div>
+                        <div class="stat-card text-center">
+                            <div class="text-2xl mb-2">📈</div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Consistency</p>
+                            <p class="text-2xl font-bold text-[#3AAFA9] mt-1">${data.consistency_score || 0}</p>
+                        </div>
                     </div>
-                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">AI Feedback</h3><p class="text-gray-600 dark:text-gray-300 text-sm">${ai.feedback}</p></div>
-                    <div class="card-glass p-6"><h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-3">Improvement Suggestions</h3><ul class="space-y-2">${ai.suggestions.map(s => `<li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300"><span class="text-[#3AAFA9] mt-0.5">•</span><span>${s}</span></li>`).join('')}</ul></div>
+
+                    <div class="card-glass p-6">
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">AI Feedback</h3>
+                        <p class="text-gray-600 dark:text-gray-300 text-sm">${data.feedback || 'Connect your GitHub repository to get AI feedback.'}</p>
+                    </div>
+
+                    <div class="card-glass p-6">
+                        <h3 class="font-semibold text-gray-800 dark:text-gray-100 mb-3">Improvement Suggestions</h3>
+                        <ul class="space-y-2">
+                            ${(data.suggestions || ['Connect GitHub', 'Join a group', 'Start contributing']).map(s => 
+                                `<li class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                    <span class="text-[#3AAFA9] mt-0.5">•</span>
+                                    <span>${s}</span>
+                                </li>`
+                            ).join('')}
+                        </ul>
+                    </div>
+
+                    ${!data.is_github_connected ? `
+                        <div class="card-glass p-6 text-center bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-800">
+                            <p class="text-yellow-800 dark:text-yellow-300">🤖 Connect GitHub to get personalized AI feedback</p>
+                            <a href="#" onclick="navigate('repository')" class="btn-teal inline-block mt-2">Connect GitHub</a>
+                        </div>
+                    ` : ''}
                 </div>
             `;
         }

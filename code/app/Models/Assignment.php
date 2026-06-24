@@ -25,6 +25,12 @@ class Assignment extends Model
         'peer_review_deadline' => 'datetime',
     ];
 
+    /**
+     * ============================================
+     * RELATIONSHIPS
+     * ============================================
+     */
+
     public function course()
     {
         return $this->belongsTo(Course::class);
@@ -52,6 +58,17 @@ class Assignment extends Model
         return $this->hasMany(ContributionScore::class);
     }
 
+    public function workingHours()
+    {
+        return $this->hasMany(WorkingHour::class);
+    }
+
+    /**
+     * ============================================
+     * ACCESSORS & MUTATORS
+     * ============================================
+     */
+
     public function getWeightageAttribute($value)
     {
         return json_decode($value, true);
@@ -60,5 +77,81 @@ class Assignment extends Model
     public function setWeightageAttribute($value)
     {
         $this->attributes['weightage'] = is_array($value) ? json_encode($value) : $value;
+    }
+
+    /**
+     * ============================================
+     * HELPER METHODS
+     * ============================================
+     */
+
+    /**
+     * Check if assignment is active (deadline not passed)
+     */
+    public function isActive(): bool
+    {
+        return $this->deadline && $this->deadline->isFuture();
+    }
+
+    /**
+     * Check if peer review is active
+     */
+    public function isPeerReviewActive(): bool
+    {
+        return $this->peer_review_deadline && $this->peer_review_deadline->isFuture();
+    }
+
+    /**
+     * Get submission status for a specific group
+     */
+    public function getSubmissionStatus($groupId)
+    {
+        $groupAssignment = $this->groups()
+            ->where('group_id', $groupId)
+            ->first();
+
+        return $groupAssignment ? $groupAssignment->pivot->status : 'not_submitted';
+    }
+
+    /**
+     * Get submissions count
+     */
+    public function getSubmissionsCount(): int
+    {
+        return $this->groups()
+            ->wherePivot('status', 'submitted')
+            ->count();
+    }
+
+    /**
+     * Get total groups count
+     */
+    public function getTotalGroupsCount(): int
+    {
+        return $this->groups()->count();
+    }
+
+    /**
+     * Scope for active assignments
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('deadline', '>=', now());
+    }
+
+    /**
+     * Scope for expired assignments
+     */
+    public function scopeExpired($query)
+    {
+        return $query->where('deadline', '<', now());
+    }
+
+    /**
+     * Scope for peer review active
+     */
+    public function scopePeerReviewActive($query)
+    {
+        return $query->where('peer_review_deadline', '>=', now());
     }
 }

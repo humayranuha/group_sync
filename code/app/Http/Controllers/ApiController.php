@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Http;  // 👈 এই লাইন যোগ করুন
+use Illuminate\Support\Facades\Http;
 use App\Models\User;
 use App\Models\Course;
 use App\Models\Group;
@@ -47,7 +47,9 @@ class ApiController extends Controller
                     'email' => $user->email,
                     'role' => $user->role,
                     'department' => $user->department ?? null,
-                    'profile_picture' => $user->profile_picture ?? null
+                    'profile_picture' => $user->profile_picture ?? null,
+                    'github_connected' => $user->hasGithubConnected(),
+                    'github_repo_url' => $user->github_repo_url
                 ],
                 'redirect' => $this->getRedirectUrl($user->role)
             ]);
@@ -85,7 +87,8 @@ class ApiController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => $request->role,
-            'department' => $request->department ?? null
+            'department' => $request->department ?? null,
+            'is_active' => true
         ]);
 
         $this->logActivity('register', $user->id, 'User registered');
@@ -184,6 +187,714 @@ class ApiController extends Controller
             'success' => true,
             'message' => 'Password changed successfully'
         ]);
+    }
+
+    // ============================================
+    // STUDENT DASHBOARD
+    // ============================================
+
+    public function getStudentDashboard(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->isStudent()) {
+            return response()->json([
+                'error' => 'Unauthorized. Student access required.'
+            ], 403);
+        }
+
+        // Get or calculate contribution data
+        $contributionData = $this->getStudentContributions($user);
+
+        // Get peer reviews
+        $peerReviews = $this->getStudentPeerReviews($user);
+
+        // Get group info
+        $groupInfo = $this->getStudentGroupInfo($user);
+
+        // Get weekly data
+        $weeklyData = $this->getWeeklyData($user->id);
+
+        // Get daily activity
+        $dailyActivity = $this->getDailyActivity($user->id);
+
+        // Get score breakdown
+        $scoreBreakdown = $this->getScoreBreakdown($user->id);
+
+        // Get team rankings
+        $teamRankings = $this->getTeamRankings($user->id);
+
+        // Get AI feedback
+        $aiFeedback = $this->getAIFeedback($user, $contributionData);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_commits' => $contributionData['commits'] ?? 0,
+                'total_prs' => $contributionData['pull_requests'] ?? 0,
+                'peer_reviews' => $peerReviews['total'] ?? 0,
+                'activity_consistency_score' => $contributionData['score'] ?? 0,
+                'activity_score' => $contributionData['score'] ?? 0,
+                'team_rank' => $groupInfo['rank'] ?? 'N/A',
+                'is_github_connected' => $user->hasGithubConnected(),
+                'github_repo_url' => $user->github_repo_url,
+                'weekly_data' => $weeklyData,
+                'daily_activity' => $dailyActivity,
+                'score_breakdown' => $scoreBreakdown,
+                'group_name' => $groupInfo['name'] ?? null,
+                'group_members' => $groupInfo['members'] ?? [],
+                'team_ranking' => $teamRankings,
+                'peer_breakdown' => $peerReviews['reviews'] ?? [],
+                'classification' => $contributionData['classification'] ?? 'Moderate',
+                'feedback' => $aiFeedback['feedback'] ?? '',
+                'suggestions' => $aiFeedback['suggestions'] ?? [],
+                'participation_score' => $aiFeedback['participation_score'] ?? 0,
+                'quality_score' => $aiFeedback['quality_score'] ?? 0,
+                'consistency_score' => $aiFeedback['consistency_score'] ?? 0,
+                'overall_score' => $aiFeedback['overall_score'] ?? 0,
+            ]
+        ]);
+    }
+
+    // ============================================
+    // PRIVATE HELPER METHODS FOR DASHBOARD
+    // ============================================
+
+    private function getStudentContributions($user)
+    {
+        // Try to get from database
+        $contribution = ContributionScore::where('student_id', $user->id)
+            ->latest('calculated_at')
+            ->first();
+
+        if ($contribution) {
+            return [
+                'commits' => $contribution->commits ?? 0,
+                'pull_requests' => $contribution->pull_requests ?? 0,
+                'forks' => $contribution->forks ?? 0,
+                'lines_added' => $contribution->lines_added ?? 0,
+                'lines_deleted' => $contribution->lines_deleted ?? 0,
+                'score' => $contribution->score ?? 0,
+                'classification' => $contribution->classification ?? 'Moderate',
+                'peer_review_score' => $contribution->peer_review_score ?? 0,
+                'attendance_score' => $contribution->attendance_score ?? 0,
+                'working_hours_score' => $contribution->working_hours_score ?? 0,
+            ];
+        }
+
+        // If no contribution found, try to calculate from GitHub
+        if ($user->hasGithubConnected()) {
+            $githubData = $this->fetchGitHubData($user);
+            if ($githubData) {
+                // Save to database
+                $contribution = ContributionScore::create([
+                    'student_id' => $user->id,
+                    'commits' => $githubData['commits'] ?? 0,
+                    'pull_requests' => $githubData['pull_requests'] ?? 0,
+                    'forks' => $githubData['forks'] ?? 0,
+                    'lines_added' => $githubData['lines_added'] ?? 0,
+                    'lines_deleted' => $githubData['lines_deleted'] ?? 0,
+                    'score' => $githubData['score'] ?? 0,
+                    'calculated_at' => now()
+                ]);
+
+                return [
+                    'commits' => $contribution->commits ?? 0,
+                    'pull_requests' => $contribution->pull_requests ?? 0,
+                    'forks' => $contribution->forks ?? 0,
+                    'lines_added' => $contribution->lines_added ?? 0,
+                    'lines_deleted' => $contribution->lines_deleted ?? 0,
+                    'score' => $contribution->score ?? 0,
+                    'classification' => $contribution->classification ?? 'Moderate',
+                    'peer_review_score' => 0,
+                    'attendance_score' => 0,
+                    'working_hours_score' => 0,
+                ];
+            }
+        }
+
+        // Return default data
+        return [
+            'commits' => 0,
+            'pull_requests' => 0,
+            'forks' => 0,
+            'lines_added' => 0,
+            'lines_deleted' => 0,
+            'score' => 0,
+            'classification' => 'Moderate',
+            'peer_review_score' => 0,
+            'attendance_score' => 0,
+            'working_hours_score' => 0,
+        ];
+    }
+
+    private function fetchGitHubData($user)
+    {
+        if (!$user->hasGithubConnected()) {
+            return null;
+        }
+
+        try {
+            $repoPath = $user->github_repo_path;
+            if (!$repoPath) {
+                return null;
+            }
+
+            $token = $user->github_token;
+            if (!$token) {
+                return null;
+            }
+
+            // Fetch commits
+            $commitsResponse = Http::withHeaders([
+                'Authorization' => "token {$token}",
+                'Accept' => 'application/vnd.github.v3+json'
+            ])->get("https://api.github.com/repos/{$repoPath}/commits", [
+                'author' => $user->github_username,
+                'per_page' => 100
+            ]);
+
+            $commits = $commitsResponse->successful() ? count($commitsResponse->json()) : 0;
+
+            // Fetch pull requests
+            $prResponse = Http::withHeaders([
+                'Authorization' => "token {$token}",
+                'Accept' => 'application/vnd.github.v3+json'
+            ])->get("https://api.github.com/repos/{$repoPath}/pulls", [
+                'state' => 'all',
+                'per_page' => 100
+            ]);
+
+            $pullRequests = $prResponse->successful() ? count($prResponse->json()) : 0;
+
+            // Fetch forks
+            $forksResponse = Http::withHeaders([
+                'Authorization' => "token {$token}",
+                'Accept' => 'application/vnd.github.v3+json'
+            ])->get("https://api.github.com/repos/{$repoPath}/forks", [
+                'per_page' => 100
+            ]);
+
+            $forks = $forksResponse->successful() ? count($forksResponse->json()) : 0;
+
+            // Calculate score
+            $score = $this->calculateScore($commits, $pullRequests, $forks);
+
+            return [
+                'commits' => $commits,
+                'pull_requests' => $pullRequests,
+                'forks' => $forks,
+                'lines_added' => 0,
+                'lines_deleted' => 0,
+                'score' => $score,
+            ];
+        } catch (\Exception $e) {
+            \Log::error('GitHub API Error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    private function calculateScore($commits, $prs, $forks)
+    {
+        $score = 0;
+        $score += min($commits * 2, 50);
+        $score += min($prs * 5, 25);
+        $score += min($forks * 3, 15);
+        return min(round($score), 100);
+    }
+
+    private function getStudentPeerReviews($user)
+    {
+        $reviews = PeerReview::where('reviewee_id', $user->id)
+            ->whereNotNull('submitted_at')
+            ->get();
+
+        $total = $reviews->count();
+        $average = $total > 0 ? $reviews->avg('overall_rating') : 0;
+
+        return [
+            'total' => $total,
+            'average' => round($average, 1),
+            'reviews' => $reviews->take(5)->map(function($review) {
+                return [
+                    'reviewer' => $review->reviewer ? $review->reviewer->full_name : 'Anonymous',
+                    'rating' => $review->overall_rating ?? $review->average_rating,
+                    'comment' => $review->comments,
+                    'submitted_at' => $review->submitted_at
+                ];
+            })
+        ];
+    }
+
+    private function getStudentGroupInfo($user)
+    {
+        $group = $user->groups()->first();
+
+        if (!$group) {
+            return [
+                'name' => null,
+                'rank' => 'N/A',
+                'members' => []
+            ];
+        }
+
+        $members = $group->members()->get();
+
+        // Calculate rank
+        $rank = $this->calculateTeamRank($user->id, $group->id);
+
+        return [
+            'name' => $group->name,
+            'rank' => $rank,
+            'members' => $members->map(function($member) use ($group) {
+                $score = ContributionScore::where('student_id', $member->id)
+                    ->where('group_id', $group->id)
+                    ->latest('calculated_at')
+                    ->first();
+
+                return [
+                    'id' => $member->id,
+                    'name' => $member->full_name . ($member->id == auth()->id() ? ' (You)' : ''),
+                    'role' => $member->pivot->role ?? 'member',
+                    'commits' => $score->commits ?? 0,
+                    'contribution_percentage' => $score->score ?? 0,
+                    'classification' => $score->classification ?? 'Moderate'
+                ];
+            })
+        ];
+    }
+
+    private function calculateTeamRank($userId, $groupId)
+    {
+        $group = Group::find($groupId);
+        if (!$group) {
+            return 'N/A';
+        }
+
+        $allGroups = Group::where('course_id', $group->course_id)->get();
+        $rankings = [];
+
+        foreach ($allGroups as $g) {
+            $avgScore = ContributionScore::where('group_id', $g->id)->avg('score') ?? 0;
+            $rankings[] = [
+                'group_id' => $g->id,
+                'score' => $avgScore
+            ];
+        }
+
+        usort($rankings, function($a, $b) {
+            return $b['score'] <=> $a['score'];
+        });
+
+        foreach ($rankings as $index => $rank) {
+            if ($rank['group_id'] == $groupId) {
+                return $index + 1;
+            }
+        }
+
+        return 'N/A';
+    }
+
+    private function getWeeklyData($userId)
+    {
+        $data = [];
+        $scores = ContributionScore::where('student_id', $userId)
+            ->latest('calculated_at')
+            ->take(8)
+            ->get()
+            ->reverse();
+
+        $week = 1;
+        foreach ($scores as $score) {
+            $data[] = [
+                'week' => $week++,
+                'commits' => $score->commits ?? 0
+            ];
+        }
+
+        // If no data, return default
+        if (empty($data)) {
+            for ($i = 1; $i <= 8; $i++) {
+                $data[] = ['week' => $i, 'commits' => 0];
+            }
+        }
+
+        return $data;
+    }
+
+    private function getDailyActivity($userId)
+    {
+        $activity = [];
+        $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+        $scores = ContributionScore::where('student_id', $userId)
+            ->where('calculated_at', '>=', now()->subDays(7))
+            ->get();
+
+        if ($scores->count() > 0) {
+            foreach ($days as $index => $day) {
+                $dayScore = $scores->filter(function($s) use ($index) {
+                    return $s->calculated_at->dayOfWeek == ($index + 1);
+                })->first();
+
+                $activity[] = $dayScore ? round($dayScore->score / 10, 0) : 0;
+            }
+        } else {
+            $activity = [0, 0, 0, 0, 0, 0, 0];
+        }
+
+        return $activity;
+    }
+
+    private function getScoreBreakdown($userId)
+    {
+        $score = ContributionScore::where('student_id', $userId)
+            ->latest('calculated_at')
+            ->first();
+
+        if ($score) {
+            return [
+                'github' => $score->score ?? 0,
+                'attendance' => $score->attendance_score ?? 0,
+                'peer_reviews' => $score->peer_review_score ?? 0,
+                'working_hours' => $score->working_hours_score ?? 0
+            ];
+        }
+
+        return [
+            'github' => 0,
+            'attendance' => 0,
+            'peer_reviews' => 0,
+            'working_hours' => 0
+        ];
+    }
+
+    private function getTeamRankings($userId)
+    {
+        $user = User::find($userId);
+        $group = $user->groups()->first();
+
+        if (!$group) {
+            return [];
+        }
+
+        $allGroups = Group::where('course_id', $group->course_id)->get();
+        $rankings = [];
+
+        foreach ($allGroups as $g) {
+            $avgScore = ContributionScore::where('group_id', $g->id)->avg('score') ?? 0;
+
+            $rankings[] = [
+                'team' => $g->name,
+                'rank' => 0,
+                'score' => round($avgScore, 2)
+            ];
+        }
+
+        usort($rankings, function($a, $b) {
+            return $b['score'] <=> $a['score'];
+        });
+
+        foreach ($rankings as $index => &$rank) {
+            $rank['rank'] = $index + 1;
+        }
+
+        return $rankings;
+    }
+
+    private function getAIFeedback($user, $contributionData)
+    {
+        $score = $contributionData['score'] ?? 0;
+        $classification = $contributionData['classification'] ?? 'Moderate';
+
+        $feedback = '';
+        $suggestions = [];
+
+        if ($score >= 80) {
+            $feedback = "Excellent contribution quality and consistency! You're demonstrating strong collaboration skills and delivering high-quality work. Your activity pattern shows regular engagement with the repository. You've consistently met your team's expectations and shown initiative in completing tasks.";
+            $suggestions = [
+                "Continue mentoring other team members",
+                "Share your best practices with the team",
+                "Take on more challenging tasks"
+            ];
+        } elseif ($score >= 60) {
+            $feedback = "Good performance! You're consistently contributing to the project. Keep up the momentum. Your work quality is good and you're showing reliability in completing tasks.";
+            $suggestions = [
+                "Increase code review participation by reviewing teammates' PRs regularly",
+                "Help mentor passive group members to improve overall team performance",
+                "Document your code more thoroughly for better knowledge transfer"
+            ];
+        } elseif ($score >= 40) {
+            $feedback = "You're showing moderate participation. There's room for improvement in your contribution levels. Try to engage more with the repository and your team members.";
+            $suggestions = [
+                "Set daily contribution goals",
+                "Participate more in code reviews",
+                "Communicate more with team members",
+                "Try to make at least one commit per day"
+            ];
+        } else {
+            $feedback = "Your contribution levels are below expectations. We recommend taking immediate action to improve participation. Your team may be relying on you for specific tasks.";
+            $suggestions = [
+                "Reach out to your team members for support",
+                "Set a regular schedule for contributions",
+                "Start with small, manageable tasks",
+                "Schedule a meeting with your team to discuss expectations"
+            ];
+        }
+
+        return [
+            'feedback' => $feedback,
+            'suggestions' => $suggestions,
+            'classification' => $classification,
+            'participation_score' => $score,
+            'quality_score' => min($score + 10, 100),
+            'consistency_score' => max($score - 5, 0),
+            'overall_score' => $score
+        ];
+    }
+
+    // ============================================
+    // GITHUB OAUTH SECTION (সম্পূর্ণ আপডেটেড)
+    // ============================================
+
+    public function githubRedirect()
+    {
+        $clientId = env('GITHUB_CLIENT_ID');
+        $redirectUri = env('GITHUB_REDIRECT_URI', url('/api/auth/github/callback'));
+        $scope = 'repo,user:email';
+        $state = csrf_token();
+        
+        $url = "https://github.com/login/oauth/authorize?client_id={$clientId}&redirect_uri=" . urlencode($redirectUri) . "&scope={$scope}&state={$state}";
+        
+        return redirect($url);
+    }
+
+    public function githubCallback(Request $request)
+    {
+        $code = $request->code;
+        $state = $request->state;
+        
+        $clientId = env('GITHUB_CLIENT_ID');
+        $clientSecret = env('GITHUB_CLIENT_SECRET');
+
+        // Exchange code for access token
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://github.com/login/oauth/access_token');
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'code' => $code,
+            'state' => $state
+        ]));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        
+        $data = json_decode($response, true);
+
+        if (!isset($data['access_token'])) {
+            return redirect('/student/dashboard.html?error=github_auth_failed');
+        }
+
+        $accessToken = $data['access_token'];
+
+        // Get user data from GitHub
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/user');
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer ' . $accessToken,
+            'Accept: application/vnd.github.v3+json'
+        ]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $userInfo = json_decode(curl_exec($ch), true);
+        curl_close($ch);
+
+        // Save GitHub token to user
+        $user = $request->user();
+        if (!$user) {
+            return redirect('/login.html?error=user_not_found');
+        }
+
+        $user->github_token = $accessToken;
+        $user->github_username = $userInfo['login'] ?? null;
+        $user->save();
+
+        $this->logActivity('github_connect', $user->id, 'Connected GitHub account');
+
+        return redirect('/student/dashboard.html?github_connected=success');
+    }
+
+    /**
+     * Get GitHub OAuth redirect URL (JSON response for frontend)
+     */
+    public function githubOAuthRedirect()
+    {
+        $clientId = env('GITHUB_CLIENT_ID');
+        $redirectUri = env('GITHUB_REDIRECT_URI', url('/api/auth/github/callback'));
+        $scope = 'repo,user:email';
+        $state = csrf_token();
+        
+        $url = "https://github.com/login/oauth/authorize?client_id={$clientId}&redirect_uri=" . urlencode($redirectUri) . "&scope={$scope}&state={$state}";
+        
+        return response()->json([
+            'success' => true,
+            'url' => $url
+        ]);
+    }
+
+    /**
+     * Sync GitHub repository data
+     */
+    public function syncGitHub(Request $request)
+    {
+        $user = $request->user();
+        
+        if (!$user->hasGithubConnected()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No GitHub repository connected'
+            ], 400);
+        }
+        
+        // Calculate contributions
+        $this->calculateContributions($user);
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Repository synced successfully'
+        ]);
+    }
+
+    /**
+     * Disconnect GitHub repository
+     */
+    public function disconnectGitHub(Request $request)
+    {
+        $user = $request->user();
+        
+        $user->github_token = null;
+        $user->github_username = null;
+        $user->github_repo_url = null;
+        $user->github_connected_at = null;
+        $user->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'GitHub disconnected successfully'
+        ]);
+    }
+
+    // ============================================
+    // GITHUB CONNECTION (আপডেটেড)
+    // ============================================
+
+    public function connectGitHub(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'repo_url' => 'required|url|regex:/^https?:\/\/github\.com\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-._]+$/',
+            'repo_type' => 'nullable|string|in:original,collaborator,forked'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $user = $request->user();
+
+        // Check if user has GitHub token
+        if (empty($user->github_token)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Please connect your GitHub account first using the "Connect GitHub Account" button above.'
+            ], 400);
+        }
+
+        // Extract repo path from URL
+        $repoPath = $this->extractRepoPath($request->repo_url);
+        if (!$repoPath) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid GitHub repository URL'
+            ], 400);
+        }
+
+        // Verify repository exists and user has access
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => "token {$user->github_token}",
+                'Accept' => 'application/vnd.github.v3+json'
+            ])->get("https://api.github.com/repos/{$repoPath}");
+
+            if (!$response->successful()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Repository not found or you don\'t have access. Make sure the repository exists and you have connected your GitHub account.'
+                ], 400);
+            }
+
+            $repoData = $response->json();
+            
+            // Save repository URL
+            $user->github_repo_url = $request->repo_url;
+            $user->github_connected_at = now();
+            $user->save();
+
+            // Calculate contributions
+            $this->calculateContributions($user);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Repository connected successfully!',
+                'data' => [
+                    'repo_url' => $user->github_repo_url,
+                    'repo_name' => $repoData['full_name'] ?? $repoPath,
+                    'connected_at' => $user->github_connected_at
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('GitHub connection error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to connect repository: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getGitHubRepoDetails(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user->hasGithubConnected()) {
+            return response()->json(['error' => 'No repository connected'], 404);
+        }
+
+        $repoPath = $user->github_repo_path;
+        if (!$repoPath) {
+            return response()->json(['error' => 'Invalid repository path'], 400);
+        }
+
+        $token = $user->github_token;
+
+        try {
+            $response = Http::withHeaders([
+                'Authorization' => "token {$token}",
+                'Accept' => 'application/vnd.github.v3+json'
+            ])->get("https://api.github.com/repos/{$repoPath}");
+
+            if ($response->successful()) {
+                return response()->json($response->json());
+            }
+
+            return response()->json(['error' => 'Failed to fetch repository details'], 400);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
     }
 
     // ============================================
@@ -646,10 +1357,10 @@ class ApiController extends Controller
         $peerReviews = $this->getPeerReviewScore($studentId, $assignmentId);
         $workingHours = $this->getWorkingHours($studentId, $assignmentId);
 
-        $score = ($gitHubMetrics * $weightage['commits'] / 100) +
-                 ($attendanceScore * $weightage['attendance'] / 100) +
-                 ($peerReviews * $weightage['peer_reviews'] / 100) +
-                 ($workingHours * $weightage['working_hours'] / 100);
+        $score = ($gitHubMetrics * ($weightage['commits'] ?? 25) / 100) +
+                 ($attendanceScore * ($weightage['attendance'] ?? 25) / 100) +
+                 ($peerReviews * ($weightage['peer_reviews'] ?? 25) / 100) +
+                 ($workingHours * ($weightage['working_hours'] ?? 25) / 100);
 
         $status = 'normal';
         if ($score < 30) {
@@ -709,22 +1420,22 @@ class ApiController extends Controller
         $scores = ContributionScore::where('student_id', $id)->get();
         $reviews = PeerReview::where('reviewee_id', $id)->get();
 
+        $weeklyData = $this->getWeeklyData($id);
+        $dailyActivity = $this->getDailyActivity($id);
+        $scoreBreakdown = $this->getScoreBreakdown($id);
+
         return response()->json([
             'success' => true,
-            'total_commits' => $scores->sum('score') > 0 ? rand(50, 200) : 0,
-            'total_prs' => rand(5, 30),
-            'total_lines_added' => rand(500, 5000),
-            'total_lines_deleted' => rand(200, 2000),
-            'activity_consistency_score' => $scores->avg('score') ?? 75,
-            'team_rank' => rand(1, 5),
-            'contribution_percentage' => $scores->avg('score') ?? 35,
-            'weekly_data' => [
-                ['week' => 1, 'commits' => rand(5, 20)],
-                ['week' => 2, 'commits' => rand(5, 20)],
-                ['week' => 3, 'commits' => rand(5, 20)],
-                ['week' => 4, 'commits' => rand(5, 20)],
-            ],
-            'daily_activity' => [rand(1, 10), rand(1, 10), rand(1, 10), rand(1, 10), rand(1, 10), rand(1, 10), rand(1, 10)],
+            'total_commits' => $scores->sum('commits') ?? 0,
+            'total_prs' => $scores->sum('pull_requests') ?? 0,
+            'total_lines_added' => $scores->sum('lines_added') ?? 0,
+            'total_lines_deleted' => $scores->sum('lines_deleted') ?? 0,
+            'activity_consistency_score' => $scores->avg('score') ?? 0,
+            'team_rank' => $this->calculateTeamRank($id, $scores->first()?->group_id ?? null),
+            'contribution_percentage' => $scores->avg('score') ?? 0,
+            'weekly_data' => $weeklyData,
+            'daily_activity' => $dailyActivity,
+            'score_breakdown' => $scoreBreakdown,
             'peer_reviews' => [
                 'communication' => $reviews->avg('communication_rating') ?? 0,
                 'reliability' => $reviews->avg('reliability_rating') ?? 0,
@@ -745,17 +1456,18 @@ class ApiController extends Controller
             'total_contributions' => $members->sum(function($m) { return $m->contributionScores->count(); }),
             'avg_activity' => round($avgScore, 2),
             'team_performance' => round($avgScore * 1.2, 2),
-            'total_commits' => rand(50, 200),
+            'total_commits' => $members->sum(function($m) { return $m->contributionScores->sum('commits'); }),
             'weekly_scores' => [65, 70, 75, round($avgScore, 2)],
             'members' => $members->map(function($m) {
+                $score = $m->contributionScores->first();
                 return [
                     'id' => $m->id,
                     'name' => $m->first_name . ' ' . $m->last_name,
                     'contribution_percentage' => round($m->contributionScores->avg('score') ?? 0, 2),
                     'classification' => $this->getClassification($m->contributionScores->avg('score') ?? 0),
-                    'commits' => rand(10, 50),
-                    'prs' => rand(1, 10),
-                    'lines_added' => rand(100, 1000)
+                    'commits' => $score->commits ?? 0,
+                    'prs' => $score->pull_requests ?? 0,
+                    'lines_added' => $score->lines_added ?? 0
                 ];
             })
         ]);
@@ -764,7 +1476,7 @@ class ApiController extends Controller
     public function evaluateStudent($id)
     {
         $scores = ContributionScore::where('student_id', $id)->get();
-        $avgScore = $scores->avg('score') ?? 75;
+        $avgScore = $scores->avg('score') ?? 0;
         $classification = $this->getClassification($avgScore);
         $feedback = $this->getFeedback($classification);
 
@@ -778,11 +1490,25 @@ class ApiController extends Controller
             'feedback' => $feedback,
             'suggestions' => $this->getSuggestions($classification),
             'weekly_labels' => ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
-            'weekly_scores' => [
-                rand(60, 80), rand(60, 80), rand(60, 80), rand(60, 80),
-                rand(60, 80), rand(60, 80), rand(60, 80), round($avgScore, 2)
-            ]
+            'weekly_scores' => $this->getWeeklyScores($id)
         ]);
+    }
+
+    private function getWeeklyScores($id)
+    {
+        $scores = ContributionScore::where('student_id', $id)
+            ->latest('calculated_at')
+            ->take(8)
+            ->get()
+            ->reverse()
+            ->pluck('score')
+            ->toArray();
+
+        while (count($scores) < 8) {
+            array_unshift($scores, 0);
+        }
+
+        return $scores;
     }
 
     // ============================================
@@ -819,59 +1545,145 @@ class ApiController extends Controller
     }
 
     // ============================================
-    // GITHUB OAUTH SECTION
+    // ATTENDANCE MANAGEMENT
     // ============================================
 
-    public function githubRedirect()
+    public function markAttendance(Request $request)
     {
-        $query = http_build_query([
-            'client_id' => env('GITHUB_CLIENT_ID'),
-            'redirect_uri' => env('GITHUB_REDIRECT_URI'),
-            'scope' => 'repo,user:email',
-            'state' => csrf_token(),
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:users,id,role,student',
+            'course_id' => 'required|exists:courses,id',
+            'date' => 'required|date',
+            'present' => 'required|boolean'
         ]);
-        return redirect('https://github.com/login/oauth/authorize?' . $query);
-    }
 
-    public function githubCallback(Request $request)
-    {
-        $code = $request->code;
-        $clientId = env('GITHUB_CLIENT_ID');
-        $clientSecret = env('GITHUB_CLIENT_SECRET');
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://github.com/login/oauth/access_token');
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query([
-            'client_id' => $clientId,
-            'client_secret' => $clientSecret,
-            'code' => $code,
-        ]));
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/json']);
-        $response = curl_exec($ch);
-        curl_close($ch);
-        $data = json_decode($response, true);
-
-        if (!isset($data['access_token'])) {
-            return response()->json(['success' => false, 'message' => 'GitHub authentication failed'], 400);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
         }
 
-        $user = $request->user();
-        $user->github_token = $data['access_token'];
+        $attendance = Attendance::updateOrCreate(
+            [
+                'student_id' => $request->student_id,
+                'course_id' => $request->course_id,
+                'date' => $request->date
+            ],
+            [
+                'present' => $request->present
+            ]
+        );
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, 'https://api.github.com/user');
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $data['access_token']]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $userInfo = json_decode(curl_exec($ch), true);
-        curl_close($ch);
-        $user->github_username = $userInfo['login'] ?? null;
-        $user->save();
+        $this->logActivity('mark_attendance', $request->user()->id,
+            "Marked attendance for student {$request->student_id} on {$request->date}");
 
-        $this->logActivity('github_connect', $user->id, 'Connected GitHub account');
+        return response()->json([
+            'success' => true,
+            'message' => 'Attendance marked successfully',
+            'attendance' => $attendance
+        ]);
+    }
 
-        return redirect('/student/dashboard.html');
+    public function getStudentAttendance(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:users,id',
+            'course_id' => 'required|exists:courses,id',
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $query = Attendance::where('student_id', $request->student_id)
+            ->where('course_id', $request->course_id);
+
+        if ($request->start_date) {
+            $query->where('date', '>=', $request->start_date);
+        }
+        if ($request->end_date) {
+            $query->where('date', '<=', $request->end_date);
+        }
+
+        $attendance = $query->orderBy('date', 'desc')->get();
+
+        $totalDays = $attendance->count();
+        $presentDays = $attendance->where('present', true)->count();
+        $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 2) : 0;
+
+        return response()->json([
+            'success' => true,
+            'attendance' => $attendance,
+            'summary' => [
+                'total_days' => $totalDays,
+                'present_days' => $presentDays,
+                'absent_days' => $totalDays - $presentDays,
+                'attendance_rate' => $attendanceRate
+            ]
+        ]);
+    }
+
+    public function getCourseAttendance($courseId)
+    {
+        $students = User::where('role', 'student')->get();
+        $attendanceData = [];
+
+        foreach ($students as $student) {
+            $attendance = Attendance::where('student_id', $student->id)
+                ->where('course_id', $courseId)
+                ->get();
+
+            $total = $attendance->count();
+            $present = $attendance->where('present', true)->count();
+            $rate = $total > 0 ? round(($present / $total) * 100, 2) : 0;
+
+            $attendanceData[] = [
+                'student_id' => $student->id,
+                'student_name' => $student->first_name . ' ' . $student->last_name,
+                'total_days' => $total,
+                'present_days' => $present,
+                'absent_days' => $total - $present,
+                'attendance_rate' => $rate
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'course_id' => $courseId,
+            'attendance' => $attendanceData
+        ]);
+    }
+
+    // ============================================
+    // REPORT GENERATION
+    // ============================================
+
+    public function generateReport(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'type' => 'required|in:student,group,course',
+            'id' => 'required|integer',
+            'format' => 'sometimes|in:html,csv,txt'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        $format = $request->format ?? 'html';
+        $type = $request->type;
+        $id = $request->id;
+
+        switch ($type) {
+            case 'student':
+                return $this->generateStudentReport($id, $format);
+            case 'group':
+                return $this->generateGroupReport($id, $format);
+            case 'course':
+                return $this->generateCourseReport($id, $format);
+            default:
+                return response()->json(['success' => false, 'message' => 'Invalid report type'], 400);
+        }
     }
 
     // ============================================
@@ -924,7 +1736,7 @@ class ApiController extends Controller
     private function getFeedback($classification)
     {
         $feedback = [
-            'Active' => 'Excellent contribution quality and consistency!',
+            'Active' => 'Excellent contribution quality and consistency! You\'re demonstrating strong collaboration skills.',
             'Moderate' => 'Good performance overall. Consider increasing participation.',
             'Passive' => 'Your contribution is below average. Try to engage more.',
             'Free Rider' => 'Your contribution is significantly low. Please increase involvement.'
@@ -942,10 +1754,6 @@ class ApiController extends Controller
         ];
         return $suggestions[$classification] ?? ['Stay engaged with your team'];
     }
-
-    // ============================================
-    // METRICS FETCHING
-    // ============================================
 
     private function getGitHubMetrics($studentId, $assignmentId, $groupId)
     {
@@ -980,7 +1788,6 @@ class ApiController extends Controller
         }
     }
 
-    // 👇 নাম পরিবর্তন করা হয়েছে (পুরনো getAttendance থেকে getAttendanceScore)
     private function getAttendanceScore($studentId, $assignmentId)
     {
         $assignment = Assignment::find($assignmentId);
@@ -1048,36 +1855,8 @@ class ApiController extends Controller
     }
 
     // ============================================
-    // REPORT GENERATION
+    // REPORT GENERATION METHODS
     // ============================================
-
-    public function generateReport(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'type' => 'required|in:student,group,course',
-            'id' => 'required|integer',
-            'format' => 'sometimes|in:html,csv,txt'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        $format = $request->format ?? 'html';
-        $type = $request->type;
-        $id = $request->id;
-
-        switch ($type) {
-            case 'student':
-                return $this->generateStudentReport($id, $format);
-            case 'group':
-                return $this->generateGroupReport($id, $format);
-            case 'course':
-                return $this->generateCourseReport($id, $format);
-            default:
-                return response()->json(['success' => false, 'message' => 'Invalid report type'], 400);
-        }
-    }
 
     private function generateStudentReport($studentId, $format = 'html')
     {
@@ -1091,7 +1870,7 @@ class ApiController extends Controller
             'scores' => $scores,
             'avg_score' => round($avgScore, 2),
             'classification' => $classification,
-            'total_commits' => $scores->sum('score') > 0 ? rand(50, 200) : 0,
+            'total_commits' => $scores->sum('commits') ?? 0,
             'generated_at' => now()->toDateTimeString()
         ];
 
@@ -1402,115 +2181,5 @@ HTML;
         $txt .= "Generated by GroupSync\n";
         return response($txt)->header('Content-Type', 'text/plain')
             ->header('Content-Disposition', "attachment; filename=course_report_{$course->id}.txt");
-    }
-
-    // ============================================
-    // ATTENDANCE MANAGEMENT
-    // ============================================
-
-    public function markAttendance(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required|exists:users,id,role,student',
-            'course_id' => 'required|exists:courses,id',
-            'date' => 'required|date',
-            'present' => 'required|boolean'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        $attendance = Attendance::updateOrCreate(
-            [
-                'student_id' => $request->student_id,
-                'course_id' => $request->course_id,
-                'date' => $request->date
-            ],
-            [
-                'present' => $request->present
-            ]
-        );
-
-        $this->logActivity('mark_attendance', $request->user()->id,
-            "Marked attendance for student {$request->student_id} on {$request->date}");
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Attendance marked successfully',
-            'attendance' => $attendance
-        ]);
-    }
-
-    public function getStudentAttendance(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required|exists:users,id',
-            'course_id' => 'required|exists:courses,id',
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        $query = Attendance::where('student_id', $request->student_id)
-            ->where('course_id', $request->course_id);
-
-        if ($request->start_date) {
-            $query->where('date', '>=', $request->start_date);
-        }
-        if ($request->end_date) {
-            $query->where('date', '<=', $request->end_date);
-        }
-
-        $attendance = $query->orderBy('date', 'desc')->get();
-
-        $totalDays = $attendance->count();
-        $presentDays = $attendance->where('present', true)->count();
-        $attendanceRate = $totalDays > 0 ? round(($presentDays / $totalDays) * 100, 2) : 0;
-
-        return response()->json([
-            'success' => true,
-            'attendance' => $attendance,
-            'summary' => [
-                'total_days' => $totalDays,
-                'present_days' => $presentDays,
-                'absent_days' => $totalDays - $presentDays,
-                'attendance_rate' => $attendanceRate
-            ]
-        ]);
-    }
-
-    public function getCourseAttendance($courseId)
-    {
-        $students = User::where('role', 'student')->get();
-        $attendanceData = [];
-
-        foreach ($students as $student) {
-            $attendance = Attendance::where('student_id', $student->id)
-                ->where('course_id', $courseId)
-                ->get();
-
-            $total = $attendance->count();
-            $present = $attendance->where('present', true)->count();
-            $rate = $total > 0 ? round(($present / $total) * 100, 2) : 0;
-
-            $attendanceData[] = [
-                'student_id' => $student->id,
-                'student_name' => $student->first_name . ' ' . $student->last_name,
-                'total_days' => $total,
-                'present_days' => $present,
-                'absent_days' => $total - $present,
-                'attendance_rate' => $rate
-            ];
-        }
-
-        return response()->json([
-            'success' => true,
-            'course_id' => $courseId,
-            'attendance' => $attendanceData
-        ]);
     }
 }

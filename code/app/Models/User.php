@@ -26,7 +26,12 @@ class User extends Authenticatable
         'department',
         'profile_picture',
         'is_active',
-        'last_login_at'
+        'last_login_at',
+        // GitHub fields
+        'github_token',
+        'github_username',
+        'github_repo_url',
+        'github_connected_at',
     ];
 
     /**
@@ -37,6 +42,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'github_token', // Hide GitHub token for security
     ];
 
     /**
@@ -50,6 +56,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
+            'github_connected_at' => 'datetime',
             'is_active' => 'boolean',
         ];
     }
@@ -119,10 +126,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(PeerReview::class, 'reviewee_id');
     }
+
     public function peerReviewsReceived()
-{
-    return $this->receivedPeerReviews();
-}
+    {
+        return $this->receivedPeerReviews();
+    }
 
     /**
      * Get the contribution scores for this student
@@ -130,6 +138,14 @@ class User extends Authenticatable
     public function contributionScores()
     {
         return $this->hasMany(ContributionScore::class, 'student_id');
+    }
+
+    /**
+     * Get the latest contribution score for this student
+     */
+    public function getLatestContributionScore()
+    {
+        return $this->contributionScores()->latest()->first();
     }
 
     /**
@@ -158,7 +174,86 @@ class User extends Authenticatable
 
     /**
      * ============================================
-     * HELPER METHODS
+     * GITHUB METHODS
+     * ============================================
+     */
+
+    /**
+     * Check if user has GitHub connected
+     */
+    public function hasGithubConnected(): bool
+    {
+        return !empty($this->github_repo_url) && !empty($this->github_token);
+    }
+
+    /**
+     * Get GitHub repository path (owner/repo)
+     */
+    public function getGithubRepoPathAttribute(): ?string
+    {
+        if (!$this->github_repo_url) {
+            return null;
+        }
+        
+        preg_match('/github\.com\/([^\/]+\/[^\/]+)/', $this->github_repo_url, $matches);
+        return $matches[1] ?? null;
+    }
+
+    /**
+     * Get the user's avatar URL
+     */
+    public function getAvatarUrlAttribute(): string
+    {
+        // If user has GitHub username, try to get GitHub avatar
+        if ($this->github_username) {
+            return "https://github.com/{$this->github_username}.png";
+        }
+        
+        // If profile picture exists in database
+        if ($this->profile_picture) {
+            return asset('storage/profile-pictures/' . $this->profile_picture);
+        }
+        
+        // Fallback to UI Avatars
+        $name = urlencode($this->getFullNameAttribute());
+        return "https://ui-avatars.com/api/?name={$name}&background=3AAFA9&color=fff&size=120&bold=true";
+    }
+
+    /**
+     * Get GitHub API token
+     */
+    public function getGithubToken(): ?string
+    {
+        return $this->github_token;
+    }
+
+    /**
+     * Check if GitHub token is valid (not expired)
+     */
+    public function hasValidGithubToken(): bool
+    {
+        // If connected_at is more than 30 days ago, token might be expired
+        if ($this->github_connected_at) {
+            return $this->github_connected_at->diffInDays(now()) < 30;
+        }
+        return false;
+    }
+
+    /**
+     * Disconnect GitHub
+     */
+    public function disconnectGithub(): void
+    {
+        $this->github_token = null;
+        $this->github_username = null;
+        $this->github_repo_url = null;
+        $this->github_connected_at = null;
+        $this->save();
+    }
+
+    /**
+     * ============================================
+     * ROLE METHODS
      * ============================================
      */
 
@@ -195,6 +290,12 @@ class User extends Authenticatable
     }
 
     /**
+     * ============================================
+     * GROUP METHODS
+     * ============================================
+     */
+
+    /**
      * Get the user's current group for a specific course
      */
     public function getGroupForCourse($courseId)
@@ -216,5 +317,45 @@ class User extends Authenticatable
                 $query->where('course_id', $courseId);
             })
             ->exists();
+    }
+
+    /**
+     * ============================================
+     * SCOPES
+     * ============================================
+     */
+
+    /**
+     * Scope a query to only include users with GitHub connected.
+     */
+    public function scopeWithGithub($query)
+    {
+        return $query->whereNotNull('github_repo_url')
+                     ->whereNotNull('github_token');
+    }
+
+    /**
+     * Scope a query to only include users without GitHub connected.
+     */
+    public function scopeWithoutGithub($query)
+    {
+        return $query->whereNull('github_repo_url')
+                     ->orWhereNull('github_token');
+    }
+
+    /**
+     * Scope a query to only include active users.
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope a query to only include users with a specific role.
+     */
+    public function scopeWithRole($query, string $role)
+    {
+        return $query->where('role', $role);
     }
 }

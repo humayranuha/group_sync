@@ -28,6 +28,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/auth/profile', [ApiController::class, 'updateProfile'])->name('profile.update');
     Route::post('/auth/change-password', [ApiController::class, 'changePassword'])->name('password.change');
 
+    // ---- Student Dashboard ----
+    Route::get('/student/dashboard', [ApiController::class, 'getStudentDashboard']);
+
+    // ---- GitHub Routes ----
+    Route::get('/github/repo-details', [ApiController::class, 'getGitHubRepoDetails']);
+    Route::post('/github/connect', [ApiController::class, 'connectGitHub']);
+    Route::post('/github/sync', [ApiController::class, 'syncGitHub']);
+    Route::delete('/github/disconnect', [ApiController::class, 'disconnectGitHub']);
+    Route::get('/github/redirect', [ApiController::class, 'githubOAuthRedirect']);
+
     // ---- Courses ----
     Route::get('/courses', [ApiController::class, 'getCourses']);
     Route::get('/courses/professor/{id}', [ApiController::class, 'getProfessorCourses']);
@@ -67,11 +77,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // ---- Notifications ----
     Route::get('/notifications', [ApiController::class, 'getNotifications']);
     Route::post('/notifications/{id}/read', [ApiController::class, 'markNotificationRead']);
-Route::post('/reports/generate', [ApiController::class, 'generateReport']);
-// ============================================
-// ATTENDANCE ROUTES
-// ============================================
-Route::post('/attendance/mark', [App\Http\Controllers\ApiController::class, 'markAttendance']);
-Route::post('/attendance/get', [App\Http\Controllers\ApiController::class, 'getStudentAttendance']);
-Route::get('/attendance/course/{courseId}', [App\Http\Controllers\ApiController::class, 'getCourseAttendance']);
+
+    // ---- Reports ----
+    Route::post('/reports/generate', [ApiController::class, 'generateReport']);
+
+    // ---- Attendance ----
+    Route::post('/attendance/mark', [ApiController::class, 'markAttendance']);
+    Route::post('/attendance/get', [ApiController::class, 'getStudentAttendance']);
+    Route::get('/attendance/course/{courseId}', [ApiController::class, 'getCourseAttendance']);
 });

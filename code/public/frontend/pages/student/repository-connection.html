@@ -1,376 +1,843 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Connection - GroupSync</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Repository Connection - GroupSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <style>
-        .sidebar-transition { transition: transform 0.3s ease-in-out; }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
-        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
-        .animate-spin { animation: spin 1s linear infinite; }
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        
+        body { transition: background 0.5s ease, color 0.4s ease; background: #f6f9fc; }
+        .dark body { background: #0b1717; color: #e8edf0; }
+
+        /* Dark mode overrides */
+        .dark .bg-white { background-color: #132424 !important; }
+        .dark .bg-gray-50 { background-color: #0b1717 !important; }
+        .dark .bg-gray-100 { background-color: #1a2d2d !important; }
+        .dark .text-gray-600, .dark .text-gray-700, .dark .text-gray-800 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .text-gray-400 { color: #81999b !important; }
+        .dark .border-gray-200 { border-color: #1e3a3a !important; }
+        .dark .border-gray-300 { border-color: #1e3a3a !important; }
+        .dark .shadow { box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important; }
+        .dark .shadow-lg { box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important; }
+
+        /* Sidebar */
+        .sidebar-teal {
+            background: linear-gradient(180deg, #0b1717 0%, #1a3a38 100%);
+            border-right: 1px solid rgba(58,175,169,0.08);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .dark .sidebar-teal { background: linear-gradient(180deg, #071010 0%, #0f2624 100%); }
+
+        .nav-link {
+            transition: all 0.3s ease;
+            color: rgba(255,255,255,0.55);
+            border-radius: 12px;
+            padding: 0.65rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+        .nav-link:hover { background: rgba(58,175,169,0.08); color: #fff; }
+        .nav-link.active { background: rgba(58,175,169,0.15); color: #3AAFA9; box-shadow: 0 0 20px rgba(58,175,169,0.05); }
+        .nav-link .icon { width: 24px; text-align: center; font-size: 1.15rem; }
+
+        .header-teal {
+            background: rgba(43,122,120,0.88);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(58,175,169,0.12);
+            transition: background 0.4s, border-color 0.4s;
+        }
+        .dark .header-teal { background: rgba(11,23,23,0.92); border-bottom-color: rgba(58,175,169,0.06); }
+
+        .card-glass {
+            background: rgba(255,255,255,0.80);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(58,175,169,0.06);
+            border-radius: 20px;
+            transition: all 0.4s cubic-bezier(0.22,1,0.36,1);
+        }
+        .card-glass:hover { transform: translateY(-4px); border-color: #3AAFA9; box-shadow: 0 20px 40px -12px rgba(58,175,169,0.12); }
+        .dark .card-glass { background: rgba(19,36,36,0.80); border-color: rgba(58,175,169,0.06); }
+        .dark .card-glass:hover { box-shadow: 0 20px 40px -12px rgba(58,175,169,0.06); border-color: #3AAFA9; }
+
+        .btn-teal {
+            background: #3AAFA9; color: #fff; transition: all 0.3s ease;
+            box-shadow: 0 4px 14px rgba(58,175,169,0.25);
+            padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; border: none; cursor: pointer;
+        }
+        .btn-teal:hover { background: #2B7A78; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(58,175,169,0.30); }
+        .btn-teal-outline {
+            background: transparent; border: 2px solid #3AAFA9; color: #3AAFA9;
+            transition: all 0.3s ease; padding: 0.6rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer;
+        }
+        .btn-teal-outline:hover { background: #3AAFA9; color: #fff; transform: translateY(-2px); }
+        .dark .btn-teal { background: #2B7A78; box-shadow: 0 4px 14px rgba(43,122,120,0.20); }
+        .dark .btn-teal:hover { background: #3AAFA9; box-shadow: 0 8px 24px rgba(58,175,169,0.20); }
+
+        .theme-toggle {
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), background 0.3s;
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; background: rgba(255,255,255,0.05); border: none; cursor: pointer;
+            color: rgba(255,255,255,0.70); font-size: 17px;
+        }
+        .theme-toggle:hover { transform: rotate(25deg) scale(1.05); background: rgba(255,255,255,0.12); color: #fff; }
+
+        .menu-btn {
+            background: rgba(58,175,169,0.90); backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s;
+        }
+        .menu-btn:hover { background: #2B7A78; transform: scale(1.04); }
+        .dark .menu-btn { background: rgba(43,122,120,0.80); }
+
+        .logout-btn {
+            transition: all 0.3s ease; color: rgba(255,255,255,0.40); background: transparent;
+            border: none; cursor: pointer; font-size: 1.2rem; padding: 0.4rem 0.6rem; border-radius: 8px;
+        }
+        .logout-btn:hover { color: #3AAFA9; background: rgba(58,175,169,0.08); }
+
+        .input-teal {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease; color: #fff; padding: 0.75rem 1rem; border-radius: 12px;
+            width: 100%; font-size: 0.95rem;
+        }
+        .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.20); background: rgba(255,255,255,0.06); outline: none; }
+        .input-teal::placeholder { color: rgba(255,255,255,0.25); }
+        .dark .input-teal { background: rgba(0,0,0,0.25); border-color: rgba(255,255,255,0.05); }
+        .dark .input-teal:focus { border-color: #3AAFA9; box-shadow: 0 0 0 3px rgba(58,175,169,0.15); }
+
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-connected { background: rgba(58,175,169,0.15); color: #3AAFA9; }
+        .status-disconnected { background: rgba(156,163,175,0.15); color: #94a3b8; }
+        .status-syncing { background: rgba(251,191,36,0.15); color: #d97706; }
+
+        .repo-item {
+            transition: all 0.3s ease;
+        }
+        .repo-item:hover { background: rgba(58,175,169,0.04); }
+
         @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+
+        @keyframes fadeIn { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease forwards; }
+
+        .sidebar-scroll { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(58,175,169,0.15) transparent; }
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(58,175,169,0.15); border-radius: 999px; }
     </style>
 </head>
-<body class="bg-gray-50">
-    <div id="student-dashboard">
-        <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
-            <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center">
-                <h1 class="text-xl font-bold text-white">GroupSync</h1>
-                <span class="ml-2 text-xs text-blue-200">Student</span>
+<body>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar" class="sidebar-teal fixed inset-y-0 left-0 w-64 shadow-2xl transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 flex flex-col">
+        <div class="h-16 flex items-center justify-center gap-2 border-b border-white/5 shrink-0">
+            <a href="/" class="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm hover:opacity-80 transition">
+                Group<span class="text-[#c6f0ee]">Sync</span>
+            </a>
+            <span class="text-[10px] font-medium tracking-widest uppercase bg-white/10 text-white/50 px-2 py-0.5 rounded-full border border-white/5">Student</span>
+        </div>
+        <nav class="flex-1 px-3 py-4 space-y-0.5 sidebar-scroll">
+            <a href="/student/dashboard.html" data-page="dashboard" class="nav-link"><span class="icon">📊</span> Dashboard</a>
+            <a href="/student/group-details.html" data-page="group" class="nav-link"><span class="icon">👥</span> My Group</a>
+            <a href="#" data-page="repository" class="nav-link active"><span class="icon">🔗</span> GitHub Connection</a>
+            <a href="/student/contribution-analytics.html" data-page="analytics" class="nav-link"><span class="icon">📈</span> Analytics</a>
+            <a href="/student/peer-review.html" data-page="peer-review" class="nav-link"><span class="icon">⭐</span> Peer Reviews</a>
+            <a href="/student/ai-feedback.html" data-page="ai-feedback" class="nav-link"><span class="icon">🤖</span> AI Feedback</a>
+            <a href="/student/dashboard.html#profile" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
+        </nav>
+        <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
+            <div class="flex items-center gap-3">
+                <div id="user-avatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-[#3AAFA9]/20 cursor-pointer hover:scale-105 transition">ST</div>
+                <div class="flex-1 min-w-0"><p id="user-name" class="text-sm font-medium text-white truncate">Student</p><p class="text-xs text-white/40 truncate">Student</p></div>
+                <button id="logoutBtn" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
             </div>
-            <nav class="p-4 space-y-1">
-                <a href="/student/dashboard.html" data-page="dashboard" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">📊</span><span>Dashboard</span>
-                </a>
-                <a href="/student/group-details.html" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">👥</span><span>My Group</span>
-                </a>
-                <a href="/student/repository-connection.html" data-page="repository" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">🔗</span><span>GitHub Connection</span>
-                </a>
-                <a href="/student/contribution-analytics.html" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">📈</span><span>Analytics</span>
-                </a>
-                <a href="/student/peer-review.html" data-page="peer-review" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">⭐</span><span>Peer Reviews</span>
-                </a>
-                <a href="/student/ai-feedback.html" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
-                    <span class="text-xl mr-3">🤖</span><span>AI Feedback</span>
-                </a>
-            </nav>
-            <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
-                <div class="flex items-center">
-                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">ST</div>
-                    <div class="ml-3 flex-1">
-                        <p id="user-name" class="text-sm font-medium text-gray-800">Student</p>
-                        <p class="text-xs text-gray-500">Student</p>
-                    </div>
-                    <button id="logoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+        </div>
+    </aside>
+
+    <!-- ===== MOBILE MENU ===== -->
+    <button id="menuBtn" class="menu-btn fixed top-4 left-4 z-50 md:hidden text-white p-2.5 rounded-xl shadow-lg"><i class="fas fa-bars text-lg"></i></button>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header-teal fixed top-0 right-0 left-0 md:left-64 z-30 transition-colors">
+        <div class="max-w-full px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-medium text-white/70 hidden sm:block">GitHub Connection</span>
+                <span class="h-4 w-px bg-white/10 hidden sm:block"></span>
+                <span id="page-title" class="text-sm font-medium text-white/50">Repository Setup</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme"><i id="themeIcon" class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
+        <div id="page-content" class="animate-fade-in">
+            <div class="space-y-6 max-w-4xl mx-auto">
+                <!-- Page Header -->
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                        <i class="fab fa-github text-[#3AAFA9] text-3xl"></i>
+                        GitHub Repository Connection
+                    </h1>
+                    <button id="refreshBtn" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
                 </div>
-            </div>
-        </aside>
 
-        <!-- Mobile Menu Button -->
-        <button id="menuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
-
-        <!-- Main Content -->
-        <main class="md:ml-64 p-6">
-            <div id="page-content">
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800">GitHub Repository Connection</h2>
-                        <button id="refreshBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">🔄 Refresh</button>
-                    </div>
-
-                    <!-- Connect New Repository Card -->
-                    <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg shadow-lg p-6 text-white">
-                        <div class="flex items-center justify-between flex-wrap gap-4">
-                            <div class="flex items-center">
-                                <div class="text-4xl mr-4">🐙</div>
-                                <div>
-                                    <h3 class="text-xl font-semibold">Connect GitHub Repository</h3>
-                                    <p class="text-gray-300 text-sm mt-1">Connect your repository to start tracking contributions</p>
-                                </div>
-                            </div>
-                            <button id="githubConnectBtn" class="px-6 py-3 bg-white text-gray-900 rounded-lg hover:bg-gray-100 transition font-medium">
-                                Connect GitHub Account
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Manual Connect Card -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Connect Repository Manually</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Repository URL</label>
-                                <input type="url" id="repoUrl" placeholder="https://github.com/username/repository" 
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <!-- Connection Status Card -->
+                <div class="card-glass p-6">
+                    <div class="flex flex-wrap items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-2xl">
+                                <i class="fab fa-github"></i>
                             </div>
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Repository Type</label>
-                                <select id="repoType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="original">Original Repository</option>
-                                    <option value="collaborator">Collaborator Repository</option>
-                                    <option value="forked">Forked Repository</option>
-                                </select>
+                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">GitHub Connection Status</h3>
+                                <p class="text-sm text-gray-500 dark:text-gray-400" id="connectionStatusText">Checking connection...</p>
                             </div>
-                            <button id="manualConnectBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                                Connect Repository
-                            </button>
                         </div>
+                        <span id="statusBadge" class="status-badge status-disconnected flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-gray-400"></span>
+                            Checking...
+                        </span>
                     </div>
-
-                    <!-- Connected Repositories -->
-                    <div class="bg-white rounded-lg shadow overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-800">Connected Repositories</h3>
-                        </div>
-                        <div id="repositoriesList" class="divide-y divide-gray-200">
-                            <div class="p-6 text-center text-gray-500">No repositories connected yet.</div>
+                    <div id="repoInfo" class="mt-4 hidden">
+                        <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                            <p class="text-sm text-gray-600 dark:text-gray-300">
+                                <span class="font-medium">Connected Repository:</span>
+                                <span id="connectedRepoUrl" class="text-[#3AAFA9]"></span>
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                <i class="fas fa-clock mr-1"></i>
+                                Connected: <span id="connectedAt"></span>
+                            </p>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
-    </div>
 
+                <!-- Connect GitHub Account Card -->
+                <div class="card-glass p-6 bg-gradient-to-r from-[#0b1717] to-[#1a3a38] border-none shadow-xl">
+                    <div class="flex flex-wrap items-center justify-between gap-4 text-white">
+                        <div class="flex items-center gap-4">
+                            <div class="text-5xl">🐙</div>
+                            <div>
+                                <h3 class="text-xl font-semibold">Connect GitHub Account</h3>
+                                <p class="text-white/60 text-sm">Authorize GroupSync to access your GitHub repositories for activity tracking</p>
+                            </div>
+                        </div>
+                        <button id="githubOAuthBtn" class="btn-teal bg-white text-[#2B7A78] hover:bg-gray-100 shadow-lg flex items-center gap-2">
+                            <i class="fab fa-github"></i>
+                            Connect GitHub Account
+                        </button>
+                    </div>
+                    <div class="mt-4 text-xs text-white/40">
+                        <i class="fas fa-shield-alt mr-1"></i>
+                        Your GitHub credentials are secure and will only be used for contribution tracking
+                    </div>
+                </div>
+
+                <!-- OR Divider -->
+                <div class="flex items-center gap-4">
+                    <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+                    <span class="text-sm text-gray-400 dark:text-gray-500 font-medium">OR</span>
+                    <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
+                </div>
+
+                <!-- Manual Connect Card -->
+                <div class="card-glass p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="fas fa-link text-[#3AAFA9]"></i>
+                        Connect Repository Manually
+                    </h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                        Enter your GitHub repository URL directly if you prefer not to use OAuth
+                    </p>
+                    <form id="repoForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Repository URL</label>
+                            <input 
+                                type="url" 
+                                id="repoUrl" 
+                                placeholder="https://github.com/username/repository" 
+                                class="input-teal"
+                                required
+                            />
+                            <p class="text-xs text-gray-400 mt-1">Format: https://github.com/username/repository-name</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Repository Type</label>
+                            <select id="repoType" class="input-teal">
+                                <option value="original">Original Repository</option>
+                                <option value="collaborator" selected>Collaborator Repository</option>
+                                <option value="forked">Forked Repository</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-teal flex items-center gap-2">
+                            <i class="fas fa-link"></i>
+                            Connect Repository
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Connected Repositories -->
+                <div class="card-glass p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                        <i class="fas fa-list text-[#3AAFA9]"></i>
+                        Connected Repositories
+                    </h3>
+                    <div id="repositoriesList" class="space-y-3">
+                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <div class="text-4xl mb-3">🔗</div>
+                            <p class="text-sm">No repositories connected</p>
+                            <p class="text-xs mt-1">Connect your GitHub repository using the options above</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== SCRIPTS ===== -->
     <script>
-        // ============================================
-        // CONFIGURATION
-        // ============================================
-        const API_BASE = '/api';
-        const STORAGE_KEYS = {
-            TOKEN: 'groupsync_auth_token',
-            USER: 'groupsync_user_data'
-        };
+    // ============================================
+    // CONFIGURATION
+    // ============================================
+    const API_BASE = '/api';
+    const STORAGE_KEYS = {
+        TOKEN: 'groupsync_auth_token',
+        USER: 'groupsync_user_data',
+        THEME: 'theme'
+    };
 
-        // ============================================
-        // TOAST SYSTEM
-        // ============================================
-        class ToastManager {
-            constructor() {
-                this.container = null;
-                this.init();
+    // ============================================
+    // TOAST SYSTEM
+    // ============================================
+    class ToastManager {
+        constructor() {
+            this.container = null;
+            this.init();
+        }
+        init() {
+            this.container = document.createElement('div');
+            this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
+            document.body.appendChild(this.container);
+        }
+        show(message, type = 'info', duration = 5000) {
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-[#3AAFA9]/10 border-[#3AAFA9] text-[#2B7A78]',
+                error: 'bg-red-50 border-red-400 text-red-800',
+                warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                info: 'bg-blue-50 border-blue-400 text-blue-800'
+            };
+            const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+            toast.className =
+                `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
+            toast.innerHTML =
+                `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
+            this.container.appendChild(toast);
+            requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
+            toast.querySelector('button').onclick = () => toast.remove();
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
+            return toast;
+        }
+        success(m) { this.show(m, 'success'); }
+        error(m) { this.show(m, 'error'); }
+        warning(m) { this.show(m, 'warning'); }
+        info(m) { this.show(m, 'info'); }
+    }
+
+    // ============================================
+    // AUTH SERVICE
+    // ============================================
+    const AuthService = {
+        getToken() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+        getUser() { const data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+        isAuthenticated() { return !!this.getToken(); },
+        logout() {
+            localStorage.removeItem(STORAGE_KEYS.TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.USER);
+            window.location.href = '/login.html';
+        },
+        updateUser(userData) {
+            localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
+        }
+    };
+
+    // ============================================
+    // GLOBALS
+    // ============================================
+    window.toast = new ToastManager();
+    window.auth = AuthService;
+    let currentRepositories = [];
+
+    // ============================================
+    // HELPERS
+    // ============================================
+    function getInitials(name) {
+        if (!name) return 'ST';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function updateSidebarAvatar() {
+        const user = AuthService.getUser();
+        const avatarEl = document.getElementById('user-avatar');
+        const name = user ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : 'Student';
+        avatarEl.textContent = getInitials(name);
+        document.getElementById('user-name').textContent = name || 'Student';
+    }
+
+    // ============================================
+    // API SERVICE
+    // ============================================
+    const ApiService = {
+        async request(endpoint, options = {}) {
+            const token = AuthService.getToken();
+            if (!token) {
+                throw new Error('No authentication token found');
             }
-            init() {
-                this.container = document.createElement('div');
-                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
-                document.body.appendChild(this.container);
+            
+            const headers = { 
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${token}`,
+                ...options.headers 
+            };
+
+            const response = await fetch(`${API_BASE}${endpoint}`, { ...options, headers });
+            const data = await response.json();
+            
+            if (!response.ok) {
+                if (response.status === 401) {
+                    AuthService.logout();
+                    throw new Error('Session expired. Please login again.');
+                }
+                throw new Error(data.message || 'Request failed');
             }
-            show(message, type, duration) {
-                type = type || 'info';
-                duration = duration || 5000;
-                var toast = document.createElement('div');
-                var colors = {
-                    success: 'bg-green-50 border-green-400 text-green-800',
-                    error: 'bg-red-50 border-red-400 text-red-800',
-                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
-                    info: 'bg-blue-50 border-blue-400 text-blue-800'
-                };
-                var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ' + colors[type];
-                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm">' + message + '</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>';
-                this.container.appendChild(toast);
-                setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
-                toast.querySelector('button').onclick = function() { toast.remove(); };
-                setTimeout(function() { if(toast.parentNode) toast.remove(); }, duration);
-                return toast;
+            return data;
+        },
+        get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+        post(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); },
+        put(endpoint, data) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(data) }); },
+        delete(endpoint) { return this.request(endpoint, { method: 'DELETE' }); }
+    };
+
+    // ============================================
+    // CHECK CONNECTION STATUS
+    // ============================================
+    async function checkConnectionStatus() {
+        try {
+            const response = await ApiService.get('/github/repo-details');
+            
+            if (response && response.full_name) {
+                updateConnectionStatus(true, response);
+            } else {
+                updateConnectionStatus(false);
             }
-            success(m) { this.show(m, 'success'); }
-            error(m) { this.show(m, 'error'); }
-            warning(m) { this.show(m, 'warning'); }
-            info(m) { this.show(m, 'info'); }
+        } catch (error) {
+            if (error.message.includes('404')) {
+                updateConnectionStatus(false);
+            } else {
+                console.error('Error checking connection:', error);
+                updateConnectionStatus(false);
+            }
+        }
+    }
+
+    function updateConnectionStatus(connected, data = null) {
+        const statusBadge = document.getElementById('statusBadge');
+        const statusText = document.getElementById('connectionStatusText');
+        const repoInfo = document.getElementById('repoInfo');
+        const connectedRepoUrl = document.getElementById('connectedRepoUrl');
+        const connectedAt = document.getElementById('connectedAt');
+
+        if (connected && data) {
+            statusBadge.className = 'status-badge status-connected flex items-center gap-2';
+            statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-[#3AAFA9]"></span> Connected`;
+            statusText.textContent = `Connected to ${data.full_name || 'repository'}`;
+            repoInfo.classList.remove('hidden');
+            connectedRepoUrl.textContent = data.html_url || data.full_name;
+            connectedAt.textContent = data.updated_at ? new Date(data.updated_at).toLocaleString() : 'Recently';
+            
+            addRepositoryToList({
+                id: data.id || Date.now(),
+                name: data.full_name || 'Repository',
+                url: data.html_url || '',
+                type: 'connected',
+                last_synced: data.updated_at ? new Date(data.updated_at).toLocaleString() : 'Just now'
+            });
+        } else {
+            statusBadge.className = 'status-badge status-disconnected flex items-center gap-2';
+            statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-gray-400"></span> Not Connected`;
+            statusText.textContent = 'No GitHub repository connected';
+            repoInfo.classList.add('hidden');
+        }
+    }
+
+    // ============================================
+    // REPOSITORY LIST MANAGEMENT
+    // ============================================
+    function addRepositoryToList(repo) {
+        const exists = currentRepositories.some(r => r.id === repo.id || r.url === repo.url);
+        if (!exists) {
+            currentRepositories.push(repo);
+            renderRepositories();
+        }
+    }
+
+    function renderRepositories() {
+        const container = document.getElementById('repositoriesList');
+        
+        if (currentRepositories.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <div class="text-4xl mb-3">🔗</div>
+                    <p class="text-sm">No repositories connected</p>
+                    <p class="text-xs mt-1">Connect your GitHub repository using the options above</p>
+                </div>
+            `;
+            return;
         }
 
-        // ============================================
-        // LOADING SYSTEM
-        // ============================================
-        class LoadingManager {
-            show() {
-                if(this.loader) return;
-                this.loader = document.createElement('div');
-                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
-                document.body.appendChild(this.loader);
+        container.innerHTML = currentRepositories.map(repo => `
+            <div class="repo-item flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/20 rounded-xl border border-gray-100 dark:border-gray-700/50">
+                <div class="flex items-center gap-4 flex-1 min-w-0">
+                    <div class="w-10 h-10 rounded-full bg-[#3AAFA9]/10 flex items-center justify-center text-[#3AAFA9] text-lg flex-shrink-0">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">${repo.name}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 truncate">${repo.url || repo.name}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="px-2 py-0.5 text-xs rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">${repo.type || 'Connected'}</span>
+                            <span class="text-xs text-gray-400">Last synced: ${repo.last_synced || 'Just now'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0 ml-4">
+                    <button onclick="syncRepository('${repo.id}')" class="px-3 py-1.5 text-xs bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition flex items-center gap-1">
+                        <i class="fas fa-sync-alt"></i> Sync
+                    </button>
+                    <button onclick="removeRepository('${repo.id}')" class="px-3 py-1.5 text-xs bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition flex items-center gap-1">
+                        <i class="fas fa-trash"></i> Remove
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ============================================
+    // SYNC & REMOVE REPOSITORY
+    // ============================================
+    async function syncRepository(repoId) {
+        window.toast.info('Syncing repository data...');
+        
+        try {
+            const response = await ApiService.post('/github/sync');
+            if (response.success) {
+                window.toast.success('Repository synced successfully!');
+                const repo = currentRepositories.find(r => r.id == repoId);
+                if (repo) {
+                    repo.last_synced = new Date().toLocaleString();
+                    renderRepositories();
+                }
             }
-            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
+        } catch (error) {
+            window.toast.error('Failed to sync repository');
+        }
+    }
+
+    async function removeRepository(repoId) {
+        if (!confirm('Are you sure you want to disconnect this repository?')) {
+            return;
         }
 
-        // ============================================
-        // AUTH SERVICE
-        // ============================================
-        var AuthService = {
-            getToken: function() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
-            getUser: function() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
-            isAuthenticated: function() { return !!this.getToken(); },
-            logout: function() {
-                localStorage.removeItem(STORAGE_KEYS.TOKEN);
-                localStorage.removeItem(STORAGE_KEYS.USER);
+        try {
+            const response = await ApiService.delete('/github/disconnect');
+            if (response.success) {
+                currentRepositories = currentRepositories.filter(r => r.id != repoId);
+                renderRepositories();
+                updateConnectionStatus(false);
+                window.toast.success('Repository disconnected successfully');
+            }
+        } catch (error) {
+            window.toast.error('Failed to disconnect repository');
+        }
+    }
+
+    // ============================================
+    // GITHUB OAUTH FLOW
+    // ============================================
+    async function initiateGitHubOAuth() {
+        try {
+            window.toast.info('Redirecting to GitHub for authorization...');
+            
+            const token = AuthService.getToken();
+            if (!token) {
+                window.toast.error('Please login first');
                 window.location.href = '/login.html';
+                return;
             }
-        };
 
-        // ============================================
-        // API SERVICE
-        // ============================================
-        var ApiService = {
-            request: async function(endpoint, options) {
-                options = options || {};
-                var token = AuthService.getToken();
-                var headers = {
+            const response = await fetch(`${API_BASE}/github/redirect`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+            
+            if (response.ok && data.success && data.url) {
+                localStorage.setItem('github_oauth_return', window.location.pathname);
+                window.location.href = data.url;
+            } else {
+                window.toast.error('Failed to get GitHub authorization URL');
+            }
+        } catch (error) {
+            console.error('GitHub OAuth initiation failed:', error);
+            window.toast.error('Failed to initiate GitHub connection. Please try manually.');
+        }
+    }
+
+    // ============================================
+    // CHECK FOR OAUTH CALLBACK
+    // ============================================
+    function checkOAuthCallback() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        const error = urlParams.get('error');
+        const githubConnected = urlParams.get('github_connected');
+        
+        if (error) {
+            window.toast.error('GitHub authorization failed: ' + error);
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+        }
+        
+        if (githubConnected === 'success') {
+            window.toast.success('GitHub connected successfully!');
+            window.history.replaceState({}, document.title, window.location.pathname);
+            checkConnectionStatus();
+            refreshUserData();
+            return;
+        }
+        
+        if (code) {
+            window.toast.info('Processing GitHub authentication...');
+        }
+    }
+
+    // ============================================
+    // REFRESH USER DATA
+    // ============================================
+    async function refreshUserData() {
+        try {
+            const token = AuthService.getToken();
+            if (!token) return;
+
+            const response = await fetch(`${API_BASE}/auth/user`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.success && data.user) {
+                    AuthService.updateUser(data.user);
+                    const user = data.user;
+                    const name = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
+                    document.getElementById('user-name').textContent = name || 'Student';
+                    document.getElementById('user-avatar').textContent = getInitials(name);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to refresh user data:', error);
+        }
+    }
+
+    // ============================================
+    // CONNECT REPOSITORY
+    // ============================================
+    async function connectRepository(repoUrl, repoType) {
+        const token = AuthService.getToken();
+        if (!token) {
+            window.toast.error('Please login first');
+            window.location.href = '/login.html';
+            return;
+        }
+
+        try {
+            window.toast.info('Connecting repository...');
+            
+            const response = await fetch(`${API_BASE}/github/connect`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
-                };
-                if (token) {
-                    headers['Authorization'] = 'Bearer ' + token;
+                },
+                body: JSON.stringify({
+                    repo_url: repoUrl,
+                    repo_type: repoType || 'original'
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                let errorMessage = data.message || 'Connection failed';
+                
+                if (data.errors) {
+                    const errors = Object.values(data.errors).flat().join(', ');
+                    errorMessage = errors;
                 }
-                var response = await fetch(API_BASE + endpoint, {
-                    method: options.method || 'GET',
-                    headers: headers,
-                    body: options.body || null
-                });
-                var data = await response.json();
-                if (!response.ok) {
-                    if (response.status === 401) AuthService.logout();
-                    throw new Error(data.message || 'Request failed');
+                
+                if (response.status === 400 && errorMessage.includes('GitHub account')) {
+                    errorMessage = 'Please connect your GitHub account first using the "Connect GitHub Account" button above.';
+                    document.getElementById('githubOAuthBtn')?.classList.add('animate-pulse');
                 }
-                return data;
-            },
-            get: function(endpoint) { return this.request(endpoint, { method: 'GET' }); },
-            post: function(endpoint, data) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(data) }); }
-        };
-
-        // ============================================
-        // GLOBALS
-        // ============================================
-        window.toast = new ToastManager();
-        window.loading = new LoadingManager();
-        window.api = ApiService;
-        window.auth = AuthService;
-
-        // ============================================
-        // REPOSITORY LOGIC
-        // ============================================
-        var demoRepositories = [];
-
-        function renderRepositories(repos) {
-            var container = document.getElementById('repositoriesList');
-            if (repos && repos.length > 0) {
-                var html = '';
-                for (var i = 0; i < repos.length; i++) {
-                    var repo = repos[i];
-                    var badgeColor = repo.type === 'original' ? 'bg-green-100 text-green-800' : 
-                                   repo.type === 'collaborator' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
-                    html += `
-                        <div class="flex items-center justify-between p-4 hover:bg-gray-50 transition">
-                            <div class="flex items-center flex-1">
-                                <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
-                                    <span class="text-xl">📦</span>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-900">${repo.name}</p>
-                                    <p class="text-xs text-gray-500">${repo.url}</p>
-                                    <div class="flex items-center space-x-2 mt-1">
-                                        <span class="px-2 py-0.5 text-xs rounded-full ${badgeColor}">${repo.type}</span>
-                                        <span class="text-xs text-gray-400">Last synced: ${repo.last_synced || 'Just now'}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <button class="sync-btn text-blue-600 hover:text-blue-800 text-sm font-medium" data-repo-id="${repo.id}">🔄 Sync</button>
-                                <button class="remove-btn text-red-600 hover:text-red-800 text-sm font-medium" data-repo-id="${repo.id}">Remove</button>
-                            </div>
-                        </div>
-                    `;
-                }
-                container.innerHTML = html;
-
-                // Event listeners
-                document.querySelectorAll('.sync-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        window.toast.success('Repository synced successfully!');
-                    });
-                });
-                document.querySelectorAll('.remove-btn').forEach(function(btn) {
-                    btn.addEventListener('click', function() {
-                        if (confirm('Are you sure you want to remove this repository?')) {
-                            window.toast.success('Repository removed successfully!');
-                            var id = parseInt(this.dataset.repoId);
-                            demoRepositories = demoRepositories.filter(function(r) { return r.id !== id; });
-                            renderRepositories(demoRepositories);
-                        }
-                    });
-                });
-            } else {
-                container.innerHTML = `
-                    <div class="p-12 text-center">
-                        <div class="text-6xl mb-4">🔗</div>
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">No Repositories Connected</h3>
-                        <p class="text-gray-500">Connect your first GitHub repository to start tracking contributions.</p>
-                    </div>
-                `;
+                
+                window.toast.error(errorMessage);
+                return;
             }
+
+            if (data.success) {
+                window.toast.success('Repository connected successfully!');
+                
+                const repoName = repoUrl.split('/').pop() || 'Repository';
+                const newRepo = {
+                    id: Date.now(),
+                    name: repoName,
+                    url: repoUrl,
+                    type: repoType || 'original',
+                    last_synced: 'Just now'
+                };
+                currentRepositories.push(newRepo);
+                renderRepositories();
+                
+                updateConnectionStatus(true, { 
+                    full_name: repoName, 
+                    html_url: repoUrl 
+                });
+                
+                document.getElementById('repoUrl').value = '';
+                await refreshUserData();
+            } else {
+                window.toast.error(data.message || 'Failed to connect repository');
+            }
+        } catch (error) {
+            console.error('Connection error:', error);
+            window.toast.error('Network error. Please check your connection and try again.');
+        }
+    }
+
+    // ============================================
+    // THEME TOGGLE
+    // ============================================
+    (function initTheme() {
+        const toggle = document.getElementById('themeToggle');
+        const icon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+        const saved = localStorage.getItem(STORAGE_KEYS.THEME);
+        
+        if (saved === 'dark') {
+            html.setAttribute('data-theme', 'dark');
+            html.classList.add('dark');
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+        
+        toggle.addEventListener('click', function() {
+            const isDark = html.classList.toggle('dark');
+            html.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            
+            if (isDark) {
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem(STORAGE_KEYS.THEME, 'dark');
+            } else {
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem(STORAGE_KEYS.THEME, 'light');
+            }
+        });
+    })();
+
+    // ============================================
+    // INITIALIZATION
+    // ============================================
+    function init() {
+        if (!AuthService.isAuthenticated()) {
+            window.location.href = '/login.html';
+            return;
         }
 
-        function connectRepository() {
-            var url = document.getElementById('repoUrl').value.trim();
-            var type = document.getElementById('repoType').value;
+        const user = AuthService.getUser();
+        if (user) {
+            const name = `${user.first_name || 'Student'} ${user.last_name || ''}`.trim();
+            document.getElementById('user-name').textContent = name || 'Student';
+            document.getElementById('user-avatar').textContent = getInitials(name);
+        }
+
+        document.getElementById('menuBtn')?.addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('-translate-x-full');
+        });
+
+        document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
+
+        document.getElementById('refreshBtn')?.addEventListener('click', () => {
+            checkConnectionStatus();
+            window.toast.info('Refreshed connection status');
+        });
+
+        document.getElementById('githubOAuthBtn')?.addEventListener('click', initiateGitHubOAuth);
+
+        document.getElementById('repoForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            if (!url) {
+            const repoUrl = document.getElementById('repoUrl').value.trim();
+            const repoType = document.getElementById('repoType').value;
+            
+            if (!repoUrl) {
                 window.toast.warning('Please enter a repository URL');
                 return;
             }
-
-            var repoName = url.split('/').pop();
-            var newRepo = {
-                id: Date.now(),
-                name: repoName,
-                url: url,
-                type: type,
-                last_synced: 'Just now'
-            };
-            demoRepositories.push(newRepo);
-            renderRepositories(demoRepositories);
-            document.getElementById('repoUrl').value = '';
-            window.toast.success('Repository connected successfully!');
-        }
-
-        // ============================================
-        // INITIALIZATION
-        // ============================================
-        function init() {
-            if (!AuthService.isAuthenticated()) {
-                window.location.href = '/login.html';
+            
+            const urlPattern = /^https?:\/\/github\.com\/[a-zA-Z0-9-]+\/[a-zA-Z0-9-._]+$/;
+            if (!urlPattern.test(repoUrl)) {
+                window.toast.warning('Please enter a valid GitHub repository URL');
                 return;
             }
+            
+            await connectRepository(repoUrl, repoType);
+            document.getElementById('repoUrl').value = '';
+        });
 
-            var user = AuthService.getUser();
-            if (user) {
-                document.getElementById('user-name').textContent = (user.first_name || 'Student') + ' ' + (user.last_name || '');
-                document.getElementById('user-avatar').textContent = function(name) {
-                    if (!name) return 'ST';
-                    var parts = name.split(' ');
-                    return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
-                }((user.first_name || 'S') + ' ' + (user.last_name || 'T'));
-            }
+        checkConnectionStatus();
+        checkOAuthCallback();
+    }
 
-            document.getElementById('menuBtn')?.addEventListener('click', function() {
-                document.getElementById('sidebar').classList.toggle('-translate-x-full');
-            });
-
-            document.getElementById('logoutBtn')?.addEventListener('click', function() {
-                AuthService.logout();
-            });
-
-            document.getElementById('githubConnectBtn')?.addEventListener('click', function() {
-                window.toast.info('GitHub OAuth redirect would happen here');
-            });
-
-            document.getElementById('manualConnectBtn')?.addEventListener('click', connectRepository);
-
-            document.getElementById('refreshBtn')?.addEventListener('click', function() {
-                renderRepositories(demoRepositories);
-                window.toast.success('Refreshed!');
-            });
-
-            // Demo repositories
-            demoRepositories = [
-                { id: 1, name: 'project-repo', url: 'https://github.com/student/project-repo', type: 'original', last_synced: '2 hours ago' },
-                { id: 2, name: 'team-collab', url: 'https://github.com/team/collab', type: 'collaborator', last_synced: '1 day ago' }
-            ];
-            renderRepositories(demoRepositories);
-        }
-
-        document.addEventListener('DOMContentLoaded', init);
-    </script>
+    document.addEventListener('DOMContentLoaded', init);
+</script>
 </body>
 </html>
