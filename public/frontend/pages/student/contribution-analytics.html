@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contribution Analytics - GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="student-dashboard">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+            <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center">
+                <h1 class="text-xl font-bold text-white">GroupSync</h1>
+                <span class="ml-2 text-xs text-blue-200">Student</span>
+            </div>
+            <nav class="p-4 space-y-1">
+                <a href="/student/dashboard.html" data-page="dashboard" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📊</span><span>Dashboard</span>
+                </a>
+                <a href="/student/group-details.html" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">👥</span><span>My Group</span>
+                </a>
+                <a href="/student/repository-connection.html" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">🔗</span><span>GitHub Connection</span>
+                </a>
+                <a href="/student/contribution-analytics.html" data-page="analytics" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📈</span><span>Analytics</span>
+                </a>
+                <a href="/student/peer-review.html" data-page="peer-review" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">⭐</span><span>Peer Reviews</span>
+                </a>
+                <a href="/student/ai-feedback.html" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">🤖</span><span>AI Feedback</span>
+                </a>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">ST</div>
+                    <div class="ml-3 flex-1">
+                        <p id="user-name" class="text-sm font-medium text-gray-800">Student</p>
+                        <p class="text-xs text-gray-500">Student</p>
+                    </div>
+                    <button id="logoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Menu Button -->
+        <button id="menuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Main Content -->
+        <main class="md:ml-64 p-6">
+            <div id="page-content">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">Contribution Analytics</h2>
+                        <select id="timeframeSelect" class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500">
+                            <option value="week">Last 7 Days</option>
+                            <option value="month" selected>Last 30 Days</option>
+                            <option value="semester">This Semester</option>
+                        </select>
+                    </div>
+
+                    <!-- Metrics Cards -->
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="bg-white rounded-lg shadow p-6 card-hover">
+                            <p class="text-sm text-gray-600">Total Commits</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1" id="totalCommits">127</p>
+                            <p class="text-xs text-green-600 mt-1" id="commitTrend">↑ 12%</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6 card-hover">
+                            <p class="text-sm text-gray-600">Lines Added</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1" id="linesAdded">2,450</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6 card-hover">
+                            <p class="text-sm text-gray-600">Lines Deleted</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1" id="linesDeleted">890</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6 card-hover">
+                            <p class="text-sm text-gray-600">Consistency Score</p>
+                            <p class="text-2xl font-bold text-gray-900 mt-1" id="consistencyScore">85%</p>
+                        </div>
+                    </div>
+
+                    <!-- Charts Grid -->
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Commit Activity</h3>
+                            <canvas id="commitChart" height="250"></canvas>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">Code Changes</h3>
+                            <canvas id="codeChangesChart" height="250"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Activity Consistency -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Activity Consistency</h3>
+                        <canvas id="consistencyChart" height="200"></canvas>
+                    </div>
+
+                    <!-- Contribution Heatmap -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Contribution Heatmap</h3>
+                        <div id="heatmapContainer" class="overflow-x-auto">
+                            <div class="grid grid-cols-7 gap-1">
+                                <div class="text-center"><div class="text-xs text-gray-600 mb-1">Mon</div><div class="w-10 h-10 rounded bg-green-400 flex items-center justify-center text-white text-xs mx-auto">8</div></div>
+                                <div class="text-center"><div class="text-xs text-gray-600 mb-1">Tue</div><div class="w-10 h-10 rounded bg-green-600 flex items-center justify-center text-white text-xs mx-auto">12</div></div>
+                                <div class="text-center"><div class="text-xs text-gray-600 mb-1">Wed</div><div class="w-10 h-10 rounded bg-green-700 flex items-center justify-center text-white text-xs mx-auto">15</div></div>
+                                <div class="text-center"><div class="text-xs text-gray-600 mb-1">Thu</div><div class="w-10 h-10 rounded bg-green-500 flex items-center justify-center text-white text-xs mx-auto">10</div></div>
+                                <div class="text-center"><div class="text-xs text-gray-600 mb-1">Fri</div><div class="w-10 h-10 rounded bg-green-300 flex items-center justify-center text-white text-xs mx-auto">5</div></div>
+                                <div class="text-center"><div class="text-xs text-gray-600 mb-1">Sat</div><div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-gray-600 text-xs">0</div></div>
+                                <div class="text-center"><div class="text-xs text-gray-600 mb-1">Sun</div><div class="w-10 h-10 rounded bg-gray-200 flex items-center justify-center text-gray-600 text-xs">0</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Repositories -->
+                    <div class="bg-white rounded-lg shadow overflow-hidden">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800">Top Repositories</h3>
+                        </div>
+                        <div id="topRepos" class="divide-y divide-gray-200">
+                            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                                <div><p class="font-medium text-gray-900">project-repo</p><p class="text-sm text-gray-500">45 commits • 1,250 lines added</p></div>
+                                <div class="text-right"><p class="text-sm font-semibold text-gray-900">35%</p><p class="text-xs text-gray-500">of total</p></div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                                <div><p class="font-medium text-gray-900">team-collab</p><p class="text-sm text-gray-500">32 commits • 890 lines added</p></div>
+                                <div class="text-right"><p class="text-sm font-semibold text-gray-900">28%</p><p class="text-xs text-gray-500">of total</p></div>
+                            </div>
+                            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                                <div><p class="font-medium text-gray-900">documentation</p><p class="text-sm text-gray-500">18 commits • 450 lines added</p></div>
+                                <div class="text-right"><p class="text-sm font-semibold text-gray-900">22%</p><p class="text-xs text-gray-500">of total</p></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = '/api';
+        const STORAGE_KEYS = {
+            TOKEN: 'groupsync_auth_token',
+            USER: 'groupsync_user_data'
+        };
+
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        class ToastManager {
+            constructor() {
+                this.container = null;
+                this.init();
+            }
+            init() {
+                this.container = document.createElement('div');
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                document.body.appendChild(this.container);
+            }
+            show(message, type, duration) {
+                type = type || 'info';
+                duration = duration || 5000;
+                var toast = document.createElement('div');
+                var colors = {
+                    success: 'bg-green-50 border-green-400 text-green-800',
+                    error: 'bg-red-50 border-red-400 text-red-800',
+                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                    info: 'bg-blue-50 border-blue-400 text-blue-800'
+                };
+                var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ' + colors[type];
+                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm">' + message + '</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>';
+                this.container.appendChild(toast);
+                setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
+                toast.querySelector('button').onclick = function() { toast.remove(); };
+                setTimeout(function() { if(toast.parentNode) toast.remove(); }, duration);
+                return toast;
+            }
+            success(m) { this.show(m, 'success'); }
+            error(m) { this.show(m, 'error'); }
+            warning(m) { this.show(m, 'warning'); }
+            info(m) { this.show(m, 'info'); }
+        }
+
+        // ============================================
+        // LOADING SYSTEM
+        // ============================================
+        class LoadingManager {
+            show() {
+                if(this.loader) return;
+                this.loader = document.createElement('div');
+                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
+                document.body.appendChild(this.loader);
+            }
+            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
+        }
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        var AuthService = {
+            getToken: function() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser: function() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated: function() { return !!this.getToken(); },
+            logout: function() {
+                localStorage.removeItem(STORAGE_KEYS.TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER);
+                window.location.href = '/login.html';
+            }
+        };
+
+        // ============================================
+        // GLOBALS
+        // ============================================
+        window.toast = new ToastManager();
+        window.loading = new LoadingManager();
+        window.auth = AuthService;
+
+        // ============================================
+        // CHART LOGIC
+        // ============================================
+        var charts = {};
+
+        function renderCharts() {
+            // Commit Chart
+            var commitCtx = document.getElementById('commitChart')?.getContext('2d');
+            if (commitCtx) {
+                if (charts.commit) charts.commit.destroy();
+                charts.commit = new Chart(commitCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [{
+                            label: 'Commits',
+                            data: [12, 19, 15, 27],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59,130,246,0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+            }
+
+            // Code Changes Chart
+            var codeCtx = document.getElementById('codeChangesChart')?.getContext('2d');
+            if (codeCtx) {
+                if (charts.code) charts.code.destroy();
+                charts.code = new Chart(codeCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                        datasets: [
+                            { label: 'Lines Added', data: [320, 450, 380, 520], backgroundColor: '#10b981' },
+                            { label: 'Lines Deleted', data: [120, 180, 140, 210], backgroundColor: '#ef4444' }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: true }
+                });
+            }
+
+            // Consistency Chart
+            var consCtx = document.getElementById('consistencyChart')?.getContext('2d');
+            if (consCtx) {
+                if (charts.consistency) charts.consistency.destroy();
+                charts.consistency = new Chart(consCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Commits', 'PRs', 'Code Quality', 'Reviews', 'Documentation'],
+                        datasets: [{
+                            label: 'Your Score',
+                            data: [85, 70, 78, 65, 80],
+                            backgroundColor: 'rgba(59,130,246,0.2)',
+                            borderColor: '#3b82f6',
+                            pointBackgroundColor: '#3b82f6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            r: { beginAtZero: true, max: 100 }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            var user = AuthService.getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = (user.first_name || 'Student') + ' ' + (user.last_name || '');
+                document.getElementById('user-avatar').textContent = function(name) {
+                    if (!name) return 'ST';
+                    var parts = name.split(' ');
+                    return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+                }((user.first_name || 'S') + ' ' + (user.last_name || 'T'));
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                AuthService.logout();
+            });
+
+            document.getElementById('timeframeSelect')?.addEventListener('change', function() {
+                window.toast.info('Loading data for: ' + this.value);
+            });
+
+            renderCharts();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

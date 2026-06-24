@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Feedback - GroupSync</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .sidebar-transition { transition: transform 0.3s ease-in-out; }
+        .card-hover { transition: all 0.3s ease; }
+        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); }
+        .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="student-dashboard">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="fixed inset-y-0 left-0 w-64 bg-white shadow-lg transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-30">
+            <div class="h-16 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center">
+                <h1 class="text-xl font-bold text-white">GroupSync</h1>
+                <span class="ml-2 text-xs text-blue-200">Student</span>
+            </div>
+            <nav class="p-4 space-y-1">
+                <a href="/student/dashboard.html" data-page="dashboard" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📊</span><span>Dashboard</span>
+                </a>
+                <a href="/student/group-details.html" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">👥</span><span>My Group</span>
+                </a>
+                <a href="/student/repository-connection.html" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">🔗</span><span>GitHub Connection</span>
+                </a>
+                <a href="/student/contribution-analytics.html" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">📈</span><span>Analytics</span>
+                </a>
+                <a href="/student/peer-review.html" data-page="peer-review" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">⭐</span><span>Peer Reviews</span>
+                </a>
+                <a href="/student/ai-feedback.html" data-page="ai-feedback" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                    <span class="text-xl mr-3">🤖</span><span>AI Feedback</span>
+                </a>
+            </nav>
+            <div class="absolute bottom-0 w-full p-4 border-t bg-gray-50">
+                <div class="flex items-center">
+                    <div id="user-avatar" class="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-lg">ST</div>
+                    <div class="ml-3 flex-1">
+                        <p id="user-name" class="text-sm font-medium text-gray-800">Student</p>
+                        <p class="text-xs text-gray-500">Student</p>
+                    </div>
+                    <button id="logoutBtn" class="p-2 text-red-500 hover:text-red-700 transition" title="Logout">🚪</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Mobile Menu Button -->
+        <button id="menuBtn" class="fixed top-4 left-4 z-40 md:hidden bg-blue-600 text-white p-2 rounded-lg shadow-lg">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+            </svg>
+        </button>
+
+        <!-- Main Content -->
+        <main class="md:ml-64 p-6">
+            <div id="page-content">
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800">AI Evaluation Feedback</h2>
+                        <button id="refreshBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">🔄 Refresh Analysis</button>
+                    </div>
+
+                    <!-- Overall Classification -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-lg p-6">
+                        <div class="flex justify-between items-start flex-wrap gap-4">
+                            <div>
+                                <h3 class="text-xl font-semibold text-gray-800">Your Performance Classification</h3>
+                                <p class="text-gray-600 mt-1">Week 8 Evaluation</p>
+                            </div>
+                            <span id="classificationBadge" class="px-4 py-2 rounded-full text-lg font-semibold bg-green-100 text-green-800">Active Contributor</span>
+                        </div>
+                    </div>
+
+                    <!-- Score Cards -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover">
+                            <div class="text-4xl mb-2">📊</div>
+                            <p class="text-sm text-gray-600">Participation Score</p>
+                            <p class="text-3xl font-bold text-blue-600 mt-2">85</p>
+                            <p class="text-xs text-gray-500 mt-1">out of 100</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover">
+                            <div class="text-4xl mb-2">⭐</div>
+                            <p class="text-sm text-gray-600">Quality Score</p>
+                            <p class="text-3xl font-bold text-blue-600 mt-2">78</p>
+                            <p class="text-xs text-gray-500 mt-1">out of 100</p>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6 text-center card-hover">
+                            <div class="text-4xl mb-2">📈</div>
+                            <p class="text-sm text-gray-600">Consistency Score</p>
+                            <p class="text-3xl font-bold text-blue-600 mt-2">92</p>
+                            <p class="text-xs text-gray-500 mt-1">out of 100</p>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Feedback -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">AI Feedback</h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            Excellent contribution quality and consistency! You're demonstrating strong collaboration skills 
+                            and delivering high-quality work. Your activity pattern shows regular engagement with the repository.
+                            You've consistently met your team's expectations and shown initiative in completing tasks.
+                        </p>
+                    </div>
+
+                    <!-- Improvement Suggestions -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Improvement Suggestions</h3>
+                        <ul class="space-y-2">
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">•</span>
+                                <span class="text-gray-700">Increase code review participation by reviewing teammates' PRs regularly</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">•</span>
+                                <span class="text-gray-700">Help mentor passive group members to improve overall team performance</span>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="text-blue-500 mr-2">•</span>
+                                <span class="text-gray-700">Document your code more thoroughly for better knowledge transfer</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Suspicious Activity Detection -->
+                    <div class="bg-yellow-50 rounded-lg shadow p-6 border-l-4 border-yellow-400">
+                        <div class="flex items-start">
+                            <div class="text-2xl mr-3">⚠️</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-yellow-800">Suspicious Activity Detected</h3>
+                                <p class="text-yellow-700 mt-1">No suspicious activity detected in your contribution history.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Weekly Performance Chart -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Weekly Performance Trend</h3>
+                        <canvas id="weeklyTrendChart" height="250"></canvas>
+                    </div>
+
+                    <!-- Comparison with Team -->
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Comparison with Team Average</h3>
+                        <canvas id="teamComparisonChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURATION
+        // ============================================
+        const API_BASE = '/api';
+        const STORAGE_KEYS = {
+            TOKEN: 'groupsync_auth_token',
+            USER: 'groupsync_user_data'
+        };
+
+        // ============================================
+        // TOAST SYSTEM
+        // ============================================
+        class ToastManager {
+            constructor() {
+                this.container = null;
+                this.init();
+            }
+            init() {
+                this.container = document.createElement('div');
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                document.body.appendChild(this.container);
+            }
+            show(message, type, duration) {
+                type = type || 'info';
+                duration = duration || 5000;
+                var toast = document.createElement('div');
+                var colors = {
+                    success: 'bg-green-50 border-green-400 text-green-800',
+                    error: 'bg-red-50 border-red-400 text-red-800',
+                    warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
+                    info: 'bg-blue-50 border-blue-400 text-blue-800'
+                };
+                var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ' + colors[type];
+                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm">' + message + '</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>';
+                this.container.appendChild(toast);
+                setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
+                toast.querySelector('button').onclick = function() { toast.remove(); };
+                setTimeout(function() { if(toast.parentNode) toast.remove(); }, duration);
+                return toast;
+            }
+            success(m) { this.show(m, 'success'); }
+            error(m) { this.show(m, 'error'); }
+            warning(m) { this.show(m, 'warning'); }
+            info(m) { this.show(m, 'info'); }
+        }
+
+        // ============================================
+        // LOADING SYSTEM
+        // ============================================
+        class LoadingManager {
+            show() {
+                if(this.loader) return;
+                this.loader = document.createElement('div');
+                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
+                document.body.appendChild(this.loader);
+            }
+            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
+        }
+
+        // ============================================
+        // AUTH SERVICE
+        // ============================================
+        var AuthService = {
+            getToken: function() { return localStorage.getItem(STORAGE_KEYS.TOKEN); },
+            getUser: function() { var data = localStorage.getItem(STORAGE_KEYS.USER); return data ? JSON.parse(data) : null; },
+            isAuthenticated: function() { return !!this.getToken(); },
+            logout: function() {
+                localStorage.removeItem(STORAGE_KEYS.TOKEN);
+                localStorage.removeItem(STORAGE_KEYS.USER);
+                window.location.href = '/login.html';
+            }
+        };
+
+        // ============================================
+        // GLOBALS
+        // ============================================
+        window.toast = new ToastManager();
+        window.loading = new LoadingManager();
+        window.auth = AuthService;
+
+        // ============================================
+        // CHART LOGIC
+        // ============================================
+        var charts = {};
+
+        function renderCharts() {
+            // Weekly Trend Chart
+            var trendCtx = document.getElementById('weeklyTrendChart')?.getContext('2d');
+            if (trendCtx) {
+                if (charts.trend) charts.trend.destroy();
+                charts.trend = new Chart(trendCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
+                        datasets: [
+                            {
+                                label: 'Your Performance',
+                                data: [70, 72, 75, 78, 80, 82, 85, 87],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59,130,246,0.1)',
+                                tension: 0.4,
+                                fill: true
+                            },
+                            {
+                                label: 'Team Average',
+                                data: [68, 70, 71, 73, 74, 75, 76, 77],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16,185,129,0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: { beginAtZero: true, max: 100, title: { display: true, text: 'Performance Score (%)' } }
+                        }
+                    }
+                });
+            }
+
+            // Team Comparison Chart
+            var compCtx = document.getElementById('teamComparisonChart')?.getContext('2d');
+            if (compCtx) {
+                if (charts.comparison) charts.comparison.destroy();
+                charts.comparison = new Chart(compCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Commits', 'Code Quality', 'PRs', 'Reviews', 'Documentation', 'Collaboration'],
+                        datasets: [
+                            {
+                                label: 'You',
+                                data: [85, 78, 82, 70, 75, 80],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59,130,246,0.2)'
+                            },
+                            {
+                                label: 'Team Average',
+                                data: [75, 72, 70, 68, 65, 70],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16,185,129,0.2)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            r: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+        function init() {
+            if (!AuthService.isAuthenticated()) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            var user = AuthService.getUser();
+            if (user) {
+                document.getElementById('user-name').textContent = (user.first_name || 'Student') + ' ' + (user.last_name || '');
+                document.getElementById('user-avatar').textContent = function(name) {
+                    if (!name) return 'ST';
+                    var parts = name.split(' ');
+                    return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
+                }((user.first_name || 'S') + ' ' + (user.last_name || 'T'));
+            }
+
+            document.getElementById('menuBtn')?.addEventListener('click', function() {
+                document.getElementById('sidebar').classList.toggle('-translate-x-full');
+            });
+
+            document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                AuthService.logout();
+            });
+
+            document.getElementById('refreshBtn')?.addEventListener('click', function() {
+                window.toast.success('AI feedback refreshed!');
+                renderCharts();
+            });
+
+            renderCharts();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
