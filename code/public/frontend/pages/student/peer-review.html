@@ -12,6 +12,54 @@
         .nav-link.active { background-color: #eff6ff; color: #1d4ed8; }
         .animate-spin { animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .peer-rating {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(58,175,169,0.15);
+            transition: all 0.3s ease;
+            color: #1f2937;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .peer-rating:focus {
+            border-color: #3AAFA9;
+            box-shadow: 0 0 0 3px rgba(58,175,169,0.15);
+            outline: none;
+        }
+        .dark .peer-rating {
+            background: rgba(0,0,0,0.2);
+            color: #e2e8f0;
+        }
+        .peer-comment {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(58,175,169,0.15);
+            transition: all 0.3s ease;
+            color: #1f2937;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            width: 100%;
+            resize: vertical;
+            min-height: 60px;
+        }
+        .peer-comment:focus {
+            border-color: #3AAFA9;
+            box-shadow: 0 0 0 3px rgba(58,175,169,0.15);
+            outline: none;
+        }
+        .dark .peer-comment {
+            background: rgba(0,0,0,0.2);
+            color: #e2e8f0;
+        }
+        .dark .bg-white { background-color: #132424 !important; }
+        .dark .bg-gray-50 { background-color: #0b1717 !important; }
+        .dark .text-gray-600, .dark .text-gray-700 { color: #cbd5e1 !important; }
+        .dark .text-gray-500 { color: #94a3b8 !important; }
+        .dark .border-gray-200 { border-color: #1e3a3a !important; }
+        .dark .bg-yellow-50 { background-color: rgba(58,175,169,0.08) !important; }
+        .dark .bg-green-100 { background-color: rgba(58,175,169,0.12) !important; }
+        .dark .text-green-800 { color: #7ccfca !important; }
+        .dark .text-yellow-800 { color: #7ccfca !important; }
+        .dark .text-blue-600 { color: #5ccbc5 !important; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -23,22 +71,22 @@
                 <span class="ml-2 text-xs text-blue-200">Student</span>
             </div>
             <nav class="p-4 space-y-1">
-                <a href="/student/dashboard.html" data-page="dashboard" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="/student/dashboard.html" data-page="dashboard" class="nav-link flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
                     <span class="text-xl mr-3">📊</span><span>Dashboard</span>
                 </a>
-                <a href="/student/group-details.html" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="/student/group-details.html" data-page="group" class="nav-link flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
                     <span class="text-xl mr-3">👥</span><span>My Group</span>
                 </a>
-                <a href="/student/repository-connection.html" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="/student/repository-connection.html" data-page="repository" class="nav-link flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
                     <span class="text-xl mr-3">🔗</span><span>GitHub Connection</span>
                 </a>
-                <a href="/student/contribution-analytics.html" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="/student/contribution-analytics.html" data-page="analytics" class="nav-link flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
                     <span class="text-xl mr-3">📈</span><span>Analytics</span>
                 </a>
-                <a href="/student/peer-review.html" data-page="peer-review" class="nav-link active flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="/student/peer-review.html" data-page="peer-review" class="nav-link active flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
                     <span class="text-xl mr-3">⭐</span><span>Peer Reviews</span>
                 </a>
-                <a href="/student/ai-feedback.html" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg transition-colors hover:bg-gray-100">
+                <a href="/student/ai-feedback.html" data-page="ai-feedback" class="nav-link flex items-center px-3 py-2 rounded-lg hover:bg-gray-100">
                     <span class="text-xl mr-3">🤖</span><span>AI Feedback</span>
                 </a>
             </nav>
@@ -64,137 +112,11 @@
         <!-- Main Content -->
         <main class="md:ml-64 p-6">
             <div id="page-content">
-                <div class="space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 class="text-2xl font-bold text-gray-800">Peer Reviews</h2>
-                        <span class="text-sm text-gray-500">Deadline: May 30, 2026</span>
-                    </div>
-
-                    <!-- Review Status -->
-                    <div class="bg-white rounded-lg shadow p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Review Status</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <p class="text-2xl font-bold text-blue-600">4</p>
-                                <p class="text-sm text-gray-600">Total Members</p>
-                            </div>
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <p class="text-2xl font-bold text-green-600">3</p>
-                                <p class="text-sm text-gray-600">Reviewed</p>
-                            </div>
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <p class="text-2xl font-bold text-yellow-600">1</p>
-                                <p class="text-sm text-gray-600">Pending</p>
-                            </div>
-                            <div class="text-center p-4 bg-gray-50 rounded-lg">
-                                <p class="text-2xl font-bold text-gray-600">75%</p>
-                                <p class="text-sm text-gray-600">Completion</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Team Members to Review -->
-                    <div class="bg-white rounded-lg shadow overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-200">
-                            <h3 class="text-lg font-semibold text-gray-800">Team Members</h3>
-                        </div>
-                        <div class="divide-y divide-gray-200">
-                            <!-- Member 1 - Already Reviewed -->
-                            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg">✓</div>
-                                    <div class="ml-4">
-                                        <p class="text-sm font-medium text-gray-900">John Doe</p>
-                                        <p class="text-xs text-gray-500">Reviewed • May 28, 2026</p>
-                                    </div>
-                                </div>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Completed</span>
-                            </div>
-                            <!-- Member 2 - Already Reviewed -->
-                            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg">✓</div>
-                                    <div class="ml-4">
-                                        <p class="text-sm font-medium text-gray-900">Jane Smith</p>
-                                        <p class="text-xs text-gray-500">Reviewed • May 27, 2026</p>
-                                    </div>
-                                </div>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Completed</span>
-                            </div>
-                            <!-- Member 3 - Already Reviewed -->
-                            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-lg">✓</div>
-                                    <div class="ml-4">
-                                        <p class="text-sm font-medium text-gray-900">Mike Brown</p>
-                                        <p class="text-xs text-gray-500">Reviewed • May 26, 2026</p>
-                                    </div>
-                                </div>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Completed</span>
-                            </div>
-                            <!-- Member 4 - Pending -->
-                            <div class="flex items-center justify-between p-4 hover:bg-gray-50 bg-yellow-50">
-                                <div class="flex items-center">
-                                    <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 text-lg">⏳</div>
-                                    <div class="ml-4">
-                                        <p class="text-sm font-medium text-gray-900">Lisa Wong</p>
-                                        <p class="text-xs text-gray-500">Pending review</p>
-                                    </div>
-                                </div>
-                                <button class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm">Review Now</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Review Form (Hidden by default, shown when Review Now clicked) -->
-                    <div id="reviewForm" class="bg-white rounded-lg shadow p-6 hidden">
-                        <h3 class="text-lg font-semibold text-gray-800 mb-4">Submit Peer Review</h3>
-                        <form id="peerReviewForm" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Team Member</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500">
-                                    <option>Lisa Wong</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Communication Rating</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4" selected>4 - Good</option>
-                                    <option value="3">3 - Average</option>
-                                    <option value="2">2 - Below Average</option>
-                                    <option value="1">1 - Poor</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Reliability Rating</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4" selected>4 - Good</option>
-                                    <option value="3">3 - Average</option>
-                                    <option value="2">2 - Below Average</option>
-                                    <option value="1">1 - Poor</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Task Participation Rating</label>
-                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500">
-                                    <option value="5">5 - Excellent</option>
-                                    <option value="4">4 - Good</option>
-                                    <option value="3" selected>3 - Average</option>
-                                    <option value="2">2 - Below Average</option>
-                                    <option value="1">1 - Poor</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Comments (Optional)</label>
-                                <textarea rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500" placeholder="Provide constructive feedback..."></textarea>
-                            </div>
-                            <div class="flex space-x-3">
-                                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Submit Review</button>
-                                <button type="button" id="cancelReviewBtn" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Cancel</button>
-                            </div>
-                        </form>
+                <!-- Loading -->
+                <div class="flex items-center justify-center h-64">
+                    <div class="text-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-2 border-[#3AAFA9] border-t-transparent mx-auto"></div>
+                        <p class="text-gray-500 dark:text-gray-400 mt-4 text-sm">Loading peer reviews...</p>
                     </div>
                 </div>
             </div>
@@ -212,55 +134,55 @@
         };
 
         // ============================================
+        // DEMO GROUP DATA
+        // ============================================
+        const DEMO_GROUP = {
+            id: 1,
+            name: 'Team Alpha',
+            course_name: 'Software Engineering (CS401)',
+            member_count: 4,
+            members: [
+                { id: 1, name: 'Arisha Ridha (You)', role: 'Student', commits: 45, contribution_percentage: 35, classification: 'Active' },
+                { id: 2, name: 'John Doe', role: 'Student', commits: 32, contribution_percentage: 28, classification: 'Active' },
+                { id: 3, name: 'Jane Smith', role: 'Student', commits: 18, contribution_percentage: 22, classification: 'Moderate' },
+                { id: 4, name: 'Mike Brown', role: 'Student', commits: 8, contribution_percentage: 15, classification: 'Passive' }
+            ]
+        };
+
+        // ============================================
         // TOAST SYSTEM
         // ============================================
         class ToastManager {
-            constructor() {
-                this.container = null;
-                this.init();
-            }
+            constructor() { this.container = null;
+                this.init(); }
             init() {
                 this.container = document.createElement('div');
-                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2';
+                this.container.className = 'fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full';
                 document.body.appendChild(this.container);
             }
-            show(message, type, duration) {
-                type = type || 'info';
-                duration = duration || 5000;
-                var toast = document.createElement('div');
-                var colors = {
-                    success: 'bg-green-50 border-green-400 text-green-800',
+            show(message, type = 'info', duration = 5000) {
+                const toast = document.createElement('div');
+                const colors = {
+                    success: 'bg-[#3AAFA9]/10 border-[#3AAFA9] text-[#2B7A78]',
                     error: 'bg-red-50 border-red-400 text-red-800',
                     warning: 'bg-yellow-50 border-yellow-400 text-yellow-800',
                     info: 'bg-blue-50 border-blue-400 text-blue-800'
                 };
-                var icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
-                toast.className = 'transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-lg shadow-lg p-4 mb-2 ' + colors[type];
-                toast.innerHTML = '<div class="flex items-center"><span class="text-lg font-bold mr-2">' + icons[type] + '</span><p class="text-sm">' + message + '</p><button class="ml-auto font-bold hover:text-gray-700">&times;</button></div>';
+                const icons = { success: '✓', error: '✕', warning: '⚠', info: 'ℹ' };
+                toast.className =
+                    `transform transition-all duration-300 translate-x-full opacity-0 border-l-4 rounded-xl shadow-xl p-4 mb-2 ${colors[type]} dark:bg-[#132424] dark:border-[#3AAFA9] dark:text-[#7ccfca]`;
+                toast.innerHTML =
+                    `<div class="flex items-center"><span class="text-lg font-bold mr-2">${icons[type]}</span><p class="text-sm font-medium">${message}</p><button class="ml-auto font-bold hover:opacity-70 transition">&times;</button></div>`;
                 this.container.appendChild(toast);
-                setTimeout(function() { toast.classList.add('translate-x-0', 'opacity-100'); }, 10);
-                toast.querySelector('button').onclick = function() { toast.remove(); };
-                setTimeout(function() { if(toast.parentNode) toast.remove(); }, duration);
+                requestAnimationFrame(() => { toast.classList.remove('translate-x-full', 'opacity-0'); });
+                toast.querySelector('button').onclick = () => toast.remove();
+                setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
                 return toast;
             }
             success(m) { this.show(m, 'success'); }
             error(m) { this.show(m, 'error'); }
             warning(m) { this.show(m, 'warning'); }
             info(m) { this.show(m, 'info'); }
-        }
-
-        // ============================================
-        // LOADING SYSTEM
-        // ============================================
-        class LoadingManager {
-            show() {
-                if(this.loader) return;
-                this.loader = document.createElement('div');
-                this.loader.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-                this.loader.innerHTML = '<div class="bg-white rounded-lg p-6"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div><p class="mt-2 text-gray-700">Loading...</p></div>';
-                document.body.appendChild(this.loader);
-            }
-            hide() { if(this.loader) { this.loader.remove(); this.loader = null; } }
         }
 
         // ============================================
@@ -278,14 +200,245 @@
         };
 
         // ============================================
-        // GLOBALS
+        // HELPERS
         // ============================================
-        window.toast = new ToastManager();
-        window.loading = new LoadingManager();
-        window.auth = AuthService;
+        function getInitials(name) {
+            if (!name) return 'ST';
+            return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function getClassificationClass(classification) {
+            const map = { 'Active': 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+                'Moderate': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+                'Passive': 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+                'Free Rider': 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300'
+            };
+            return map[classification] || 'bg-gray-100 text-gray-600';
+        }
 
         // ============================================
         // PEER REVIEW LOGIC
+        // ============================================
+        function loadGroupData() {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve(DEMO_GROUP);
+                }, 300);
+            });
+        }
+
+        function renderPeerReviewPage() {
+            const container = document.getElementById('page-content');
+
+            loadGroupData().then(group => {
+                if (!group || !group.members || group.members.length <= 1) {
+                    container.innerHTML = `
+                        <div class="space-y-6">
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⭐ Peer Reviews</h2>
+                            <div class="bg-white dark:bg-[#132424] rounded-lg shadow p-8 text-center">
+                                <div class="text-6xl mb-4">👥</div>
+                                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Team Members to Review</h3>
+                                <p class="text-gray-500 dark:text-gray-400 mt-2">You need to be in a group with at least one other member to submit peer reviews.</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Get members except current user (assume first is "You")
+                const members = group.members.filter(m => !m.name.includes('(You)'));
+                if (members.length === 0) {
+                    container.innerHTML = `
+                        <div class="space-y-6">
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⭐ Peer Reviews</h2>
+                            <div class="bg-white dark:bg-[#132424] rounded-lg shadow p-8 text-center">
+                                <div class="text-6xl mb-4">👥</div>
+                                <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">No Other Members</h3>
+                                <p class="text-gray-500 dark:text-gray-400 mt-2">You are the only member in your group.</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Get submitted reviews from localStorage
+                const submittedReviews = JSON.parse(localStorage.getItem('peer_reviews_submitted') || '{}');
+
+                // Build review cards
+                let reviewCards = members.map((member, index) => {
+                    const isSubmitted = submittedReviews[member.id];
+                    return `
+                        <div class="bg-white dark:bg-[#132424] rounded-lg shadow p-6 border border-[#3AAFA9]/20" id="review-card-${member.id}">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-r from-[#3AAFA9] to-[#2B7A78] flex items-center justify-center text-white font-semibold text-sm">
+                                        ${getInitials(member.name)}
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800 dark:text-gray-100">${member.name}</h4>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">${member.role || 'Team Member'}</p>
+                                    </div>
+                                </div>
+                                <span class="text-xs text-gray-400">${member.commits || 0} commits</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Communication</label>
+                                    <select class="peer-rating w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] dark:bg-[#132424] text-gray-800 dark:text-gray-200" data-member="${member.id}" ${isSubmitted ? 'disabled' : ''}>
+                                        <option value="5">5 - Excellent</option>
+                                        <option value="4" selected>4 - Good</option>
+                                        <option value="3">3 - Average</option>
+                                        <option value="2">2 - Below Average</option>
+                                        <option value="1">1 - Poor</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Reliability</label>
+                                    <select class="peer-rating w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] dark:bg-[#132424] text-gray-800 dark:text-gray-200" data-member="${member.id}" ${isSubmitted ? 'disabled' : ''}>
+                                        <option value="5">5 - Excellent</option>
+                                        <option value="4" selected>4 - Good</option>
+                                        <option value="3">3 - Average</option>
+                                        <option value="2">2 - Below Average</option>
+                                        <option value="1">1 - Poor</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task Participation</label>
+                                    <select class="peer-rating w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] dark:bg-[#132424] text-gray-800 dark:text-gray-200" data-member="${member.id}" ${isSubmitted ? 'disabled' : ''}>
+                                        <option value="5">5 - Excellent</option>
+                                        <option value="4" selected>4 - Good</option>
+                                        <option value="3">3 - Average</option>
+                                        <option value="2">2 - Below Average</option>
+                                        <option value="1">1 - Poor</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Comments (Optional)</label>
+                                <textarea class="peer-comment w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3AAFA9] dark:bg-[#132424] text-gray-800 dark:text-gray-200" rows="2" placeholder="Provide constructive feedback..." data-member="${member.id}" ${isSubmitted ? 'disabled' : ''}>${isSubmitted ? JSON.parse(localStorage.getItem('peer_reviews_data') || '{}')[member.id]?.comment || '' : ''}</textarea>
+                            </div>
+
+                            <div class="mt-3 flex items-center justify-between">
+                                <span class="text-xs text-gray-400">Your review will be anonymous</span>
+                                ${isSubmitted ? 
+                                    `<span class="px-4 py-2 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-lg text-sm">✅ Submitted</span>` :
+                                    `<button class="submit-review-btn px-4 py-2 bg-[#3AAFA9] text-white rounded-lg hover:bg-[#2B7A78] text-sm transition" data-member="${member.id}" data-name="${member.name}">Submit Review</button>`
+                                }
+                            </div>
+                            ${isSubmitted ? `<div class="review-status mt-2 text-sm text-green-600 dark:text-green-400">✅ Review submitted on ${new Date(JSON.parse(localStorage.getItem('peer_reviews_data') || '{}')[member.id]?.submitted_at).toLocaleDateString()}</div>` : `<div class="review-status mt-2 text-sm hidden"></div>`}
+                        </div>
+                    `;
+                }).join('');
+
+                container.innerHTML = `
+                    <div class="space-y-6">
+                        <div class="flex justify-between items-center">
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⭐ Peer Reviews</h2>
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Deadline: ${new Date(Date.now() + 7*24*60*60*1000).toLocaleDateString()}</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="bg-white dark:bg-[#132424] rounded-lg shadow p-4 text-center">
+                                <p class="text-2xl font-bold text-[#3AAFA9]">${members.length}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Total Members</p>
+                            </div>
+                            <div class="bg-white dark:bg-[#132424] rounded-lg shadow p-4 text-center" id="reviewed-count">
+                                <p class="text-2xl font-bold text-green-600 dark:text-green-400">${Object.keys(submittedReviews).length}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p>
+                            </div>
+                            <div class="bg-white dark:bg-[#132424] rounded-lg shadow p-4 text-center" id="pending-count">
+                                <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${members.length - Object.keys(submittedReviews).length}</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>
+                            </div>
+                            <div class="bg-white dark:bg-[#132424] rounded-lg shadow p-4 text-center" id="completion-count">
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">${members.length > 0 ? Math.round((Object.keys(submittedReviews).length / members.length) * 100) : 0}%</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Completion</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            ${reviewCards}
+                        </div>
+                    </div>
+                `;
+
+                // ---- Handle Submit Review ----
+                document.querySelectorAll('.submit-review-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const memberId = parseInt(this.dataset.member);
+                        const memberName = this.dataset.name;
+                        const card = document.getElementById(`review-card-${memberId}`);
+                        const ratingSelects = card.querySelectorAll('.peer-rating');
+                        const comment = card.querySelector('.peer-comment').value.trim();
+                        const statusDiv = card.querySelector('.review-status');
+
+                        // Check if already submitted
+                        const submitted = JSON.parse(localStorage.getItem('peer_reviews_submitted') || '{}');
+                        if (submitted[memberId]) {
+                            statusDiv.className = 'review-status mt-2 text-sm text-yellow-600 dark:text-yellow-400';
+                            statusDiv.textContent = '⚠️ You have already reviewed this member.';
+                            return;
+                        }
+
+                        const ratings = {
+                            communication: parseInt(ratingSelects[0].value),
+                            reliability: parseInt(ratingSelects[1].value),
+                            task_participation: parseInt(ratingSelects[2].value)
+                        };
+
+                        // Validate
+                        if (ratings.communication < 1 || ratings.reliability < 1 || ratings.task_participation < 1) {
+                            statusDiv.className = 'review-status mt-2 text-sm text-red-600 dark:text-red-400';
+                            statusDiv.textContent = '❌ Please select ratings for all categories.';
+                            return;
+                        }
+
+                        // Save to localStorage (simulating API)
+                        const reviews = JSON.parse(localStorage.getItem('peer_reviews_data') || '{}');
+                        reviews[memberId] = {
+                            member_id: memberId,
+                            member_name: memberName,
+                            ratings: ratings,
+                            comment: comment,
+                            submitted_at: new Date().toISOString()
+                        };
+                        localStorage.setItem('peer_reviews_data', JSON.stringify(reviews));
+
+                        // Mark as submitted
+                        submitted[memberId] = true;
+                        localStorage.setItem('peer_reviews_submitted', JSON.stringify(submitted));
+
+                        // Update UI
+                        statusDiv.className = 'review-status mt-2 text-sm text-green-600 dark:text-green-400';
+                        statusDiv.textContent = '✅ Review submitted successfully!';
+                        this.remove();
+                        const submitSpan = document.createElement('span');
+                        submitSpan.className = 'px-4 py-2 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 rounded-lg text-sm';
+                        submitSpan.textContent = '✅ Submitted';
+                        this.parentElement.appendChild(submitSpan);
+
+                        // Update stats
+                        updatePeerReviewStats(members.length);
+                    });
+                });
+
+                function updatePeerReviewStats(totalMembers) {
+                    const submitted = JSON.parse(localStorage.getItem('peer_reviews_submitted') || '{}');
+                    const reviewedCount = Object.keys(submitted).length;
+                    const pendingCount = totalMembers - reviewedCount;
+                    const completion = totalMembers > 0 ? Math.round((reviewedCount / totalMembers) * 100) : 0;
+
+                    document.getElementById('reviewed-count').innerHTML = `<p class="text-2xl font-bold text-green-600 dark:text-green-400">${reviewedCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Reviewed</p>`;
+                    document.getElementById('pending-count').innerHTML = `<p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">${pendingCount}</p><p class="text-sm text-gray-500 dark:text-gray-400">Pending</p>`;
+                    document.getElementById('completion-count').innerHTML = `<p class="text-2xl font-bold text-gray-800 dark:text-gray-100">${completion}%</p><p class="text-sm text-gray-500 dark:text-gray-400">Completion</p>`;
+                }
+            });
+        }
+
+        // ============================================
+        // INITIALIZATION
         // ============================================
         function init() {
             if (!AuthService.isAuthenticated()) {
@@ -296,11 +449,7 @@
             var user = AuthService.getUser();
             if (user) {
                 document.getElementById('user-name').textContent = (user.first_name || 'Student') + ' ' + (user.last_name || '');
-                document.getElementById('user-avatar').textContent = function(name) {
-                    if (!name) return 'ST';
-                    var parts = name.split(' ');
-                    return parts.map(function(n) { return n[0]; }).join('').toUpperCase().slice(0, 2);
-                }((user.first_name || 'S') + ' ' + (user.last_name || 'T'));
+                document.getElementById('user-avatar').textContent = getInitials((user.first_name || 'S') + ' ' + (user.last_name || 'T'));
             }
 
             document.getElementById('menuBtn')?.addEventListener('click', function() {
@@ -311,24 +460,7 @@
                 AuthService.logout();
             });
 
-            // Show review form
-            document.querySelectorAll('.bg-yellow-50 .px-4').forEach(function(btn) {
-                btn.addEventListener('click', function() {
-                    document.getElementById('reviewForm').classList.remove('hidden');
-                });
-            });
-
-            // Cancel review
-            document.getElementById('cancelReviewBtn')?.addEventListener('click', function() {
-                document.getElementById('reviewForm').classList.add('hidden');
-            });
-
-            // Submit review
-            document.getElementById('peerReviewForm')?.addEventListener('submit', function(e) {
-                e.preventDefault();
-                window.toast.success('Peer review submitted successfully!');
-                document.getElementById('reviewForm').classList.add('hidden');
-            });
+            renderPeerReviewPage();
         }
 
         document.addEventListener('DOMContentLoaded', init);
