@@ -6,6 +6,7 @@
     <title>Professor Dashboard — GroupSync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
     <style>
@@ -263,6 +264,96 @@
         .dark .modal-close { color: #666; }
         .dark .modal-close:hover { color: #ccc; }
 
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            color: rgba(255,255,255,0.70);
+            transition: color 0.3s;
+            font-size: 1.2rem;
+            padding: 0.4rem;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+        }
+        .notification-bell:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .notification-bell .badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #2B7A78;
+        }
+        .dark .notification-bell .badge { border-color: #0b1717; }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 48px;
+            right: 0;
+            width: 360px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border: 1px solid rgba(58,175,169,0.08);
+            display: none;
+            z-index: 100;
+        }
+        .dark .notification-dropdown {
+            background: #132424;
+            border-color: rgba(58,175,169,0.06);
+        }
+        .notification-dropdown.show { display: block; }
+        .notification-dropdown .header {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+        }
+        .dark .notification-dropdown .header {
+            border-bottom-color: #1e3a3a;
+            color: #e8edf0;
+        }
+        .notification-dropdown .item {
+            padding: 10px 16px;
+            border-bottom: 1px solid #f5f5f5;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .notification-dropdown .item:hover { background: #f8fafc; }
+        .dark .notification-dropdown .item:hover { background: #1a2d2d; }
+        .dark .notification-dropdown .item { border-bottom-color: #1e3a3a; }
+        .notification-dropdown .item .title { font-size: 0.85rem; font-weight: 500; color: #333; }
+        .dark .notification-dropdown .item .title { color: #e8edf0; }
+        .notification-dropdown .item .time { font-size: 0.7rem; color: #999; }
+        .dark .notification-dropdown .item .time { color: #666; }
+        .notification-dropdown .empty { padding: 20px; text-align: center; color: #999; font-size: 0.9rem; }
+        .dark .notification-dropdown .empty { color: #666; }
+
+        .online-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
         @media (max-width:768px) { .stat-card { padding:1rem; } .stat-icon { width:40px; height:40px; font-size:1.1rem; } }
     </style>
 </head>
@@ -280,9 +371,18 @@
             <a href="#" data-page="dashboard" class="nav-link active"><span class="icon">📊</span> Dashboard</a>
             <a href="#" data-page="courses" class="nav-link"><span class="icon">📚</span> Course Management</a>
             <a href="#" data-page="Project" class="nav-link"><span class="icon">📋</span> Project</a>
+            <a href="#" data-page="groups" class="nav-link"><span class="icon">👥</span> Groups</a>
             <a href="#" data-page="analytics" class="nav-link"><span class="icon">📈</span> Group Analytics</a>
             <a href="#" data-page="evaluation" class="nav-link"><span class="icon">🎓</span> Student Evaluation</a>
-            <a href="#" data-page="reports" class="nav-link"><span class="icon">📄</span> PDF Reports</a>
+            <a href="#" data-page="reports" class="nav-link"><span class="icon">📄</span> Reports</a>
+            <a href="#" data-page="enroll" class="nav-link"><span class="icon">📝</span> Enroll Students</a>
+            <a href="#" data-page="attendance" class="nav-link"><span class="icon">📋</span> Attendance</a>
+            <a href="#" data-page="low-contributors" class="nav-link"><span class="icon">⚠️</span> Low Contributors</a>
+            <a href="#" data-page="submissions" class="nav-link"><span class="icon">📤</span> Submissions</a>
+            <a href="#" data-page="realtime" class="nav-link"><span class="icon">📡</span> Real-Time Tracking</a>
+            <a href="#" data-page="feedback" class="nav-link"><span class="icon">💬</span> Feedback</a>
+            <a href="#" data-page="ai-evaluation" class="nav-link"><span class="icon">🤖</span> AI Evaluation</a>
+            <a href="#" data-page="peer-review" class="nav-link"><span class="icon">🔍</span> Peer Review</a>
             <a href="#" data-page="profile" class="nav-link"><span class="icon">👤</span> Profile</a>
         </nav>
         <div class="shrink-0 p-4 border-t border-white/5 bg-black/10 backdrop-blur-sm">
@@ -304,8 +404,24 @@
                 <span class="text-sm font-medium text-white/70 hidden sm:block">Professor Dashboard</span>
                 <span class="h-4 w-px bg-white/10 hidden sm:block"></span>
                 <span id="page-title" class="text-sm font-medium text-white/50">Overview</span>
+                <span id="connectionStatus" class="text-xs text-white/40 hidden sm:inline-flex items-center gap-1">
+                    <span class="online-dot" id="statusDot"></span>
+                    <span id="statusText">Connecting...</span>
+                </span>
             </div>
             <div class="flex items-center gap-3">
+                <div class="relative inline-block" id="notificationWrapper">
+                    <button id="notificationBell" class="notification-bell">
+                        <i class="fas fa-bell"></i>
+                        <span id="notificationBadge" class="badge">0</span>
+                    </button>
+                    <div id="notificationDropdown" class="notification-dropdown">
+                        <div class="header">🔔 Notifications</div>
+                        <div id="notificationList">
+                            <div class="empty">No new notifications</div>
+                        </div>
+                    </div>
+                </div>
                 <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme"><i id="themeIcon" class="fas fa-sun"></i></button>
             </div>
         </div>
@@ -348,25 +464,70 @@
                 { id: 3, code: 'CS403', title: 'Web Development', semester: 'Fall 2024', description: 'Full-stack web development with modern frameworks.', students_count: 25, groups_count: 3, is_active: true }
             ],
             students: [
-                { id: 1, name: 'John Doe', email: 'john@demo.com', classification: 'Active', activity_score: 85 },
-                { id: 2, name: 'Jane Smith', email: 'jane@demo.com', classification: 'Active', activity_score: 78 },
-                { id: 3, name: 'Mike Brown', email: 'mike@demo.com', classification: 'Moderate', activity_score: 62 },
-                { id: 4, name: 'Lisa Wong', email: 'lisa@demo.com', classification: 'Passive', activity_score: 45 },
-                { id: 5, name: 'Tom Wilson', email: 'tom@demo.com', classification: 'Free Rider', activity_score: 25 }
+                { id: 1, name: 'John Doe', email: 'john@demo.com', classification: 'Active', activity_score: 85, score_breakdown: { github: 90, attendance: 80, peer_reviews: 85, working_hours: 82 } },
+                { id: 2, name: 'Jane Smith', email: 'jane@demo.com', classification: 'Active', activity_score: 78, score_breakdown: { github: 75, attendance: 90, peer_reviews: 70, working_hours: 78 } },
+                { id: 3, name: 'Mike Brown', email: 'mike@demo.com', classification: 'Moderate', activity_score: 62, score_breakdown: { github: 55, attendance: 70, peer_reviews: 60, working_hours: 62 } },
+                { id: 4, name: 'Lisa Wong', email: 'lisa@demo.com', classification: 'Passive', activity_score: 45, score_breakdown: { github: 30, attendance: 50, peer_reviews: 40, working_hours: 55 } },
+                { id: 5, name: 'Tom Wilson', email: 'tom@demo.com', classification: 'Free Rider', activity_score: 25, score_breakdown: { github: 10, attendance: 30, peer_reviews: 20, working_hours: 40 } }
+            ],
+            enrolled_students: [
+                { id: 1, name: 'John Doe', email: 'john@demo.com', course_id: 1 },
+                { id: 2, name: 'Jane Smith', email: 'jane@demo.com', course_id: 1 },
+                { id: 3, name: 'Mike Brown', email: 'mike@demo.com', course_id: 1 },
+                { id: 4, name: 'Lisa Wong', email: 'lisa@demo.com', course_id: 2 },
+                { id: 5, name: 'Tom Wilson', email: 'tom@demo.com', course_id: 2 }
             ],
             groups: [
-                { id: 1, name: 'Team Alpha', course_name: 'CS401', members_count: 4, contribution_percentage: 78 },
-                { id: 2, name: 'Team Beta', course_name: 'CS401', members_count: 4, contribution_percentage: 65 },
-                { id: 3, name: 'Team Gamma', course_name: 'CS402', members_count: 3, contribution_percentage: 82 }
+                { id: 1, name: 'Team Alpha', course_name: 'CS401', members_count: 4, contribution_percentage: 78, members: [1,2,3] },
+                { id: 2, name: 'Team Beta', course_name: 'CS401', members_count: 4, contribution_percentage: 65, members: [4,5] },
+                { id: 3, name: 'Team Gamma', course_name: 'CS402', members_count: 3, contribution_percentage: 82, members: [1,4] }
             ],
             alerts: [
                 { student_name: 'Mike Brown', severity: 'Medium', message: 'Low contribution for 2 weeks' },
-                { student_name: 'Lisa Wong', severity: 'High', message: 'Minimal commits in last 3 weeks' }
+                { student_name: 'Lisa Wong', severity: 'High', message: 'Minimal commits in last 3 weeks' },
+                { student_name: 'Tom Wilson', severity: 'Critical', message: 'No activity in last 4 weeks' }
             ],
             Project: [
                 { id: 1, title: 'Project 1: Requirement Analysis', course_id: 1, type: 'project', deadline: '2026-07-15T23:59', description: 'Submit a detailed requirement analysis document.', weightage: { commits: 40, attendance: 20, peer_reviews: 20, working_hours: 20 }, status: 'active' },
                 { id: 2, title: 'Midterm Exam', course_id: 1, type: 'exam', deadline: '2026-07-20T23:59', description: 'Online MCQ and CQ exam.', weightage: { commits: 30, attendance: 30, peer_reviews: 20, working_hours: 20 }, status: 'active' },
                 { id: 3, title: 'Final Project', course_id: 2, type: 'project', deadline: '2026-08-10T23:59', description: 'Complete full-stack project.', weightage: { commits: 50, attendance: 10, peer_reviews: 20, working_hours: 20 }, status: 'pending' }
+            ],
+            attendance: [
+                { student_id: 1, course_id: 1, date: '2026-07-01', status: 'Present' },
+                { student_id: 2, course_id: 1, date: '2026-07-01', status: 'Present' },
+                { student_id: 3, course_id: 1, date: '2026-07-01', status: 'Absent' },
+                { student_id: 1, course_id: 1, date: '2026-07-02', status: 'Present' },
+                { student_id: 2, course_id: 1, date: '2026-07-02', status: 'Late' }
+            ],
+            submissions: [
+                { assignment_id: 1, student_id: 1, submitted_at: '2026-07-14T10:30:00', status: 'Submitted' },
+                { assignment_id: 1, student_id: 2, submitted_at: '2026-07-14T14:20:00', status: 'Submitted' },
+                { assignment_id: 1, student_id: 3, submitted_at: null, status: 'Pending' },
+                { assignment_id: 2, student_id: 1, submitted_at: '2026-07-19T09:00:00', status: 'Submitted' },
+                { assignment_id: 2, student_id: 4, submitted_at: null, status: 'Pending' }
+            ],
+            notifications: [
+                { id: 1, title: 'Mike Brown is at risk', message: 'Low contribution for 2 weeks', time: '2 hours ago', type: 'warning' },
+                { id: 2, title: 'New submission from John Doe', message: 'Project 1 submitted', time: '3 hours ago', type: 'info' },
+                { id: 3, title: 'Lisa Wong flagged as free rider', message: 'Minimal commits in last 3 weeks', time: '1 day ago', type: 'danger' }
+            ],
+            feedbacks: [],
+            peer_reviews: [
+                { id: 1, assignment_id: 1, reviewer_id: 2, reviewee_id: 1, score: 85, comment: 'Great work!', anonymous: true, date: '2026-07-14' },
+                { id: 2, assignment_id: 1, reviewer_id: 3, reviewee_id: 1, score: 70, comment: 'Good but needs improvement', anonymous: true, date: '2026-07-14' },
+                { id: 3, assignment_id: 1, reviewer_id: 1, reviewee_id: 2, score: 90, comment: 'Excellent submission!', anonymous: true, date: '2026-07-14' }
+            ],
+            working_hours: [
+                { student_id: 1, date: '2026-07-01', hours: 4.5 },
+                { student_id: 1, date: '2026-07-02', hours: 3.0 },
+                { student_id: 2, date: '2026-07-01', hours: 5.0 },
+                { student_id: 2, date: '2026-07-02', hours: 2.5 },
+                { student_id: 3, date: '2026-07-01', hours: 1.0 }
+            ],
+            group_join_leave: [
+                { student_id: 1, group_id: 1, action: 'join', date: '2026-07-01' },
+                { student_id: 2, group_id: 1, action: 'join', date: '2026-07-01' },
+                { student_id: 3, group_id: 1, action: 'join', date: '2026-07-02' }
             ]
         };
 
@@ -435,7 +596,7 @@
         };
 
         // ============================================
-        // API SERVICE (with fallback)
+        // API SERVICE
         // ============================================
         var ApiService = {
             request: function(endpoint, options) {
@@ -478,6 +639,9 @@
         window.auth = AuthService;
         var currentPage = 'dashboard';
         var charts = {};
+        var ws = null;
+        var wsConnected = false;
+        var realtimeInterval = null;
 
         // ============================================
         // HELPERS
@@ -516,7 +680,7 @@
         }
 
         // ============================================
-        // PROFESSOR DATA (localStorage with demo fallback)
+        // PROFESSOR DATA
         // ============================================
         function loadProfessorData() {
             var key = STORAGE_KEYS.PROFESSOR_DATA;
@@ -524,7 +688,21 @@
             if (stored) {
                 try {
                     var parsed = JSON.parse(stored);
-                    return { courses: parsed.courses || DEMO_PROFESSOR_DATA.courses, students: parsed.students || DEMO_PROFESSOR_DATA.students, groups: parsed.groups || DEMO_PROFESSOR_DATA.groups, alerts: parsed.alerts || DEMO_PROFESSOR_DATA.alerts, Project: parsed.Project || DEMO_PROFESSOR_DATA.Project };
+                    return { 
+                        courses: parsed.courses || DEMO_PROFESSOR_DATA.courses, 
+                        students: parsed.students || DEMO_PROFESSOR_DATA.students, 
+                        enrolled_students: parsed.enrolled_students || DEMO_PROFESSOR_DATA.enrolled_students,
+                        groups: parsed.groups || DEMO_PROFESSOR_DATA.groups, 
+                        alerts: parsed.alerts || DEMO_PROFESSOR_DATA.alerts, 
+                        Project: parsed.Project || DEMO_PROFESSOR_DATA.Project,
+                        attendance: parsed.attendance || DEMO_PROFESSOR_DATA.attendance,
+                        submissions: parsed.submissions || DEMO_PROFESSOR_DATA.submissions,
+                        notifications: parsed.notifications || DEMO_PROFESSOR_DATA.notifications,
+                        feedbacks: parsed.feedbacks || DEMO_PROFESSOR_DATA.feedbacks,
+                        peer_reviews: parsed.peer_reviews || DEMO_PROFESSOR_DATA.peer_reviews,
+                        working_hours: parsed.working_hours || DEMO_PROFESSOR_DATA.working_hours,
+                        group_join_leave: parsed.group_join_leave || DEMO_PROFESSOR_DATA.group_join_leave
+                    };
                 } catch (e) { return DEMO_PROFESSOR_DATA; }
             }
             return DEMO_PROFESSOR_DATA;
@@ -532,6 +710,195 @@
 
         function saveProfessorData(data) {
             localStorage.setItem(STORAGE_KEYS.PROFESSOR_DATA, JSON.stringify(data));
+        }
+
+        // ============================================
+        // NOTIFICATION SYSTEM
+        // ============================================
+        function updateNotificationBadge() {
+            var data = loadProfessorData();
+            var count = data.notifications ? data.notifications.length : 0;
+            var badge = document.getElementById('notificationBadge');
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function renderNotifications() {
+            var data = loadProfessorData();
+            var list = document.getElementById('notificationList');
+            var notifications = data.notifications || [];
+            if (notifications.length === 0) {
+                list.innerHTML = '<div class="empty">No new notifications</div>';
+                return;
+            }
+            var html = '';
+            for (var i = 0; i < notifications.length; i++) {
+                var n = notifications[i];
+                var color = n.type === 'danger' ? 'text-red-500' : n.type === 'warning' ? 'text-yellow-500' : 'text-blue-500';
+                html += '<div class="item" onclick="markNotificationRead(' + n.id + ')"><div class="title ' + color + '">' + n.title + '</div><div class="text-xs text-gray-600 dark:text-gray-400 mt-0.5">' + n.message + '</div><div class="time mt-1">' + n.time + '</div></div>';
+            }
+            list.innerHTML = html;
+        }
+
+        function markNotificationRead(id) {
+            var data = loadProfessorData();
+            var newNotifs = [];
+            for (var i = 0; i < data.notifications.length; i++) {
+                if (data.notifications[i].id !== id) newNotifs.push(data.notifications[i]);
+            }
+            data.notifications = newNotifs;
+            saveProfessorData(data);
+            updateNotificationBadge();
+            renderNotifications();
+            window.toast.info('Notification marked as read');
+        }
+
+        function addNotification(title, message, type) {
+            var data = loadProfessorData();
+            if (!data.notifications) data.notifications = [];
+            data.notifications.unshift({
+                id: Date.now(),
+                title: title,
+                message: message,
+                time: 'Just now',
+                type: type || 'info'
+            });
+            saveProfessorData(data);
+            updateNotificationBadge();
+            renderNotifications();
+        }
+
+        // ============================================
+        // WEBSOCKET FOR REAL-TIME UPDATES
+        // ============================================
+        function connectWebSocket() {
+            var token = AuthService.getToken();
+            if (!token) return;
+            
+            try {
+                var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+                var host = window.location.host;
+                var wsUrl = protocol + '//' + host + '/ws/professor?token=' + token;
+                
+                ws = new WebSocket(wsUrl);
+                
+                ws.onopen = function() {
+                    wsConnected = true;
+                    updateConnectionStatus(true);
+                    console.log('🔗 WebSocket connected');
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        var data = JSON.parse(event.data);
+                        handleRealTimeUpdate(data);
+                    } catch (e) {
+                        console.warn('Invalid WebSocket message:', event.data);
+                    }
+                };
+                
+                ws.onclose = function() {
+                    wsConnected = false;
+                    updateConnectionStatus(false);
+                    console.log('🔌 WebSocket disconnected');
+                    setTimeout(connectWebSocket, 5000);
+                };
+                
+                ws.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    wsConnected = false;
+                    updateConnectionStatus(false);
+                };
+            } catch (e) {
+                console.warn('WebSocket not available, using polling fallback');
+                updateConnectionStatus(false);
+                // Fallback: Poll every 10 seconds
+                if (realtimeInterval) clearInterval(realtimeInterval);
+                realtimeInterval = setInterval(pollRealtimeUpdates, 10000);
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            var dot = document.getElementById('statusDot');
+            var text = document.getElementById('statusText');
+            if (connected) {
+                dot.className = 'online-dot';
+                text.textContent = 'Live';
+            } else {
+                dot.className = 'inline-block w-2 h-2 rounded-full bg-yellow-500';
+                text.textContent = 'Polling';
+            }
+        }
+
+        function handleRealTimeUpdate(data) {
+            switch (data.type) {
+                case 'contribution_update':
+                    updateStudentContribution(data.student_id, data.score);
+                    break;
+                case 'commit_push':
+                    addNotification('New Commit', data.student_name + ' pushed ' + data.commit_count + ' commits', 'info');
+                    break;
+                case 'group_activity':
+                    updateGroupActivity(data.group_id, data.activity);
+                    break;
+                case 'alert':
+                    addNotification('Alert', data.message, 'warning');
+                    break;
+                case 'peer_review_submitted':
+                    addNotification('Peer Review', 'New peer review submitted', 'info');
+                    break;
+                default:
+                    console.log('Unknown update type:', data.type);
+            }
+        }
+
+        function pollRealtimeUpdates() {
+            if (!wsConnected) {
+                ApiService.get('/realtime/updates').then(function(response) {
+                    if (response.success && response.updates) {
+                        for (var i = 0; i < response.updates.length; i++) {
+                            handleRealTimeUpdate(response.updates[i]);
+                        }
+                    }
+                }).catch(function() {});
+            }
+        }
+
+        function updateStudentContribution(studentId, newScore) {
+            var data = loadProfessorData();
+            var found = false;
+            for (var i = 0; i < data.students.length; i++) {
+                if (data.students[i].id === studentId) {
+                    data.students[i].activity_score = newScore;
+                    if (newScore >= 80) data.students[i].classification = 'Active';
+                    else if (newScore >= 60) data.students[i].classification = 'Moderate';
+                    else if (newScore >= 30) data.students[i].classification = 'Passive';
+                    else data.students[i].classification = 'Free Rider';
+                    found = true;
+                    break;
+                }
+            }
+            if (found) {
+                saveProfessorData(data);
+                if (currentPage === 'evaluation' || currentPage === 'dashboard' || currentPage === 'realtime') {
+                    navigate(currentPage);
+                }
+            }
+        }
+
+        function updateGroupActivity(groupId, activity) {
+            var data = loadProfessorData();
+            for (var i = 0; i < data.groups.length; i++) {
+                if (data.groups[i].id === groupId) {
+                    data.groups[i].contribution_percentage = activity;
+                    break;
+                }
+            }
+            saveProfessorData(data);
         }
 
         // ============================================
@@ -603,7 +970,7 @@
             data.courses.push(newCourse);
             saveProfessorData(data);
             closeCreateCourseModal();
-
+            addNotification('New Course Created', code + ' - ' + title + ' has been created', 'info');
             window.toast.success('Course ' + code + ' created successfully! ✅');
             renderCourses();
         }
@@ -678,7 +1045,7 @@
             data.Project.push(newAssignment);
             saveProfessorData(data);
             closeCreateAssignmentModal();
-
+            addNotification('New Project Created', title + ' has been created', 'info');
             window.toast.success('Assignment "' + title + '" created successfully! ✅');
             renderProject();
         }
@@ -786,15 +1153,901 @@
             }
 
             var studentsHtml = '';
-            var count = Math.min(course.students_count, data.students.length);
-            for (var i = 0; i < count; i++) {
-                var s = data.students[i];
-                studentsHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm">' + s.name + '</span><span class="px-2 py-0.5 rounded-full text-xs ' + getClassificationClass(s.classification) + '">' + s.classification + '</span></div>';
+            var enrolled = data.enrolled_students || [];
+            var courseStudents = [];
+            for (var i = 0; i < enrolled.length; i++) {
+                if (enrolled[i].course_id === courseId) {
+                    var student = null;
+                    for (var j = 0; j < data.students.length; j++) {
+                        if (data.students[j].id === enrolled[i].id) { student = data.students[j]; break; }
+                    }
+                    if (student) courseStudents.push(student);
+                }
             }
-            if (!studentsHtml) studentsHtml = '<p class="text-gray-500 text-sm">No students enrolled yet.</p>';
+            if (courseStudents.length === 0) {
+                studentsHtml = '<p class="text-gray-500 text-sm">No students enrolled yet.</p>';
+            } else {
+                for (var i = 0; i < courseStudents.length; i++) {
+                    var s = courseStudents[i];
+                    studentsHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm">' + s.name + '</span><span class="px-2 py-0.5 rounded-full text-xs ' + getClassificationClass(s.classification) + '">' + s.classification + '</span></div>';
+                }
+            }
 
             var content = '<div class="space-y-4"><div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg"><p class="text-gray-700 dark:text-gray-300">' + (course.description || 'No description available.') + '</p></div><div class="grid grid-cols-2 gap-4"><div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-blue-600 dark:text-blue-400">' + course.semester + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Semester</p></div><div class="bg-green-50 dark:bg-green-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">' + course.students_count + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Students</p></div><div class="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-purple-600 dark:text-purple-400">' + course.groups_count + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Groups</p></div><div class="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">' + Math.round(course.students_count / (course.groups_count || 1)) + '</p><p class="text-xs text-gray-500 dark:text-gray-400">Avg Group Size</p></div></div><div><h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">Students Enrolled</h4><div class="max-h-40 overflow-y-auto">' + studentsHtml + '</div></div></div>';
             showModal(course.code + ' - ' + course.title, content);
+        }
+
+        // ============================================
+        // PAGE: ENROLL STUDENTS
+        // ============================================
+        function renderEnroll() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var courseOptions = '<option value="">Select Course</option>';
+            for (var i = 0; i < data.courses.length; i++) {
+                courseOptions += '<option value="' + data.courses[i].id + '">' + data.courses[i].code + ' - ' + data.courses[i].title + '</option>';
+            }
+
+            var enrolledHtml = '';
+            var enrolled = data.enrolled_students || [];
+            if (enrolled.length === 0) {
+                enrolledHtml = '<p class="text-gray-500 text-sm py-4">No students enrolled yet.</p>';
+            } else {
+                for (var i = 0; i < enrolled.length; i++) {
+                    var e = enrolled[i];
+                    var courseName = 'Unknown';
+                    for (var j = 0; j < data.courses.length; j++) {
+                        if (data.courses[j].id === e.course_id) { courseName = data.courses[j].code; break; }
+                    }
+                    enrolledHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm font-medium">' + e.name + '</span><span class="text-xs text-gray-500">' + e.email + '</span><span class="text-xs px-2 py-0.5 rounded-full bg-teal-soft">' + courseName + '</span></div>';
+                }
+            }
+
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📝 Enroll Students</h2><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Add New Student</h3><form id="enrollForm" onsubmit="enrollStudent(event)"><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label><select id="enrollCourse" class="input-teal mt-1" required>' + courseOptions + '</select></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student Name</label><input type="text" id="enrollName" placeholder="Full name" class="input-teal mt-1" required></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student Email</label><div class="flex gap-2"><input type="email" id="enrollEmail" placeholder="student@email.com" class="input-teal mt-1" required><button type="submit" class="btn-teal mt-1 whitespace-nowrap">Enroll</button></div></div></div></form></div><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Currently Enrolled Students</h3><div class="max-h-60 overflow-y-auto">' + enrolledHtml + '</div></div></div>';
+        }
+
+        function enrollStudent(e) {
+            e.preventDefault();
+            var courseId = parseInt(document.getElementById('enrollCourse').value);
+            var name = document.getElementById('enrollName').value.trim();
+            var email = document.getElementById('enrollEmail').value.trim();
+
+            if (!courseId || !name || !email) {
+                window.toast.warning('Please fill in all fields');
+                return;
+            }
+
+            var data = loadProfessorData();
+            if (!data.enrolled_students) data.enrolled_students = [];
+
+            for (var i = 0; i < data.enrolled_students.length; i++) {
+                if (data.enrolled_students[i].email === email && data.enrolled_students[i].course_id === courseId) {
+                    window.toast.warning('Student already enrolled in this course');
+                    return;
+                }
+            }
+
+            var studentId = null;
+            for (var i = 0; i < data.students.length; i++) {
+                if (data.students[i].email === email) { studentId = data.students[i].id; break; }
+            }
+            if (!studentId) {
+                studentId = Date.now();
+                data.students.push({
+                    id: studentId,
+                    name: name,
+                    email: email,
+                    classification: 'Moderate',
+                    activity_score: 50,
+                    score_breakdown: { github: 50, attendance: 50, peer_reviews: 50, working_hours: 50 }
+                });
+            }
+
+            data.enrolled_students.push({
+                id: studentId,
+                name: name,
+                email: email,
+                course_id: courseId
+            });
+
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].id === courseId) {
+                    data.courses[i].students_count = (data.courses[i].students_count || 0) + 1;
+                    break;
+                }
+            }
+
+            saveProfessorData(data);
+            addNotification('Student Enrolled', name + ' enrolled in course', 'info');
+            window.toast.success(name + ' enrolled successfully! ✅');
+            renderEnroll();
+        }
+
+        // ============================================
+        // PAGE: ATTENDANCE
+        // ============================================
+        function renderAttendance() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var courseOptions = '<option value="">Select Course</option>';
+            for (var i = 0; i < data.courses.length; i++) {
+                courseOptions += '<option value="' + data.courses[i].id + '">' + data.courses[i].code + ' - ' + data.courses[i].title + '</option>';
+            }
+
+            var today = new Date().toISOString().slice(0, 10);
+
+            var attendanceHtml = '';
+            var attendanceRecords = data.attendance || [];
+            if (attendanceRecords.length === 0) {
+                attendanceHtml = '<p class="text-gray-500 text-sm py-4">No attendance records.</p>';
+            } else {
+                for (var i = attendanceRecords.length - 1; i >= 0; i--) {
+                    var a = attendanceRecords[i];
+                    var studentName = 'Unknown';
+                    for (var j = 0; j < data.students.length; j++) {
+                        if (data.students[j].id === a.student_id) { studentName = data.students[j].name; break; }
+                    }
+                    var statusColor = a.status === 'Present' ? 'text-green-600' : a.status === 'Late' ? 'text-yellow-600' : 'text-red-600';
+                    attendanceHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm font-medium">' + studentName + '</span><span class="text-xs text-gray-500">' + a.date + '</span><span class="text-sm font-medium ' + statusColor + '">' + a.status + '</span></div>';
+                }
+            }
+
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Attendance Management</h2><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Mark Attendance</h3><form id="attendanceForm" onsubmit="markAttendance(event)"><div class="grid grid-cols-1 md:grid-cols-3 gap-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label><select id="attendanceCourse" class="input-teal mt-1" required>' + courseOptions + '</select></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student</label><select id="attendanceStudent" class="input-teal mt-1" required><option value="">Select Student</option></select></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label><select id="attendanceStatus" class="input-teal mt-1" required><option value="Present">Present</option><option value="Absent">Absent</option><option value="Late">Late</option></select></div></div><div class="mt-4"><button type="submit" class="btn-teal">Mark Attendance</button></div></form></div><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Attendance Records</h3><div class="max-h-60 overflow-y-auto">' + attendanceHtml + '</div></div></div>';
+
+            document.getElementById('attendanceCourse').addEventListener('change', function() {
+                var courseId = parseInt(this.value);
+                var studentSelect = document.getElementById('attendanceStudent');
+                studentSelect.innerHTML = '<option value="">Select Student</option>';
+                var data = loadProfessorData();
+                var enrolled = data.enrolled_students || [];
+                for (var i = 0; i < enrolled.length; i++) {
+                    if (enrolled[i].course_id === courseId) {
+                        studentSelect.innerHTML += '<option value="' + enrolled[i].id + '">' + enrolled[i].name + ' (' + enrolled[i].email + ')</option>';
+                    }
+                }
+            });
+        }
+
+        function markAttendance(e) {
+            e.preventDefault();
+            var courseId = parseInt(document.getElementById('attendanceCourse').value);
+            var studentId = parseInt(document.getElementById('attendanceStudent').value);
+            var status = document.getElementById('attendanceStatus').value;
+
+            if (!courseId || !studentId) {
+                window.toast.warning('Please select course and student');
+                return;
+            }
+
+            var data = loadProfessorData();
+            if (!data.attendance) data.attendance = [];
+
+            var today = new Date().toISOString().slice(0, 10);
+
+            for (var i = 0; i < data.attendance.length; i++) {
+                if (data.attendance[i].student_id === studentId && data.attendance[i].course_id === courseId && data.attendance[i].date === today) {
+                    window.toast.warning('Attendance already marked for today');
+                    return;
+                }
+            }
+
+            data.attendance.push({
+                student_id: studentId,
+                course_id: courseId,
+                date: today,
+                status: status
+            });
+
+            saveProfessorData(data);
+            addNotification('Attendance Marked', 'Student attendance marked as ' + status, 'info');
+            window.toast.success('Attendance marked as ' + status + ' ✅');
+            renderAttendance();
+        }
+
+        // ============================================
+        // PAGE: LOW CONTRIBUTORS
+        // ============================================
+        function renderLowContributors() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var lowContributors = [];
+            for (var i = 0; i < data.students.length; i++) {
+                if (data.students[i].activity_score < 30) {
+                    lowContributors.push(data.students[i]);
+                }
+            }
+
+            var rows = '';
+            if (lowContributors.length === 0) {
+                rows = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-500">🎉 No low contributors found!</td></tr>';
+            } else {
+                for (var i = 0; i < lowContributors.length; i++) {
+                    var s = lowContributors[i];
+                    var alertLevel = s.activity_score < 10 ? 'Critical' : s.activity_score < 20 ? 'High' : 'Medium';
+                    var alertColor = alertLevel === 'Critical' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 
+                                     alertLevel === 'High' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300' : 
+                                     'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+                    rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">' + s.name + '</td><td class="px-4 py-2 text-gray-600 dark:text-gray-400">' + s.email + '</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ' + alertColor + '">' + alertLevel + '</span></td><td class="px-4 py-2 text-red-600 font-semibold">' + s.activity_score + '%</td></tr>';
+                }
+            }
+
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⚠️ Low Contributors</h2><div class="card-glass p-6"><p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Students with activity score below 30% are flagged for attention.</p><div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Alert Level</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Score</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
+        }
+
+        // ============================================
+        // PAGE: SUBMISSIONS
+        // ============================================
+        function renderSubmissions() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var assignmentOptions = '<option value="">Select Assignment</option>';
+            var assignmentMap = {};
+            for (var i = 0; i < data.Project.length; i++) {
+                var a = data.Project[i];
+                var courseName = 'Unknown';
+                for (var j = 0; j < data.courses.length; j++) {
+                    if (data.courses[j].id === a.course_id) { courseName = data.courses[j].code; break; }
+                }
+                assignmentOptions += '<option value="' + a.id + '">' + a.title + ' (' + courseName + ')</option>';
+                assignmentMap[a.id] = a;
+            }
+
+            var submissionsHtml = '';
+            var submissions = data.submissions || [];
+            if (submissions.length === 0) {
+                submissionsHtml = '<p class="text-gray-500 text-sm py-4">No submissions yet.</p>';
+            } else {
+                for (var i = 0; i < submissions.length; i++) {
+                    var s = submissions[i];
+                    var studentName = 'Unknown';
+                    for (var j = 0; j < data.students.length; j++) {
+                        if (data.students[j].id === s.student_id) { studentName = data.students[j].name; break; }
+                    }
+                    var assignmentTitle = 'Unknown';
+                    for (var j = 0; j < data.Project.length; j++) {
+                        if (data.Project[j].id === s.assignment_id) { assignmentTitle = data.Project[j].title; break; }
+                    }
+                    var statusColor = s.status === 'Submitted' ? 'text-green-600' : s.status === 'Pending' ? 'text-yellow-600' : 'text-red-600';
+                    submissionsHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm font-medium">' + studentName + '</span><span class="text-xs text-gray-500">' + assignmentTitle + '</span><span class="text-xs text-gray-500">' + (s.submitted_at ? new Date(s.submitted_at).toLocaleString() : 'N/A') + '</span><span class="text-sm font-medium ' + statusColor + '">' + s.status + '</span></div>';
+                }
+            }
+
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📤 Assignment Submissions</h2><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Filter by Assignment</h3><select id="submissionFilter" class="input-teal" onchange="filterSubmissions(this.value)">' + assignmentOptions + '</select></div><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">All Submissions</h3><div id="submissionList" class="max-h-60 overflow-y-auto">' + submissionsHtml + '</div></div></div>';
+        }
+
+        function filterSubmissions(assignmentId) {
+            var data = loadProfessorData();
+            var submissions = data.submissions || [];
+            var filtered = submissions;
+            if (assignmentId) {
+                filtered = [];
+                for (var i = 0; i < submissions.length; i++) {
+                    if (submissions[i].assignment_id == assignmentId) filtered.push(submissions[i]);
+                }
+            }
+
+            var list = document.getElementById('submissionList');
+            if (filtered.length === 0) {
+                list.innerHTML = '<p class="text-gray-500 text-sm py-4">No submissions for this assignment.</p>';
+                return;
+            }
+
+            var html = '';
+            for (var i = 0; i < filtered.length; i++) {
+                var s = filtered[i];
+                var studentName = 'Unknown';
+                for (var j = 0; j < data.students.length; j++) {
+                    if (data.students[j].id === s.student_id) { studentName = data.students[j].name; break; }
+                }
+                var assignmentTitle = 'Unknown';
+                for (var j = 0; j < data.Project.length; j++) {
+                    if (data.Project[j].id === s.assignment_id) { assignmentTitle = data.Project[j].title; break; }
+                }
+                var statusColor = s.status === 'Submitted' ? 'text-green-600' : s.status === 'Pending' ? 'text-yellow-600' : 'text-red-600';
+                html += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm font-medium">' + studentName + '</span><span class="text-xs text-gray-500">' + assignmentTitle + '</span><span class="text-xs text-gray-500">' + (s.submitted_at ? new Date(s.submitted_at).toLocaleString() : 'N/A') + '</span><span class="text-sm font-medium ' + statusColor + '">' + s.status + '</span></div>';
+            }
+            list.innerHTML = html;
+        }
+
+        // ============================================
+        // PAGE: GROUPS MANAGEMENT
+        // ============================================
+        function renderGroupsManagement() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var courseOptions = '<option value="">Select Course</option>';
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].is_active) {
+                    courseOptions += '<option value="' + data.courses[i].id + '">' + data.courses[i].code + ' - ' + data.courses[i].title + '</option>';
+                }
+            }
+
+            var groupsHtml = '';
+            if (data.groups.length === 0) {
+                groupsHtml = '<p class="text-gray-500 text-sm py-4">No groups created yet.</p>';
+            } else {
+                for (var i = 0; i < data.groups.length; i++) {
+                    var g = data.groups[i];
+                    groupsHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">' +
+                        '<span class="text-sm font-medium">' + g.name + '</span>' +
+                        '<span class="text-xs text-gray-500">' + (g.course_name || 'N/A') + '</span>' +
+                        '<span class="text-xs text-gray-500">' + (g.members_count || 0) + ' members</span>' +
+                        '<div class="flex gap-2">' +
+                            '<button onclick="editGroup(' + g.id + ')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm">✏️</button>' +
+                            '<button onclick="deleteGroup(' + g.id + ')" class="text-red-500 hover:text-red-700 text-sm">🗑️</button>' +
+                        '</div>' +
+                    '</div>';
+                }
+            }
+
+            container.innerHTML = '<div class="space-y-6">' +
+                '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 Group Management</h2>' +
+                '<div class="card-glass p-6">' +
+                    '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Create New Group</h3>' +
+                    '<form id="createGroupForm" onsubmit="createGroup(event)">' +
+                        '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">' +
+                            '<div>' +
+                                '<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label>' +
+                                '<select id="groupCourse" class="input-teal mt-1" required>' + courseOptions + '</select>' +
+                            '</div>' +
+                            '<div>' +
+                                '<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Name</label>' +
+                                '<input type="text" id="groupName" placeholder="e.g., Team Alpha" class="input-teal mt-1" required>' +
+                            '</div>' +
+                            '<div>' +
+                                '<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Members (Ctrl+Click)</label>' +
+                                '<select id="groupMembers" class="input-teal mt-1" multiple style="height:80px;">' +
+                                    '<option value="">Select Students</option>' +
+                                '</select>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="mt-4">' +
+                            '<button type="submit" class="btn-teal">Create Group</button>' +
+                        '</div>' +
+                    '</form>' +
+                '</div>' +
+                '<div class="card-glass p-6">' +
+                    '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">All Groups</h3>' +
+                    '<div class="max-h-60 overflow-y-auto">' + groupsHtml + '</div>' +
+                '</div>' +
+            '</div>';
+
+            document.getElementById('groupCourse').addEventListener('change', function() {
+                var courseId = parseInt(this.value);
+                var memberSelect = document.getElementById('groupMembers');
+                memberSelect.innerHTML = '';
+                var data = loadProfessorData();
+                var enrolled = data.enrolled_students || [];
+                for (var i = 0; i < enrolled.length; i++) {
+                    if (enrolled[i].course_id === courseId) {
+                        var option = document.createElement('option');
+                        option.value = enrolled[i].id;
+                        option.textContent = enrolled[i].name + ' (' + enrolled[i].email + ')';
+                        memberSelect.appendChild(option);
+                    }
+                }
+            });
+        }
+
+        function createGroup(e) {
+            e.preventDefault();
+            var courseId = parseInt(document.getElementById('groupCourse').value);
+            var groupName = document.getElementById('groupName').value.trim();
+            var memberSelect = document.getElementById('groupMembers');
+            var selectedMembers = [];
+            for (var i = 0; i < memberSelect.options.length; i++) {
+                if (memberSelect.options[i].selected && memberSelect.options[i].value) {
+                    selectedMembers.push(parseInt(memberSelect.options[i].value));
+                }
+            }
+
+            if (!courseId || !groupName) {
+                window.toast.warning('Please select course and enter group name');
+                return;
+            }
+
+            if (selectedMembers.length === 0) {
+                window.toast.warning('Please select at least one member');
+                return;
+            }
+
+            var data = loadProfessorData();
+            var course = null;
+            for (var i = 0; i < data.courses.length; i++) {
+                if (data.courses[i].id === courseId) { course = data.courses[i]; break; }
+            }
+
+            var newGroup = {
+                id: Date.now(),
+                name: groupName,
+                course_name: course ? course.code : 'Unknown',
+                members_count: selectedMembers.length,
+                contribution_percentage: 50,
+                members: selectedMembers
+            };
+
+            data.groups.push(newGroup);
+
+            if (course) {
+                course.groups_count = (course.groups_count || 0) + 1;
+            }
+
+            saveProfessorData(data);
+            addNotification('Group Created', groupName + ' created with ' + selectedMembers.length + ' members', 'info');
+            window.toast.success('Group ' + groupName + ' created successfully! ✅');
+            renderGroupsManagement();
+        }
+
+        function deleteGroup(groupId) {
+            if (!confirm('Are you sure you want to delete this group?')) return;
+            var data = loadProfessorData();
+            var newGroups = [];
+            for (var i = 0; i < data.groups.length; i++) {
+                if (data.groups[i].id !== groupId) newGroups.push(data.groups[i]);
+            }
+            data.groups = newGroups;
+            saveProfessorData(data);
+            window.toast.success('Group deleted!');
+            renderGroupsManagement();
+        }
+
+        function editGroup(groupId) {
+            var data = loadProfessorData();
+            var group = null;
+            for (var i = 0; i < data.groups.length; i++) {
+                if (data.groups[i].id === groupId) { group = data.groups[i]; break; }
+            }
+            if (!group) { window.toast.error('Group not found'); return; }
+
+            var content = '<div class="space-y-4">' +
+                '<div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Name</label>' +
+                '<input type="text" id="editGroupName" value="' + group.name + '" class="input-teal mt-1"></div>' +
+                '<div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Members Count</label>' +
+                '<input type="number" id="editGroupMembers" value="' + group.members_count + '" class="input-teal mt-1"></div>' +
+                '<button onclick="updateGroup(' + groupId + ')" class="btn-teal w-full">Update Group</button>' +
+            '</div>';
+
+            showModal('Edit Group - ' + group.name, content);
+        }
+
+        function updateGroup(groupId) {
+            var name = document.getElementById('editGroupName').value.trim();
+            var members = parseInt(document.getElementById('editGroupMembers').value);
+
+            if (!name || members < 1) {
+                window.toast.warning('Please enter valid information');
+                return;
+            }
+
+            var data = loadProfessorData();
+            for (var i = 0; i < data.groups.length; i++) {
+                if (data.groups[i].id === groupId) {
+                    data.groups[i].name = name;
+                    data.groups[i].members_count = members;
+                    break;
+                }
+            }
+            saveProfessorData(data);
+            closeModal();
+            window.toast.success('Group updated successfully!');
+            renderGroupsManagement();
+        }
+
+        // ============================================
+        // PAGE: REAL-TIME TRACKING
+        // ============================================
+        function renderRealtimeTracking() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var sortedStudents = data.students.slice().sort(function(a, b) {
+                return b.activity_score - a.activity_score;
+            });
+
+            var rows = '';
+            for (var i = 0; i < sortedStudents.length; i++) {
+                var s = sortedStudents[i];
+                var statusColor = s.activity_score >= 80 ? 'text-green-600' : 
+                                  s.activity_score >= 60 ? 'text-yellow-600' : 
+                                  s.activity_score >= 30 ? 'text-orange-600' : 'text-red-600';
+                var barColor = s.activity_score >= 80 ? 'bg-green-500' : 
+                               s.activity_score >= 60 ? 'bg-yellow-500' : 
+                               s.activity_score >= 30 ? 'bg-orange-500' : 'bg-red-500';
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800">' +
+                    '<td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">' + s.name + '</td>' +
+                    '<td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-400">' + s.email + '</td>' +
+                    '<td class="px-4 py-2">' +
+                        '<div class="flex items-center">' +
+                            '<div class="w-32 bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mr-2">' +
+                                '<div class="' + barColor + ' h-2.5 rounded-full transition-all duration-500" style="width: ' + s.activity_score + '%"></div>' +
+                            '</div>' +
+                            '<span class="text-sm font-medium ' + statusColor + '">' + s.activity_score + '%</span>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ' + getClassificationClass(s.classification) + '">' + s.classification + '</span></td>' +
+                    '<td class="px-4 py-2">' +
+                        '<span class="text-xs text-gray-400" id="lastUpdate_' + s.id + '">Live</span>' +
+                    '</td>' +
+                '</tr>';
+            }
+
+            container.innerHTML = '<div class="space-y-6">' +
+                '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📡 Real-Time Contribution Tracking</h2>' +
+                '<div class="card-glass p-4 bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800">' +
+                    '<div class="flex items-center gap-3">' +
+                        '<span class="text-2xl">🟢</span>' +
+                        '<span class="text-sm font-medium text-gray-700 dark:text-gray-300">' +
+                            (wsConnected ? 'Connected to real-time updates' : 'Using polling (10s interval)') +
+                        '</span>' +
+                        '<span class="text-xs text-gray-500" id="realtimeStatus">' + (wsConnected ? '🔗 WebSocket' : '📡 Polling') + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="card-glass p-0 overflow-hidden">' +
+                    '<div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">' +
+                        '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Live Student Scores</h3>' +
+                        '<p class="text-xs text-gray-500">Updates in real-time as students push code</p>' +
+                    '</div>' +
+                    '<div class="overflow-x-auto">' +
+                        '<table class="w-full">' +
+                            '<thead class="bg-gray-50 dark:bg-gray-800">' +
+                                '<tr>' +
+                                    '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th>' +
+                                    '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>' +
+                                    '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Score</th>' +
+                                    '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>' +
+                                    '<th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Last Update</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                            '<tbody>' + rows + '</tbody>' +
+                        '</table>' +
+                    '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        // ============================================
+        // PAGE: FEEDBACK
+        // ============================================
+        function renderFeedback() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var studentOptions = '<option value="">Select Student</option>';
+            for (var i = 0; i < data.students.length; i++) {
+                studentOptions += '<option value="' + data.students[i].id + '">' + data.students[i].name + ' (' + data.students[i].classification + ')</option>';
+            }
+
+            var feedbacks = data.feedbacks || [];
+            var feedbackHtml = '';
+            if (feedbacks.length === 0) {
+                feedbackHtml = '<p class="text-gray-500 text-sm py-4">No feedback sent yet.</p>';
+            } else {
+                for (var i = feedbacks.length - 1; i >= 0; i--) {
+                    var f = feedbacks[i];
+                    var studentName = 'Unknown';
+                    for (var j = 0; j < data.students.length; j++) {
+                        if (data.students[j].id === f.student_id) { studentName = data.students[j].name; break; }
+                    }
+                    var typeColors = { positive: 'text-green-600', constructive: 'text-yellow-600', critical: 'text-red-600' };
+                    var typeIcons = { positive: '👍', constructive: '💡', critical: '⚠️' };
+                    feedbackHtml += '<div class="flex items-start justify-between py-2 border-b border-gray-100 dark:border-gray-800">' +
+                        '<div class="flex-1">' +
+                            '<span class="text-sm font-medium">' + studentName + '</span>' +
+                            '<p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">' + f.message + '</p>' +
+                            '<span class="text-xs text-gray-400">' + f.date + '</span>' +
+                        '</div>' +
+                        '<span class="px-2 py-0.5 rounded-full text-xs ' + typeColors[f.type] + '">' + typeIcons[f.type] + ' ' + f.type + '</span>' +
+                    '</div>';
+                }
+            }
+
+            container.innerHTML = '<div class="space-y-6">' +
+                '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">💬 Send Feedback to Students</h2>' +
+                '<div class="card-glass p-6">' +
+                    '<form id="feedbackForm" onsubmit="sendFeedback(event)">' +
+                        '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' +
+                            '<div>' +
+                                '<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Student</label>' +
+                                '<select id="feedbackStudent" class="input-teal mt-1" required>' + studentOptions + '</select>' +
+                            '</div>' +
+                            '<div>' +
+                                '<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Feedback Type</label>' +
+                                '<select id="feedbackType" class="input-teal mt-1" required>' +
+                                    '<option value="positive">👍 Positive</option>' +
+                                    '<option value="constructive">💡 Constructive</option>' +
+                                    '<option value="critical">⚠️ Critical</option>' +
+                                '</select>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="mt-4">' +
+                            '<label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Message</label>' +
+                            '<textarea id="feedbackMessage" rows="4" class="textarea-teal mt-1" placeholder="Write your feedback here..." required></textarea>' +
+                        '</div>' +
+                        '<div class="mt-4">' +
+                            '<button type="submit" class="btn-teal">Send Feedback</button>' +
+                        '</div>' +
+                    '</form>' +
+                '</div>' +
+                '<div class="card-glass p-6">' +
+                    '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Sent Feedback</h3>' +
+                    '<div class="max-h-60 overflow-y-auto">' + feedbackHtml + '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function sendFeedback(e) {
+            e.preventDefault();
+            var studentId = parseInt(document.getElementById('feedbackStudent').value);
+            var type = document.getElementById('feedbackType').value;
+            var message = document.getElementById('feedbackMessage').value.trim();
+
+            if (!studentId || !message) {
+                window.toast.warning('Please select a student and write a message');
+                return;
+            }
+
+            var data = loadProfessorData();
+            if (!data.feedbacks) data.feedbacks = [];
+
+            data.feedbacks.push({
+                id: Date.now(),
+                student_id: studentId,
+                type: type,
+                message: message,
+                date: new Date().toLocaleString()
+            });
+
+            saveProfessorData(data);
+            document.getElementById('feedbackForm').reset();
+            addNotification('Feedback Sent', 'Feedback sent to student', 'info');
+            window.toast.success('Feedback sent successfully! ✅');
+            renderFeedback();
+        }
+
+        // ============================================
+        // PAGE: AI EVALUATION
+        // ============================================
+        function renderAIEvaluation() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var aiAnalysis = analyzeWithAI(data);
+
+            var insightsHtml = '';
+            for (var i = 0; i < aiAnalysis.insights.length; i++) {
+                var insight = aiAnalysis.insights[i];
+                var color = insight.type === 'success' ? 'text-green-600' : 
+                            insight.type === 'warning' ? 'text-yellow-600' : 'text-red-600';
+                var icon = insight.type === 'success' ? '✅' : 
+                           insight.type === 'warning' ? '⚡' : '❌';
+                insightsHtml += '<div class="flex items-start py-2 border-b border-gray-100 dark:border-gray-800">' +
+                    '<span class="text-lg mr-2">' + icon + '</span>' +
+                    '<div>' +
+                        '<p class="text-sm font-medium text-gray-800 dark:text-gray-100">' + insight.title + '</p>' +
+                        '<p class="text-xs text-gray-500 dark:text-gray-400">' + insight.description + '</p>' +
+                    '</div>' +
+                '</div>';
+            }
+
+            var predictionsHtml = '';
+            for (var i = 0; i < aiAnalysis.predictions.length; i++) {
+                var p = aiAnalysis.predictions[i];
+                var riskColor = p.risk === 'Low' ? 'text-green-600' : 
+                                p.risk === 'Medium' ? 'text-yellow-600' : 'text-red-600';
+                predictionsHtml += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">' +
+                    '<span class="text-sm font-medium">' + p.name + '</span>' +
+                    '<span class="text-sm text-gray-500">Current: ' + p.current_score + '%</span>' +
+                    '<span class="text-sm">→</span>' +
+                    '<span class="text-sm font-medium text-blue-600">' + p.predicted_score + '%</span>' +
+                    '<span class="text-xs px-2 py-0.5 rounded-full ' + riskColor + '">' + p.risk + ' Risk</span>' +
+                '</div>';
+            }
+
+            var recsHtml = '';
+            for (var i = 0; i < aiAnalysis.recommendations.length; i++) {
+                var rec = aiAnalysis.recommendations[i];
+                recsHtml += '<div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">' +
+                    '<p class="text-sm font-medium text-gray-800 dark:text-gray-100">' + rec.title + '</p>' +
+                    '<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">' + rec.description + '</p>' +
+                '</div>';
+            }
+
+            container.innerHTML = '<div class="space-y-6">' +
+                '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🤖 AI Evaluation Dashboard</h2>' +
+                '<div class="grid grid-cols-1 md:grid-cols-4 gap-4">' +
+                    '<div class="stat-card text-center">' +
+                        '<p class="text-2xl font-bold text-green-600">' + aiAnalysis.summary.active + '</p>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">Active Students</p>' +
+                    '</div>' +
+                    '<div class="stat-card text-center">' +
+                        '<p class="text-2xl font-bold text-yellow-600">' + aiAnalysis.summary.at_risk + '</p>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">At Risk Students</p>' +
+                    '</div>' +
+                    '<div class="stat-card text-center">' +
+                        '<p class="text-2xl font-bold text-blue-600">' + aiAnalysis.summary.improving + '</p>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">Improving</p>' +
+                    '</div>' +
+                    '<div class="stat-card text-center">' +
+                        '<p class="text-2xl font-bold text-purple-600">' + aiAnalysis.summary.suggestions + '</p>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">AI Suggestions</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' +
+                    '<div class="card-glass p-6">' +
+                        '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">📊 AI Insights</h3>' +
+                        '<div class="max-h-60 overflow-y-auto">' + insightsHtml + '</div>' +
+                    '</div>' +
+                    '<div class="card-glass p-6">' +
+                        '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">📈 Student Predictions</h3>' +
+                        '<div class="max-h-60 overflow-y-auto">' + predictionsHtml + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="card-glass p-6">' +
+                    '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">💡 AI Recommendations</h3>' +
+                    '<div class="grid grid-cols-1 md:grid-cols-2 gap-4">' + recsHtml + '</div>' +
+                '</div>' +
+            '</div>';
+        }
+
+        function analyzeWithAI(data) {
+            var insights = [];
+            var predictions = [];
+            var recommendations = [];
+            var active = 0, at_risk = 0, improving = 0;
+
+            for (var i = 0; i < data.students.length; i++) {
+                var s = data.students[i];
+                if (s.classification === 'Active') active++;
+                else if (s.classification === 'Passive' || s.classification === 'Free Rider') at_risk++;
+                else improving++;
+
+                var predictedChange = (Math.random() - 0.3) * 10;
+                var predictedScore = Math.max(0, Math.min(100, s.activity_score + predictedChange));
+                var risk = predictedScore < 30 ? 'High' : predictedScore < 60 ? 'Medium' : 'Low';
+                predictions.push({
+                    name: s.name,
+                    current_score: s.activity_score,
+                    predicted_score: Math.round(predictedScore),
+                    risk: risk
+                });
+            }
+
+            if (at_risk > 2) {
+                insights.push({
+                    type: 'warning',
+                    title: 'Multiple students at risk',
+                    description: at_risk + ' students are showing low engagement. Consider intervention.'
+                });
+            }
+            if (active > data.students.length / 2) {
+                insights.push({
+                    type: 'success',
+                    title: 'Good overall performance',
+                    description: 'More than 50% students are actively participating.'
+                });
+            }
+
+            var avgScore = 0;
+            for (var i = 0; i < data.students.length; i++) {
+                avgScore += data.students[i].activity_score;
+            }
+            avgScore = Math.round(avgScore / data.students.length);
+            if (avgScore > 70) {
+                insights.push({
+                    type: 'success',
+                    title: 'Above average performance',
+                    description: 'Average score is ' + avgScore + '% - Keep up the good work!'
+                });
+            } else if (avgScore < 50) {
+                insights.push({
+                    type: 'error',
+                    title: 'Below average performance',
+                    description: 'Average score is ' + avgScore + '% - Consider adjusting teaching methods.'
+                });
+            }
+
+            if (at_risk > 0) {
+                recommendations.push({
+                    title: '📚 Personalized Support',
+                    description: 'Provide one-on-one support to ' + at_risk + ' students who are at risk.'
+                });
+            }
+            if (avgScore < 60) {
+                recommendations.push({
+                    title: '📝 Review Material',
+                    description: 'Consider reviewing course material and providing additional resources.'
+                });
+            }
+            recommendations.push({
+                title: '👥 Group Activities',
+                description: 'Encourage more group activities to improve collaboration.'
+            });
+            recommendations.push({
+                title: '📊 Regular Feedback',
+                description: 'Provide regular feedback to students to track their progress.'
+            });
+
+            return {
+                summary: {
+                    active: active,
+                    at_risk: at_risk,
+                    improving: improving,
+                    suggestions: recommendations.length
+                },
+                insights: insights,
+                predictions: predictions,
+                recommendations: recommendations
+            };
+        }
+
+        // ============================================
+        // PAGE: PEER REVIEW
+        // ============================================
+        function renderPeerReview() {
+            var container = document.getElementById('page-content');
+            var data = loadProfessorData();
+
+            var reviews = data.peer_reviews || [];
+            var reviewsHtml = '';
+            if (reviews.length === 0) {
+                reviewsHtml = '<p class="text-gray-500 text-sm py-4">No peer reviews yet.</p>';
+            } else {
+                for (var i = reviews.length - 1; i >= 0; i--) {
+                    var r = reviews[i];
+                    var reviewerName = 'Anonymous';
+                    var revieweeName = 'Unknown';
+                    for (var j = 0; j < data.students.length; j++) {
+                        if (data.students[j].id === r.reviewer_id) { reviewerName = data.students[j].name; }
+                        if (data.students[j].id === r.reviewee_id) { revieweeName = data.students[j].name; }
+                    }
+                    reviewsHtml += '<div class="flex items-start justify-between py-2 border-b border-gray-100 dark:border-gray-800">' +
+                        '<div>' +
+                            '<span class="text-sm font-medium">' + revieweeName + '</span>' +
+                            '<span class="text-xs text-gray-400 ml-2">by ' + (r.anonymous ? 'Anonymous' : reviewerName) + '</span>' +
+                            '<p class="text-sm text-gray-600 dark:text-gray-400 mt-0.5">' + r.comment + '</p>' +
+                        '</div>' +
+                        '<span class="text-sm font-bold text-blue-600">' + r.score + '/100</span>' +
+                    '</div>';
+                }
+            }
+
+            // Calculate summary stats
+            var totalReviews = reviews.length;
+            var avgScore = 0;
+            if (totalReviews > 0) {
+                var sum = 0;
+                for (var i = 0; i < reviews.length; i++) {
+                    sum += reviews[i].score;
+                }
+                avgScore = Math.round(sum / totalReviews);
+            }
+
+            container.innerHTML = '<div class="space-y-6">' +
+                '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🔍 Peer Review Summary</h2>' +
+                '<div class="grid grid-cols-1 md:grid-cols-3 gap-4">' +
+                    '<div class="stat-card text-center">' +
+                        '<p class="text-2xl font-bold text-[#3AAFA9]">' + totalReviews + '</p>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">Total Reviews</p>' +
+                    '</div>' +
+                    '<div class="stat-card text-center">' +
+                        '<p class="text-2xl font-bold text-blue-600">' + avgScore + '/100</p>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">Average Score</p>' +
+                    '</div>' +
+                    '<div class="stat-card text-center">' +
+                        '<p class="text-2xl font-bold text-green-600">' + (totalReviews > 0 ? Math.round(avgScore * 0.8) : 0) + '%</p>' +
+                        '<p class="text-sm text-gray-500 dark:text-gray-400">Participation Rate</p>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="card-glass p-6">' +
+                    '<h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">All Peer Reviews</h3>' +
+                    '<div class="max-h-60 overflow-y-auto">' + reviewsHtml + '</div>' +
+                '</div>' +
+            '</div>';
         }
 
         // ============================================
@@ -832,9 +2085,13 @@
             if (data.alerts.length > 0) {
                 for (var i = 0; i < data.alerts.length; i++) {
                     var alert = data.alerts[i];
-                    var color = alert.severity === 'High' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
-                    var icon = alert.severity === 'High' ? '⚠️' : '⚡';
-                    var bg = alert.severity === 'High' ? 'bg-red-100 dark:bg-red-900/20' : 'bg-yellow-100 dark:bg-yellow-900/20';
+                    var color = alert.severity === 'High' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' : 
+                                 alert.severity === 'Critical' ? 'bg-red-200 text-red-900 dark:bg-red-900/50 dark:text-red-200' :
+                                 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300';
+                    var icon = alert.severity === 'Critical' ? '🔴' : alert.severity === 'High' ? '⚠️' : '⚡';
+                    var bg = alert.severity === 'Critical' ? 'bg-red-200 dark:bg-red-900/30' : 
+                             alert.severity === 'High' ? 'bg-red-100 dark:bg-red-900/20' : 
+                             'bg-yellow-100 dark:bg-yellow-900/20';
                     alertsHtml += '<div class="flex items-center p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition cursor-pointer" onclick="window.toast.info(\'' + alert.message + '\')"><div class="flex-shrink-0"><div class="w-10 h-10 rounded-full ' + bg + ' flex items-center justify-center"><span class="text-lg">' + icon + '</span></div></div><div class="ml-4 flex-1"><p class="text-sm font-medium text-gray-900 dark:text-gray-100">' + alert.student_name + '</p><p class="text-xs text-gray-500 dark:text-gray-400">' + alert.message + '</p></div><div><span class="px-2 py-1 text-xs rounded-full ' + color + '">' + alert.severity + '</span></div></div>';
                 }
             } else {
@@ -843,7 +2100,6 @@
 
             container.innerHTML = '<div class="space-y-6"><div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl"><h2 class="text-2xl font-bold">Welcome back, Prof. ' + (user?.first_name || 'Professor') + '! 👋</h2><p class="text-white/80 mt-1 text-sm">Here\'s your academic overview</p></div><div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"><div class="stat-card" onclick="showCoursesList()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Active Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">' + activeCourses + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-book"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view all</p></div><div class="stat-card" onclick="showGroupsList()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Groups</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">' + totalGroups + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-layer-group"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view all</p></div><div class="stat-card" onclick="showFreeRidersList()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Free Riders</p><p class="text-2xl font-bold ' + (freeRiders > 0 ? 'text-red-600' : 'text-green-600') + ' mt-1">' + freeRiders + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-exclamation-triangle"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view all</p></div><div class="stat-card" onclick="showTotalStudentsBreakdown()"><div class="flex items-center justify-between"><div><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">' + totalStudents + '</p></div><div class="stat-icon teal-bg"><i class="fas fa-users"></i></div></div><p class="text-xs text-gray-400 mt-1">Click to view breakdown</p></div></div><div class="card-glass p-6"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">Risk Indicators by Course</h3><canvas id="riskChart" height="220"></canvas></div><div class="card-glass p-0 overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Recent Alerts</h3></div><div id="alerts-list" class="divide-y divide-gray-100 dark:divide-gray-800">' + alertsHtml + '</div></div><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">' + coursesHtml + '</div></div>';
 
-            // Render risk chart
             setTimeout(function() {
                 var ctx = document.getElementById('riskChart')?.getContext('2d');
                 if (ctx && data.courses.length > 0) {
@@ -859,9 +2115,13 @@
                     for (var i = 0; i < activeCoursesList.length; i++) {
                         var c = activeCoursesList[i];
                         labels.push(c.code);
-                        highRisk.push(Math.floor(Math.random() * 2));
-                        mediumRisk.push(Math.floor(Math.random() * 3));
-                        lowRisk.push((c.students_count || 0) - 3);
+                        var total = c.students_count || 0;
+                        var high = Math.floor(total * 0.1);
+                        var medium = Math.floor(total * 0.2);
+                        var low = total - high - medium;
+                        highRisk.push(high);
+                        mediumRisk.push(medium);
+                        lowRisk.push(low);
                     }
 
                     charts.risk = new Chart(ctx, {
@@ -937,12 +2197,44 @@
                     if (a.weightage) {
                         for (var key in a.weightage) { totalWeight += a.weightage[key]; }
                     }
-                    ProjectHtml += '<div class="card-glass p-6"><div class="flex justify-between items-start"><div><span class="text-2xl mr-2">' + icon + '</span><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 inline">' + a.title + '</h3></div><span class="px-2 py-0.5 rounded-full text-xs ' + statusColor + '">' + a.status + '</span></div><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">' + (course ? course.code + ' - ' + course.title : 'No course') + '</p><p class="text-sm text-gray-600 dark:text-gray-300 mt-2">' + (a.description || 'No description') + '</p><div class="mt-3 flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400"><span><i class="far fa-calendar mr-1"></i> Deadline: ' + (a.deadline ? new Date(a.deadline).toLocaleString() : 'N/A') + '</span><span><i class="fas fa-weight-hanging mr-1"></i> Weightage: ' + totalWeight + '%</span></div><div class="mt-4 flex gap-2"><button onclick="window.toast.info(\'Viewing ' + a.title + '\')" class="btn-teal text-sm flex-1">View Details</button><button onclick="deleteAssignment(' + a.id + ')" class="btn-teal-outline text-sm px-3">🗑️</button></div></div>';
+                    ProjectHtml += '<div class="card-glass p-6"><div class="flex justify-between items-start"><div><span class="text-2xl mr-2">' + icon + '</span><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 inline">' + a.title + '</h3></div><span class="px-2 py-0.5 rounded-full text-xs ' + statusColor + '">' + a.status + '</span></div><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">' + (course ? course.code + ' - ' + course.title : 'No course') + '</p><p class="text-sm text-gray-600 dark:text-gray-300 mt-2">' + (a.description || 'No description') + '</p><div class="mt-3 flex flex-wrap gap-4 text-sm text-gray-500 dark:text-gray-400"><span><i class="far fa-calendar mr-1"></i> Deadline: ' + (a.deadline ? new Date(a.deadline).toLocaleString() : 'N/A') + '</span><span><i class="fas fa-weight-hanging mr-1"></i> Weightage: ' + totalWeight + '%</span></div><div class="mt-4 flex gap-2"><button onclick="showAssignmentSubmissions(' + a.id + ')" class="btn-teal text-sm flex-1">📤 Submissions</button><button onclick="deleteAssignment(' + a.id + ')" class="btn-teal-outline text-sm px-3">🗑️</button></div></div>';
                 }
                 ProjectHtml = '<div class="grid grid-cols-1 md:grid-cols-2 gap-6">' + ProjectHtml + '</div>';
             }
 
             container.innerHTML = '<div class="space-y-6"><div class="flex justify-between items-center"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📋 Project & Assignment</h2><button onclick="showCreateAssignmentModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> New Project</button></div>' + ProjectHtml + '</div>';
+        }
+
+        function showAssignmentSubmissions(assignmentId) {
+            var data = loadProfessorData();
+            var submissions = data.submissions || [];
+            var filtered = [];
+            for (var i = 0; i < submissions.length; i++) {
+                if (submissions[i].assignment_id === assignmentId) filtered.push(submissions[i]);
+            }
+
+            var assignment = null;
+            for (var i = 0; i < data.Project.length; i++) {
+                if (data.Project[i].id === assignmentId) { assignment = data.Project[i]; break; }
+            }
+
+            var rows = '';
+            if (filtered.length === 0) {
+                rows = '<p class="text-gray-500 text-sm py-4">No submissions for this assignment.</p>';
+            } else {
+                for (var i = 0; i < filtered.length; i++) {
+                    var s = filtered[i];
+                    var studentName = 'Unknown';
+                    for (var j = 0; j < data.students.length; j++) {
+                        if (data.students[j].id === s.student_id) { studentName = data.students[j].name; break; }
+                    }
+                    var statusColor = s.status === 'Submitted' ? 'text-green-600' : s.status === 'Pending' ? 'text-yellow-600' : 'text-red-600';
+                    rows += '<div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800"><span class="text-sm font-medium">' + studentName + '</span><span class="text-xs text-gray-500">' + (s.submitted_at ? new Date(s.submitted_at).toLocaleString() : 'Not submitted') + '</span><span class="text-sm font-medium ' + statusColor + '">' + s.status + '</span></div>';
+                }
+            }
+
+            var content = '<div class="space-y-4"><h3 class="font-semibold text-gray-800 dark:text-gray-100">' + (assignment ? assignment.title : 'Assignment') + ' - Submissions</h3><div class="max-h-60 overflow-y-auto">' + rows + '</div></div>';
+            showModal('📤 Submissions', content);
         }
 
         // ============================================
@@ -992,10 +2284,26 @@
             for (var i = 0; i < data.students.length; i++) {
                 var s = data.students[i];
                 var badgeClass = getClassificationClass(s.classification);
-                rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">' + s.name + '</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ' + badgeClass + '">' + s.classification + '</span></td><td class="px-4 py-2"><div class="flex items-center"><div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ' + s.activity_score + '%"></div></div><span class="text-sm text-gray-600 dark:text-gray-400">' + s.activity_score + '%</span></div></td><td class="px-4 py-2"><button onclick="window.toast.info(\'Viewing ' + s.name + '\')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">View</button></td></tr>';
+                rows += '<tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"><td class="px-4 py-2 text-sm font-medium text-gray-900 dark:text-gray-100">' + s.name + '</td><td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ' + badgeClass + '">' + s.classification + '</span></td><td class="px-4 py-2"><div class="flex items-center"><div class="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-2"><div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ' + s.activity_score + '%"></div></div><span class="text-sm text-gray-600 dark:text-gray-400">' + s.activity_score + '%</span></div></td><td class="px-4 py-2"><button onclick="showStudentScoreBreakdown(' + s.id + ')" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">View Details</button></td></tr>';
             }
 
             container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">🎓 Student Evaluation</h2><div class="grid grid-cols-4 gap-4"><div class="stat-card text-center" onclick="window.toast.info(\'Total Students: ' + data.students.length + '\')"><p class="text-2xl font-bold text-[#3AAFA9]">' + data.students.length + '</p><p class="text-sm text-gray-500 dark:text-gray-400">Total Students</p></div><div class="stat-card text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">' + activeCount + '</p><p class="text-sm text-gray-500 dark:text-gray-400">Active</p></div><div class="stat-card text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">' + moderateCount + '</p><p class="text-sm text-gray-500 dark:text-gray-400">Moderate</p></div><div class="stat-card text-center" onclick="showFreeRidersList()"><p class="text-2xl font-bold text-red-600 dark:text-red-400">' + atRiskCount + '</p><p class="text-sm text-gray-500 dark:text-gray-400">At Risk</p><p class="text-xs text-gray-400">Click to view</p></div></div><div class="card-glass p-0 overflow-hidden"><div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800"><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Performance</h3></div><div class="overflow-x-auto"><table class="w-full"><thead class="bg-gray-50 dark:bg-gray-800"><tr><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Student</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Classification</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Activity Score</th><th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th></tr></thead><tbody>' + rows + '</tbody></table></div></div></div>';
+        }
+
+        function showStudentScoreBreakdown(studentId) {
+            var data = loadProfessorData();
+            var student = null;
+            for (var i = 0; i < data.students.length; i++) {
+                if (data.students[i].id === studentId) { student = data.students[i]; break; }
+            }
+            if (!student) {
+                window.toast.error('Student not found');
+                return;
+            }
+
+            var breakdown = student.score_breakdown || { github: 0, attendance: 0, peer_reviews: 0, working_hours: 0 };
+            var content = '<div class="space-y-4"><div class="grid grid-cols-2 gap-3"><div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center"><p class="text-2xl font-bold text-blue-600 dark:text-blue-400">' + breakdown.github + '%</p><p class="text-xs text-gray-500 dark:text-gray-400">GitHub Commits</p></div><div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center"><p class="text-2xl font-bold text-green-600 dark:text-green-400">' + breakdown.attendance + '%</p><p class="text-xs text-gray-500 dark:text-gray-400">Attendance</p></div><div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg text-center"><p class="text-2xl font-bold text-purple-600 dark:text-purple-400">' + breakdown.peer_reviews + '%</p><p class="text-xs text-gray-500 dark:text-gray-400">Peer Reviews</p></div><div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg text-center"><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">' + breakdown.working_hours + '%</p><p class="text-xs text-gray-500 dark:text-gray-400">Working Hours</p></div></div><div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg text-center"><p class="text-sm text-gray-500 dark:text-gray-400">Overall Activity Score</p><p class="text-3xl font-bold text-[#3AAFA9]">' + student.activity_score + '%</p></div></div>';
+            showModal(student.name + ' - Score Breakdown', content);
         }
 
         // ============================================
@@ -1018,14 +2326,264 @@
                 courseOptions += '<option value="' + data.courses[i].id + '">' + data.courses[i].code + ' - ' + data.courses[i].title + '</option>';
             }
 
-            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 PDF Reports</h2><div class="grid md:grid-cols-3 gap-6"><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">👨‍🎓</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p><div class="mt-4"><select id="studentReportSelect" class="input-teal">' + studentOptions + '</select></div><button onclick="generateReport(\'student\')" class="btn-teal mt-4 w-full">Generate PDF</button></div><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">👥</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p><div class="mt-4"><select id="groupReportSelect" class="input-teal">' + groupOptions + '</select></div><button onclick="generateReport(\'group\')" class="btn-teal mt-4 w-full">Generate PDF</button></div><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">📚</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p><div class="mt-4"><select id="courseReportSelect" class="input-teal">' + courseOptions + '</select></div><button onclick="generateReport(\'course\')" class="btn-teal mt-4 w-full">Generate PDF</button></div></div></div>';
+            container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">📄 Reports</h2><div class="grid md:grid-cols-3 gap-6"><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">👨‍🎓</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Student Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate individual student report</p><div class="mt-4"><select id="studentReportSelect" class="input-teal">' + studentOptions + '</select></div><div class="mt-2 flex gap-2"><button onclick="generateReport(\'student\', \'pdf\')" class="btn-teal flex-1 text-sm">PDF</button><button onclick="generateReport(\'student\', \'csv\')" class="btn-teal-outline flex-1 text-sm">CSV</button></div></div><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">👥</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Group Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate group performance report</p><div class="mt-4"><select id="groupReportSelect" class="input-teal">' + groupOptions + '</select></div><div class="mt-2 flex gap-2"><button onclick="generateReport(\'group\', \'pdf\')" class="btn-teal flex-1 text-sm">PDF</button><button onclick="generateReport(\'group\', \'csv\')" class="btn-teal-outline flex-1 text-sm">CSV</button></div></div><div class="card-glass p-6 text-center"><div class="text-5xl mb-4">📚</div><h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">Course Report</h3><p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Generate course overview report</p><div class="mt-4"><select id="courseReportSelect" class="input-teal">' + courseOptions + '</select></div><div class="mt-2 flex gap-2"><button onclick="generateReport(\'course\', \'pdf\')" class="btn-teal flex-1 text-sm">PDF</button><button onclick="generateReport(\'course\', \'csv\')" class="btn-teal-outline flex-1 text-sm">CSV</button></div></div></div></div>';
         }
 
-        function generateReport(type) {
-            window.toast.info('Generating ' + type + ' report...');
-            setTimeout(function() {
-                window.toast.success(type + ' report generated successfully! ✅');
-            }, 1500);
+        function generateReport(type, format) {
+            var selectId = type === 'student' ? 'studentReportSelect' : type === 'group' ? 'groupReportSelect' : 'courseReportSelect';
+            var select = document.getElementById(selectId);
+            var id = select.value;
+
+            if (!id) {
+                window.toast.warning('Please select a ' + type + ' first');
+                return;
+            }
+
+            window.toast.info('Generating ' + type + ' ' + format.toUpperCase() + ' report...');
+
+            var data = loadProfessorData();
+            var reportData = {};
+            var title = '';
+
+            if (type === 'student') {
+                var student = data.students.find(s => s.id == id);
+                if (!student) { window.toast.error('Student not found'); return; }
+                reportData = student;
+                title = 'Student Performance Report - ' + student.name;
+            } else if (type === 'group') {
+                var group = data.groups.find(g => g.id == id);
+                if (!group) { window.toast.error('Group not found'); return; }
+                reportData = group;
+                title = 'Group Performance Report - ' + group.name;
+            } else {
+                var course = data.courses.find(c => c.id == id);
+                if (!course) { window.toast.error('Course not found'); return; }
+                reportData = course;
+                title = 'Course Report - ' + course.code;
+            }
+
+            if (format === 'pdf') {
+                generatePDF(type, reportData, title);
+            } else {
+                generateCSV(type, reportData, title);
+            }
+        }
+
+        function generateCSV(type, data, title) {
+            var headers = [];
+            var rows = [];
+
+            if (type === 'student') {
+                headers = ['Name', 'Email', 'Classification', 'Activity Score', 'GitHub', 'Attendance', 'Peer Reviews', 'Working Hours'];
+                var breakdown = data.score_breakdown || { github: 0, attendance: 0, peer_reviews: 0, working_hours: 0 };
+                rows = [[
+                    data.name || 'N/A',
+                    data.email || 'N/A',
+                    data.classification || 'N/A',
+                    data.activity_score || 0,
+                    breakdown.github || 0,
+                    breakdown.attendance || 0,
+                    breakdown.peer_reviews || 0,
+                    breakdown.working_hours || 0
+                ]];
+            } else if (type === 'group') {
+                headers = ['Group Name', 'Course', 'Members Count', 'Contribution Percentage'];
+                rows = [[
+                    data.name || 'N/A',
+                    data.course_name || 'N/A',
+                    data.members_count || 0,
+                    data.contribution_percentage || 0
+                ]];
+            } else {
+                headers = ['Course Code', 'Course Title', 'Semester', 'Students', 'Groups', 'Status'];
+                rows = [[
+                    data.code || 'N/A',
+                    data.title || 'N/A',
+                    data.semester || 'N/A',
+                    data.students_count || 0,
+                    data.groups_count || 0,
+                    data.is_active ? 'Active' : 'Inactive'
+                ]];
+            }
+
+            var csvContent = headers.join(',') + '\n';
+            for (var i = 0; i < rows.length; i++) {
+                csvContent += rows[i].join(',') + '\n';
+            }
+
+            var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            var url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', type + '_report_' + new Date().toISOString().slice(0, 10) + '.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.toast.success(type + ' CSV report downloaded! ✅');
+        }
+
+        function generatePDF(type, data, title) {
+            if (typeof window.jspdf === 'undefined') {
+                var script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                script.onload = function() { createPDF(type, data, title); };
+                document.head.appendChild(script);
+            } else {
+                createPDF(type, data, title);
+            }
+        }
+
+        function createPDF(type, data, title) {
+            var { jsPDF } = window.jspdf;
+            var doc = new jsPDF('p', 'pt', 'a4');
+            var pageWidth = doc.internal.pageSize.getWidth();
+            var pageHeight = doc.internal.pageSize.getHeight();
+            var margin = 50;
+            var y = 40;
+
+            doc.setFillColor(43, 122, 120);
+            doc.rect(0, 0, pageWidth, 70, 'F');
+            doc.setFontSize(20);
+            doc.setTextColor(255, 255, 255);
+            doc.text('GroupSync', margin, 45);
+            doc.setFontSize(12);
+            doc.setTextColor(200, 230, 230);
+            doc.text('Academic Collaboration Analytics', margin + 100, 45);
+            doc.setDrawColor(58, 175, 169);
+            doc.line(margin, 70, pageWidth - margin, 70);
+
+            y = 95;
+            doc.setFontSize(18);
+            doc.setTextColor(41, 128, 185);
+            doc.text('📊 ' + title, margin, y);
+            y += 30;
+            doc.setFontSize(9);
+            doc.setTextColor(150, 150, 150);
+            doc.text('Generated: ' + new Date().toLocaleString(), margin, y);
+            y += 15;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, y, pageWidth - margin, y);
+            y += 20;
+
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+
+            function addLabelValue(label, value, x, y) {
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(label + ':', x, y);
+                doc.setTextColor(0, 0, 0);
+                doc.text(value, x + 100, y);
+                return y + 18;
+            }
+
+            if (type === 'student') {
+                var student = data;
+                doc.setFontSize(13);
+                doc.setTextColor(41, 128, 185);
+                doc.text('👤 Student Information', margin, y);
+                y += 22;
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                y = addLabelValue('Name', student.name || 'N/A', margin, y);
+                y = addLabelValue('Email', student.email || 'N/A', margin, y);
+                y = addLabelValue('Classification', student.classification || 'N/A', margin, y);
+                y = addLabelValue('Activity Score', (student.activity_score || 0) + '%', margin, y);
+                y += 10;
+
+                var score = student.activity_score || 0;
+                var barWidth = pageWidth - margin * 2 - 80;
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Score', margin, y);
+                doc.setFillColor(58, 175, 169);
+                doc.rect(margin + 50, y - 8, barWidth * (score / 100), 12, 'F');
+                doc.setDrawColor(200, 200, 200);
+                doc.rect(margin + 50, y - 8, barWidth, 12, 'S');
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(score + '%', margin + 50 + barWidth + 10, y + 2);
+                y += 25;
+
+                doc.setDrawColor(200, 200, 200);
+                doc.line(margin, y, pageWidth - margin, y);
+                y += 15;
+                doc.setFontSize(13);
+                doc.setTextColor(41, 128, 185);
+                doc.text('📈 Score Breakdown', margin, y);
+                y += 22;
+
+                var breakdown = student.score_breakdown || { github: 0, attendance: 0, peer_reviews: 0, working_hours: 0 };
+                y = addLabelValue('GitHub Commits', breakdown.github + '%', margin, y);
+                y = addLabelValue('Attendance', breakdown.attendance + '%', margin, y);
+                y = addLabelValue('Peer Reviews', breakdown.peer_reviews + '%', margin, y);
+                y = addLabelValue('Working Hours', breakdown.working_hours + '%', margin, y);
+
+            } else if (type === 'group') {
+                var group = data;
+                doc.setFontSize(13);
+                doc.setTextColor(41, 128, 185);
+                doc.text('👥 Group Information', margin, y);
+                y += 22;
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                y = addLabelValue('Group Name', group.name || 'N/A', margin, y);
+                y = addLabelValue('Course', group.course_name || 'N/A', margin, y);
+                y = addLabelValue('Members', (group.members_count || 0).toString(), margin, y);
+                y = addLabelValue('Contribution', (group.contribution_percentage || 0) + '%', margin, y);
+                y += 10;
+
+                var contribution = group.contribution_percentage || 0;
+                var barWidth = pageWidth - margin * 2 - 80;
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Activity', margin, y);
+                doc.setFillColor(58, 175, 169);
+                doc.rect(margin + 50, y - 8, barWidth * (contribution / 100), 12, 'F');
+                doc.setDrawColor(200, 200, 200);
+                doc.rect(margin + 50, y - 8, barWidth, 12, 'S');
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                doc.text(contribution + '%', margin + 50 + barWidth + 10, y + 2);
+
+            } else {
+                var course = data;
+                doc.setFontSize(13);
+                doc.setTextColor(41, 128, 185);
+                doc.text('📚 Course Information', margin, y);
+                y += 22;
+                doc.setFontSize(10);
+                doc.setTextColor(0, 0, 0);
+                y = addLabelValue('Course Code', course.code || 'N/A', margin, y);
+                y = addLabelValue('Course Title', course.title || 'N/A', margin, y);
+                y = addLabelValue('Semester', course.semester || 'N/A', margin, y);
+                y = addLabelValue('Total Students', (course.students_count || 0).toString(), margin, y);
+                y = addLabelValue('Total Groups', (course.groups_count || 0).toString(), margin, y);
+                y = addLabelValue('Status', course.is_active ? '✅ Active' : '❌ Inactive', margin, y);
+
+                var avgGroupSize = course.groups_count > 0 ? Math.round(course.students_count / course.groups_count) : 0;
+                y = addLabelValue('Avg Group Size', avgGroupSize.toString(), margin, y);
+            }
+
+            var footerY = pageHeight - 40;
+            doc.setDrawColor(200, 200, 200);
+            doc.line(margin, footerY, pageWidth - margin, footerY);
+            doc.setFontSize(8);
+            doc.setTextColor(150, 150, 150);
+            doc.text('© ' + new Date().getFullYear() + ' GroupSync. All rights reserved.', margin, footerY + 15);
+            doc.text('Academic Collaboration Analytics Platform', margin, footerY + 28);
+
+            var pageCount = doc.internal.getNumberOfPages();
+            for (var i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text('Page ' + i + ' of ' + pageCount, pageWidth - margin - 60, footerY + 22);
+            }
+
+            var fileName = type + '_report_' + new Date().toISOString().slice(0, 10) + '.pdf';
+            doc.save(fileName);
+            window.toast.success(type + ' PDF report downloaded successfully! ✅');
         }
 
         // ============================================
@@ -1044,7 +2602,6 @@
 
             container.innerHTML = '<div class="space-y-6"><h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👤 My Profile</h2><div class="card-glass p-6"><div class="flex flex-col md:flex-row gap-8 items-start"><div class="flex flex-col items-center gap-3 flex-shrink-0"><img id="profilePicPreview" src="' + (pic || getUserAvatar(user)) + '" alt="Profile" class="profile-pic-preview" /><label class="file-input-label text-sm"><i class="fas fa-camera"></i> Upload Photo<input type="file" id="profilePicInput" accept="image/*" class="hidden" /></label><button id="removePicBtn" class="text-xs text-red-400 hover:text-red-300 transition ' + (pic ? '' : 'hidden') + '">Remove Photo</button></div><div class="flex-1 w-full space-y-4"><form id="profileForm" class="space-y-4"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label><input type="text" id="profileFirstName" value="' + (user.first_name || '') + '" class="input-teal mt-1" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label><input type="text" id="profileLastName" value="' + (user.last_name || '') + '" class="input-teal mt-1" /></div></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label><input type="email" value="' + (user.email || '') + '" disabled class="input-teal mt-1 bg-gray-100 dark:bg-gray-800 cursor-not-allowed" /><p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Email cannot be changed</p></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Department</label><input type="text" id="profileDepartment" value="' + (user.department || '') + '" class="input-teal mt-1" /></div><hr class="border-gray-200 dark:border-gray-700" /><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Bio</label><textarea id="profileBio" class="textarea-teal mt-1" placeholder="Tell us about yourself...">' + (extra.bio || '') + '</textarea></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Skills</label><input type="text" id="profileSkills" value="' + (extra.skills || '') + '" class="input-teal mt-1" placeholder="e.g. JavaScript, Python, Teamwork" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Education</label><input type="text" id="profileEducation" value="' + (extra.education || '') + '" class="input-teal mt-1" placeholder="e.g. Ph.D. in CSE" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Experience</label><input type="text" id="profileExperience" value="' + (extra.experience || '') + '" class="input-teal mt-1" placeholder="e.g. 10 years teaching" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">GitHub</label><input type="url" id="profileGithub" value="' + (extra.github || '') + '" class="input-teal mt-1" placeholder="https://github.com/yourusername" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">LinkedIn</label><input type="url" id="profileLinkedin" value="' + (extra.linkedin || '') + '" class="input-teal mt-1" placeholder="https://linkedin.com/in/yourprofile" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Website</label><input type="url" id="profileWebsite" value="' + (extra.website || '') + '" class="input-teal mt-1" placeholder="https://yourwebsite.com" /></div><div class="flex gap-3 flex-wrap"><button type="submit" class="btn-teal">Update Profile</button><button type="button" id="showPasswordForm" class="btn-teal-outline">Change Password</button></div></form><div id="passwordFormContainer" class="mt-6 hidden border-t border-gray-200 dark:border-gray-700 pt-6"><h4 class="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">Change Password</h4><form id="passwordForm" class="space-y-4"><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Current Password</label><input type="password" id="currentPassword" class="input-teal mt-1" placeholder="Enter current password" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password</label><input type="password" id="newPassword" class="input-teal mt-1" placeholder="Enter new password (min 6 chars)" /></div><div><label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label><input type="password" id="confirmPassword" class="input-teal mt-1" placeholder="Confirm new password" /></div><div class="flex gap-3"><button type="submit" class="btn-teal">Update Password</button><button type="button" id="hidePasswordForm" class="btn-teal-outline">Cancel</button></div></form></div></div></div></div></div>';
 
-            // Profile Picture Upload
             var fileInput = document.getElementById('profilePicInput');
             var preview = document.getElementById('profilePicPreview');
             var removeBtn = document.getElementById('removePicBtn');
@@ -1073,7 +2630,6 @@
                 window.toast.info('Profile picture removed.');
             });
 
-            // Profile Update
             document.getElementById('profileForm').addEventListener('submit', function(e) {
                 e.preventDefault();
                 var firstName = document.getElementById('profileFirstName').value.trim();
@@ -1118,7 +2674,6 @@
                 });
             });
 
-            // Password Change
             document.getElementById('showPasswordForm').addEventListener('click', function() {
                 document.getElementById('passwordFormContainer').classList.remove('hidden');
             });
@@ -1176,10 +2731,19 @@
                 dashboard: 'Overview',
                 courses: 'Courses',
                 Project: 'Project',
+                groups: 'Groups',
                 analytics: 'Analytics',
                 evaluation: 'Evaluation',
                 reports: 'Reports',
-                profile: 'My Profile'
+                profile: 'My Profile',
+                enroll: 'Enroll Students',
+                attendance: 'Attendance',
+                'low-contributors': 'Low Contributors',
+                submissions: 'Submissions',
+                realtime: 'Real-Time Tracking',
+                feedback: 'Feedback',
+                'ai-evaluation': 'AI Evaluation',
+                'peer-review': 'Peer Review'
             };
             document.getElementById('page-title').textContent = titles[page] || 'Overview';
 
@@ -1187,10 +2751,19 @@
                 case 'dashboard': renderDashboard(); break;
                 case 'courses': renderCourses(); break;
                 case 'Project': renderProject(); break;
+                case 'groups': renderGroupsManagement(); break;
                 case 'analytics': renderGroupAnalytics(); break;
                 case 'evaluation': renderEvaluation(); break;
                 case 'reports': renderReports(); break;
                 case 'profile': renderProfile(); break;
+                case 'enroll': renderEnroll(); break;
+                case 'attendance': renderAttendance(); break;
+                case 'low-contributors': renderLowContributors(); break;
+                case 'submissions': renderSubmissions(); break;
+                case 'realtime': renderRealtimeTracking(); break;
+                case 'feedback': renderFeedback(); break;
+                case 'ai-evaluation': renderAIEvaluation(); break;
+                case 'peer-review': renderPeerReview(); break;
                 default: renderDashboard();
             }
         }
@@ -1223,6 +2796,32 @@
         })();
 
         // ============================================
+        // NOTIFICATION BELL
+        // ============================================
+        (function initNotifications() {
+            var bell = document.getElementById('notificationBell');
+            var dropdown = document.getElementById('notificationDropdown');
+            var isOpen = false;
+
+            bell.addEventListener('click', function(e) {
+                e.stopPropagation();
+                isOpen = !isOpen;
+                dropdown.classList.toggle('show', isOpen);
+                if (isOpen) renderNotifications();
+            });
+
+            document.addEventListener('click', function(e) {
+                var wrapper = document.getElementById('notificationWrapper');
+                if (wrapper && !wrapper.contains(e.target)) {
+                    dropdown.classList.remove('show');
+                    isOpen = false;
+                }
+            });
+
+            updateNotificationBadge();
+        })();
+
+        // ============================================
         // INITIALIZATION
         // ============================================
         function init() {
@@ -1245,6 +2844,10 @@
                 }
                 avatarEl.addEventListener('click', function() { navigate('profile'); });
             }
+
+            // Connect WebSocket for real-time updates
+            connectWebSocket();
+
             document.getElementById('menuBtn')?.addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('-translate-x-full');
             });
@@ -1258,6 +2861,7 @@
                 });
             }
             document.getElementById('logoutBtn')?.addEventListener('click', function() {
+                if (ws) ws.close();
                 AuthService.logout();
             });
             navigate('dashboard');
