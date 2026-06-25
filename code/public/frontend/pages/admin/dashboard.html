@@ -1014,86 +1014,86 @@
         // ============================================
         // PAGE: SETTINGS
         // ============================================
-        function renderSettings() {
-            const container = document.getElementById('page-content');
+       function renderSettings() {
+    const container = document.getElementById('page-content');
 
-            const savedSettings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
-            const siteName = savedSettings.siteName || 'GroupSync';
-            const emailVerification = savedSettings.emailVerification !== undefined ? savedSettings.emailVerification : true;
-            const sessionTimeout = savedSettings.sessionTimeout || 30;
-            const backupSchedule = savedSettings.backupSchedule || 'weekly';
+    const savedSettings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+    const siteName = savedSettings.siteName || 'GroupSync';
+    const emailVerification = savedSettings.emailVerification !== undefined ? savedSettings.emailVerification : true;
+    const sessionTimeout = savedSettings.sessionTimeout || 30;
+    const backupSchedule = savedSettings.backupSchedule || 'weekly';
 
-            container.innerHTML = `
-                <div class="space-y-6">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⚙️ Settings</h2>
+    container.innerHTML = `
+        <div class="space-y-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⚙️ Settings</h2>
 
-                    <div class="card-glass p-6">
-                        <form id="settingsForm" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Site Name</label>
-                                <input type="text" id="siteName" value="${siteName}" class="input-teal mt-1">
-                            </div>
-                            <div class="flex items-center">
-                                <input type="checkbox" id="emailVerification" ${emailVerification ? 'checked' : ''} class="w-4 h-4 text-[#3AAFA9] rounded">
-                                <label for="emailVerification" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Require Email Verification</label>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Session Timeout (minutes)</label>
-                                <input type="number" id="sessionTimeout" value="${sessionTimeout}" class="input-teal mt-1 w-32">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Backup Schedule</label>
-                                <select id="backupSchedule" class="input-teal mt-1 w-48">
-                                    <option value="daily" ${backupSchedule === 'daily' ? 'selected' : ''}>Daily</option>
-                                    <option value="weekly" ${backupSchedule === 'weekly' ? 'selected' : ''}>Weekly</option>
-                                    <option value="monthly" ${backupSchedule === 'monthly' ? 'selected' : ''}>Monthly</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn-teal">Save Settings</button>
-                        </form>
+            <div class="card-glass p-6">
+                <form id="settingsForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Site Name</label>
+                        <input type="text" id="siteName" value="${siteName}" class="input-teal mt-1">
                     </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="emailVerification" ${emailVerification ? 'checked' : ''} class="w-4 h-4 text-[#3AAFA9] rounded">
+                        <label for="emailVerification" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Require Email Verification</label>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Session Timeout (minutes)</label>
+                        <input type="number" id="sessionTimeout" value="${sessionTimeout}" class="input-teal mt-1 w-32">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Backup Schedule</label>
+                        <select id="backupSchedule" class="input-teal mt-1 w-48">
+                            <option value="daily" ${backupSchedule === 'daily' ? 'selected' : ''}>Daily</option>
+                            <option value="weekly" ${backupSchedule === 'weekly' ? 'selected' : ''}>Weekly</option>
+                            <option value="monthly" ${backupSchedule === 'monthly' ? 'selected' : ''}>Monthly</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-teal">Save Settings</button>
+                </form>
+            </div>
 
-                    <div class="card-glass p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">System Status</h3>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Database</p>
-                                <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Connected</p>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">API Services</p>
-                                <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Operational</p>
-                            </div>
-                            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Last Backup</p>
-                                <p class="text-gray-800 dark:text-gray-100 font-semibold">${savedSettings.lastBackup || '2 hours ago'}</p>
-                            </div>
-                        </div>
+            <div class="card-glass p-6">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">System Status</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Database</p>
+                        <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Connected</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">API Services</p>
+                        <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Operational</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Last Backup</p>
+                        <p class="text-gray-800 dark:text-gray-100 font-semibold">${savedSettings.lastBackup || '2 hours ago'}</p>
                     </div>
                 </div>
-            `;
+            </div>
+        </div>
+    `;
 
-            document.getElementById('settingsForm').addEventListener('submit', function(e) {
-                e.preventDefault();
+    document.getElementById('settingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
 
-                const settings = {
-                    siteName: document.getElementById('siteName').value,
-                    emailVerification: document.getElementById('emailVerification').checked,
-                    sessionTimeout: parseInt(document.getElementById('sessionTimeout').value) || 30,
-                    backupSchedule: document.getElementById('backupSchedule').value,
-                    lastBackup: new Date().toLocaleString()
-                };
+        const settings = {
+            siteName: document.getElementById('siteName').value,
+            emailVerification: document.getElementById('emailVerification').checked,
+            sessionTimeout: parseInt(document.getElementById('sessionTimeout').value) || 30,
+            backupSchedule: document.getElementById('backupSchedule').value,
+            lastBackup: '2 hours ago'
+        };
 
-                localStorage.setItem('admin_settings', JSON.stringify(settings));
+        localStorage.setItem('admin_settings', JSON.stringify(settings));
 
-                const backupElements = document.querySelectorAll('.bg-gray-50 .text-gray-800');
-                if (backupElements.length >= 3) {
-                    backupElements[2].textContent = settings.lastBackup;
-                }
-
-                window.toast.success('Settings saved successfully!');
-            });
+        const backupElements = document.querySelectorAll('.bg-gray-50 .text-gray-800');
+        if (backupElements.length >= 3) {
+            backupElements[2].textContent = settings.lastBackup;
         }
+
+        window.toast.success('Settings saved successfully!');
+    });
+}
 
         // ============================================
         // NAVIGATION
