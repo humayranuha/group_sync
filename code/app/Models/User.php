@@ -27,11 +27,19 @@ class User extends Authenticatable
         'profile_picture',
         'is_active',
         'last_login_at',
+        'student_id',
         // GitHub fields
         'github_token',
         'github_username',
+        'github_repo_owner',
+        'github_repo_name',
         'github_repo_url',
         'github_connected_at',
+        'total_commits',
+        'weekly_commit_data',
+        'last_github_sync',
+        'classification',
+        'overall_score',
     ];
 
     /**
@@ -57,7 +65,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'last_login_at' => 'datetime',
             'github_connected_at' => 'datetime',
+            'last_github_sync' => 'datetime',
             'is_active' => 'boolean',
+            'weekly_commit_data' => 'array',
         ];
     }
 
@@ -246,8 +256,15 @@ class User extends Authenticatable
     {
         $this->github_token = null;
         $this->github_username = null;
+        $this->github_repo_owner = null;
+        $this->github_repo_name = null;
         $this->github_repo_url = null;
         $this->github_connected_at = null;
+        $this->total_commits = 0;
+        $this->weekly_commit_data = null;
+        $this->last_github_sync = null;
+        $this->classification = 'Moderate';
+        $this->overall_score = 0;
         $this->save();
     }
 

@@ -25,7 +25,7 @@
             scroll-behavior: smooth;
         }
 
-        /* ----- Dark mode overrides (matching index) ----- */
+        /* ----- Dark mode overrides ----- */
         .dark .bg-white {
             background-color: #132424 !important;
         }
@@ -68,7 +68,7 @@
             border-bottom-color: rgba(58, 175, 169, 0.06);
         }
 
-        /* ----- Hero / Register Background (Teal Gradient + Orbs) ----- */
+        /* ----- Hero / Register Background ----- */
         .register-wrapper {
             position: relative;
             min-height: 100vh;
@@ -140,7 +140,7 @@
             }
         }
 
-        /* ----- Glass Card (matching index feature cards) ----- */
+        /* ----- Glass Card ----- */
         .card-glass {
             position: relative;
             z-index: 2;
@@ -167,7 +167,7 @@
             box-shadow: 0 30px 60px -15px rgba(58, 175, 169, 0.10);
         }
 
-        /* ----- Form Inputs (Teal focus) ----- */
+        /* ----- Form Inputs ----- */
         .input-teal {
             background: rgba(255, 255, 255, 0.04);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -196,7 +196,7 @@
             box-shadow: 0 0 0 3px rgba(58, 175, 169, 0.15);
         }
 
-        /* ----- Select dropdown (Teal) ----- */
+        /* ----- Select dropdown ----- */
         select.input-teal {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
@@ -214,7 +214,7 @@
             background: #0b1717;
         }
 
-        /* ----- Primary Button (Teal) ----- */
+        /* ----- Primary Button ----- */
         .btn-primary {
             background: #3AAFA9;
             color: #fff;
@@ -236,6 +236,11 @@
         .btn-primary:active {
             transform: translateY(0px);
         }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
         .dark .btn-primary {
             background: #2B7A78;
             box-shadow: 0 4px 18px rgba(43, 122, 120, 0.20);
@@ -245,7 +250,7 @@
             box-shadow: 0 8px 28px rgba(58, 175, 169, 0.25);
         }
 
-        /* ----- Checkbox (Teal) ----- */
+        /* ----- Checkbox ----- */
         .checkbox-teal {
             width: 18px;
             height: 18px;
@@ -264,7 +269,7 @@
             box-shadow: 0 0 0 3px rgba(58, 175, 169, 0.20);
         }
 
-        /* ----- Footer (Teal) ----- */
+        /* ----- Footer ----- */
         .footer-teal {
             background: #1e4a48;
             border-top: 1px solid rgba(58, 175, 169, 0.06);
@@ -304,7 +309,7 @@
             transform: translateY(-3px) scale(1.05);
         }
 
-        /* ----- Theme Toggle (matching index) ----- */
+        /* ----- Theme Toggle ----- */
         .theme-toggle {
             transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s;
             width: 42px;
@@ -325,7 +330,7 @@
             color: #fff;
         }
 
-        /* ----- Left side benefits list (Teal accents) ----- */
+        /* ----- Benefits list ----- */
         .benefit-item {
             display: flex;
             align-items: center;
@@ -349,7 +354,32 @@
             background: rgba(58, 175, 169, 0.10);
         }
 
-        /* ----- Responsive tweaks ----- */
+        /* ----- Misc utilities ----- */
+        .brand-gradient {
+            background: linear-gradient(135deg, #3AAFA9, #2B7A78);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .text-teal-soft {
+            color: #7ccfca;
+        }
+        .border-teal-soft {
+            border-color: rgba(58, 175, 169, 0.15);
+        }
+
+        /* ----- Password match message ----- */
+        #password_match {
+            min-height: 20px;
+        }
+        #password_match.success {
+            color: #4ade80;
+        }
+        #password_match.error {
+            color: #f87171;
+        }
+
+        /* ----- Responsive ----- */
         @media (max-width: 768px) {
             .card-glass {
                 border-radius: 24px;
@@ -367,25 +397,11 @@
                 padding: 2.5rem;
             }
         }
-
-        /* ----- Misc utilities ----- */
-        .brand-gradient {
-            background: linear-gradient(135deg, #3AAFA9, #2B7A78);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .text-teal-soft {
-            color: #7ccfca;
-        }
-        .border-teal-soft {
-            border-color: rgba(58, 175, 169, 0.15);
-        }
     </style>
 </head>
 <body>
 
-    <!-- ===== NAVIGATION (Teal/Glass, matching index) ===== -->
+    <!-- ===== NAVIGATION ===== -->
     <nav class="header-teal fixed top-0 left-0 w-full z-50 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
             <a href="/" class="flex items-center gap-2.5 group">
@@ -410,7 +426,7 @@
         </div>
     </nav>
 
-    <!-- ===== REGISTER SECTION (Teal themed) ===== -->
+    <!-- ===== REGISTER SECTION ===== -->
     <section class="register-wrapper">
         <!-- Animated Background -->
         <div class="register-bg-gradient"></div>
@@ -510,13 +526,14 @@
                         <!-- Password -->
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                            <input type="password" id="password" required placeholder="Minimum 6 characters" class="input-teal">
+                            <input type="password" id="password" required placeholder="Minimum 6 characters" class="input-teal" minlength="6">
                         </div>
 
                         <!-- Confirm Password -->
                         <div>
                             <label class="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
                             <input type="password" id="confirm_password" required placeholder="Confirm your password" class="input-teal">
+                            <div id="password_match"></div>
                         </div>
 
                         <!-- Terms -->
@@ -537,7 +554,7 @@
         </div>
     </section>
 
-    <!-- ===== FOOTER (Teal, matching index) ===== -->
+    <!-- ===== FOOTER ===== -->
     <footer class="footer-teal text-white pt-12 pb-8 transition-colors">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-10">
@@ -609,7 +626,7 @@
     <!-- ===== SCRIPTS ===== -->
     <script>
         (function() {
-            // ----- Theme Toggle (matching index) -----
+            // ----- Theme Toggle -----
             const toggle = document.getElementById('themeToggle');
             const icon = document.getElementById('themeIcon');
             const html = document.documentElement;
@@ -651,56 +668,141 @@
             roleSelect.addEventListener('change', toggleFields);
             toggleFields();
 
+            // ----- Password match check -----
+            const passwordInput = document.getElementById('password');
+            const confirmInput = document.getElementById('confirm_password');
+            const matchEl = document.getElementById('password_match');
+
+            function checkPasswordMatch() {
+                const pass = passwordInput.value;
+                const confirm = confirmInput.value;
+
+                if (confirm.length === 0) {
+                    matchEl.textContent = '';
+                    matchEl.className = '';
+                    return;
+                }
+
+                if (pass === confirm) {
+                    matchEl.textContent = '✅ Passwords match';
+                    matchEl.className = 'success';
+                } else {
+                    matchEl.textContent = '❌ Passwords do not match';
+                    matchEl.className = 'error';
+                }
+            }
+
+            passwordInput.addEventListener('input', checkPasswordMatch);
+            confirmInput.addEventListener('input', checkPasswordMatch);
+
             // ----- Registration form submission -----
             document.getElementById('register-form').addEventListener('submit', async function(e) {
                 e.preventDefault();
 
+                const firstName = document.getElementById('first_name').value.trim();
+                const lastName = document.getElementById('last_name').value.trim();
+                const email = document.getElementById('email').value.trim();
                 const password = document.getElementById('password').value;
                 const confirm = document.getElementById('confirm_password').value;
+                const role = document.getElementById('role').value;
+                const studentId = document.getElementById('student_id').value.trim();
+                const department = document.getElementById('department').value.trim();
+                const terms = document.getElementById('terms').checked;
+
+                // ----- Validation -----
+                if (!firstName || !lastName || !email || !password || !confirm) {
+                    alert('Please fill in all required fields.');
+                    return;
+                }
 
                 if (password !== confirm) {
                     alert('Passwords do not match.');
                     return;
                 }
+
                 if (password.length < 6) {
                     alert('Password must be at least 6 characters.');
                     return;
                 }
 
+                if (!terms) {
+                    alert('Please agree to the Terms & Privacy Policy.');
+                    return;
+                }
+
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+
+                // ----- Build Payload (Laravel expects password_confirmation) -----
                 const userData = {
-                    first_name: document.getElementById('first_name').value,
-                    last_name: document.getElementById('last_name').value,
-                    email: document.getElementById('email').value,
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: email,
                     password: password,
-                    role: document.getElementById('role').value,
-                    student_id: document.getElementById('student_id').value,
-                    department: document.getElementById('department').value
+                    password_confirmation: confirm, // 👈 Laravel needs this!
+                    role: role,
+                    student_id: studentId || null,
+                    department: department || null
                 };
 
+                console.log('📤 Sending registration data:', userData);
+
                 const btn = document.getElementById('registerBtn');
+                const originalText = btn.textContent;
                 btn.disabled = true;
                 btn.textContent = 'Creating...';
 
                 try {
                     const response = await fetch('/api/auth/register', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
                         body: JSON.stringify(userData)
                     });
+
                     const data = await response.json();
-                    if (data.success) {
-                        alert('✅ Registration successful! Please log in.');
-                        window.location.href = '/login.html';
+                    console.log('📥 Response:', data);
+
+                    if (response.ok && data.success) {
+                        btn.textContent = '✅ Success! Redirecting...';
+                        setTimeout(() => {
+                            window.location.href = '/login.html';
+                        }, 1500);
                     } else {
-                        alert(data.message || 'Registration failed. Please try again.');
+                        const errorMsg = data.message || data.error || 'Registration failed. Please try again.';
+                        btn.textContent = '❌ ' + errorMsg;
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                        }, 3000);
                     }
                 } catch (error) {
-                    alert('Network error. Please check your connection.');
-                } finally {
-                    btn.disabled = false;
-                    btn.textContent = 'Create Account';
+                    console.error('Registration error:', error);
+                    btn.textContent = '❌ Network Error';
+                    setTimeout(() => {
+                        btn.textContent = originalText;
+                        btn.disabled = false;
+                    }, 3000);
                 }
             });
+
+            // ----- Enter key support -----
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    const form = document.getElementById('register-form');
+                    if (document.activeElement && form.contains(document.activeElement)) {
+                        e.preventDefault();
+                        form.dispatchEvent(new Event('submit'));
+                    }
+                }
+            });
+
+            console.log('🔐 GroupSync Registration Ready');
+            console.log('📡 API Endpoint: /api/auth/register');
         })();
     </script>
 </body>

@@ -188,131 +188,9 @@
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="md:ml-64 pt-16 pb-8 px-4 sm:px-6 lg:px-8 min-h-screen">
-        <div id="page-content" class="animate-fade-in">
-            <div class="space-y-6 max-w-4xl mx-auto">
-                <!-- Page Header -->
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-                        <i class="fab fa-github text-[#3AAFA9] text-3xl"></i>
-                        GitHub Repository Connection
-                    </h1>
-                    <button id="refreshBtn" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition text-sm flex items-center gap-2">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
-                </div>
-
-                <!-- Connection Status Card -->
-                <div class="card-glass p-6">
-                    <div class="flex flex-wrap items-center justify-between gap-4">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-2xl">
-                                <i class="fab fa-github"></i>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100">GitHub Connection Status</h3>
-                                <p class="text-sm text-gray-500 dark:text-gray-400" id="connectionStatusText">Checking connection...</p>
-                            </div>
-                        </div>
-                        <span id="statusBadge" class="status-badge status-disconnected flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-gray-400"></span>
-                            Checking...
-                        </span>
-                    </div>
-                    <div id="repoInfo" class="mt-4 hidden">
-                        <div class="p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
-                            <p class="text-sm text-gray-600 dark:text-gray-300">
-                                <span class="font-medium">Connected Repository:</span>
-                                <span id="connectedRepoUrl" class="text-[#3AAFA9]"></span>
-                            </p>
-                            <p class="text-xs text-gray-400 mt-1">
-                                <i class="fas fa-clock mr-1"></i>
-                                Connected: <span id="connectedAt"></span>
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Connect GitHub Account Card -->
-                <div class="card-glass p-6 bg-gradient-to-r from-[#0b1717] to-[#1a3a38] border-none shadow-xl">
-                    <div class="flex flex-wrap items-center justify-between gap-4 text-white">
-                        <div class="flex items-center gap-4">
-                            <div class="text-5xl">🐙</div>
-                            <div>
-                                <h3 class="text-xl font-semibold">Connect GitHub Account</h3>
-                                <p class="text-white/60 text-sm">Authorize GroupSync to access your GitHub repositories for activity tracking</p>
-                            </div>
-                        </div>
-                        <button id="githubOAuthBtn" class="btn-teal bg-white text-[#2B7A78] hover:bg-gray-100 shadow-lg flex items-center gap-2">
-                            <i class="fab fa-github"></i>
-                            Connect GitHub Account
-                        </button>
-                    </div>
-                    <div class="mt-4 text-xs text-white/40">
-                        <i class="fas fa-shield-alt mr-1"></i>
-                        Your GitHub credentials are secure and will only be used for contribution tracking
-                    </div>
-                </div>
-
-                <!-- OR Divider -->
-                <div class="flex items-center gap-4">
-                    <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
-                    <span class="text-sm text-gray-400 dark:text-gray-500 font-medium">OR</span>
-                    <div class="flex-1 border-t border-gray-200 dark:border-gray-700"></div>
-                </div>
-
-                <!-- Manual Connect Card -->
-                <div class="card-glass p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <i class="fas fa-link text-[#3AAFA9]"></i>
-                        Connect Repository Manually
-                    </h3>
-                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                        Enter your GitHub repository URL directly if you prefer not to use OAuth
-                    </p>
-                    <form id="repoForm" class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Repository URL</label>
-                            <input 
-                                type="url" 
-                                id="repoUrl" 
-                                placeholder="https://github.com/username/repository" 
-                                class="input-teal"
-                                required
-                            />
-                            <p class="text-xs text-gray-400 mt-1">Format: https://github.com/username/repository-name</p>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Repository Type</label>
-                            <select id="repoType" class="input-teal">
-                                <option value="original">Original Repository</option>
-                                <option value="collaborator" selected>Collaborator Repository</option>
-                                <option value="forked">Forked Repository</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-teal flex items-center gap-2">
-                            <i class="fas fa-link"></i>
-                            Connect Repository
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Connected Repositories -->
-                <div class="card-glass p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
-                        <i class="fas fa-list text-[#3AAFA9]"></i>
-                        Connected Repositories
-                    </h3>
-                    <div id="repositoriesList" class="space-y-3">
-                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
-                            <div class="text-4xl mb-3">🔗</div>
-                            <p class="text-sm">No repositories connected</p>
-                            <p class="text-xs mt-1">Connect your GitHub repository using the options above</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <div id="page-content" class="animate-fade-in">
         </div>
-    </main>
+</main>
 
     <!-- ===== SCRIPTS ===== -->
     <script>
@@ -838,6 +716,195 @@
     }
 
     document.addEventListener('DOMContentLoaded', init);
+    // ============================================
+// GITHUB CONNECTION API INTEGRATION
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    // URL-এ কোনো সাকসেস বা এরর মেসেজ আছে কিনা চেক করা (যাতে টোস্ট দেখানো যায়)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('github_connected') === 'success') {
+        toast.success('GitHub Account Authorized Successfully!');
+        // URL ক্লিন করা
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('error') === 'oauth_failed') {
+        toast.error('GitHub Authorization Failed!');
+    }
+
+    // পেজ লোড হলেই ইউজারের গিটহাব স্ট্যাটাস চেক করবে
+    checkGithubStatus();
+});
+
+// ইউজারের কারেন্ট স্ট্যাটাস চেক করার ফাংশন
+async function checkGithubStatus() {
+    const token = localStorage.getItem('groupsync_auth_token'); // লগিনের সময় সেভ করা টোকেন
+    
+    try {
+        // আপনার ApiController এর user() বা getGitHubRepoDetails() মেথড কল করছি
+        const response = await fetch('/api/user', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            renderRepositoryPage(data.user);
+        }
+    } catch (error) {
+        console.error("Error fetching user data:", error);
+        toast.error("Failed to load GitHub status.");
+    }
+}
+
+// UI রেন্ডার করার ফাংশন (API এর ডাটার ওপর ভিত্তি করে)
+function renderRepositoryPage(user) {
+    const contentDiv = document.getElementById('page-content');
+
+    // Step 1: GitHub Account Connected না থাকলে
+    if (!user.github_connected && !user.github_username) {
+        contentDiv.innerHTML = `
+            <div class="card-glass p-8 text-center max-w-xl mx-auto mt-10 animate-fade-in shadow-lg">
+                <i class="fab fa-github text-5xl mb-6 text-gray-800 dark:text-white"></i>
+                <h2 class="text-2xl font-bold mb-3 text-gray-800 dark:text-white">Step 1: Connect GitHub Account</h2>
+                <p class="text-gray-500 mb-8">Link your personal GitHub account to authenticate and allow GroupSync to fetch your development activity.</p>
+                <a href="/api/auth/github/redirect" class="btn-teal w-full py-3 text-lg flex items-center justify-center gap-3">
+                    <i class="fab fa-github"></i> Authorize GitHub
+                </a>
+            </div>
+        `;
+        return;
+    }
+
+    // Step 2: GitHub Connected, কিন্তু Repo URL দেয়া নাই
+    if (!user.github_repo_url) {
+        contentDiv.innerHTML = `
+            <div class="card-glass p-8 max-w-xl mx-auto mt-10 animate-fade-in shadow-lg">
+                <h2 class="text-2xl font-bold mb-2 text-center text-gray-800 dark:text-white">GitHub Account Connected!</h2>
+                <p class="text-center text-[#3AAFA9] mb-8">Authenticated as <b>${user.github_username}</b></p>
+                
+                <hr class="border-gray-200 dark:border-gray-700 mb-8">
+
+                <div class="space-y-6">
+                    <h3 class="text-xl font-bold text-center text-gray-800 dark:text-white mb-2">Step 2: Link Project Repository</h3>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Repository URL</label>
+                        <input type="url" id="repo-input" class="input-teal w-full text-lg py-3" placeholder="https://github.com/owner/repo">
+                    </div>
+                    <button onclick="saveRepoUrl()" class="btn-teal w-full py-3 text-lg mt-2" id="repo-btn">Connect Repository Sync</button>
+                    
+                    <div class="text-center mt-4">
+                        <button onclick="disconnectGitHub()" class="text-sm text-red-500 hover:underline">Cancel and disconnect account</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    // Step 3: সবকিছু Connected (Dashboard Status)
+    contentDiv.innerHTML = `
+        <div class="card-glass p-8 max-w-3xl mx-auto mt-10 animate-fade-in border-t-4 border-t-[#3AAFA9]">
+            <div class="flex justify-between items-center mb-8 pb-6 border-b border-gray-100 dark:border-gray-800">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Repository Linked</h2>
+                    <a href="${user.github_repo_url}" target="_blank" class="text-[#3AAFA9] hover:underline">${user.github_repo_url}</a>
+                </div>
+                <button onclick="disconnectGitHub()" class="btn-danger text-sm px-4 py-2">
+                    <i class="fas fa-unlink"></i> Disconnect All
+                </button>
+            </div>
+            
+            <h3 class="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">You are ready! Your commits will be automatically tracked.</h3>
+            <button onclick="syncCommitsNow()" class="btn-teal-outline px-4 py-2 text-sm">
+                <i class="fas fa-sync-alt"></i> Force Sync Commits Now
+            </button>
+        </div>
+    `;
+}
+
+// Repo URL সেভ করার API কল (আপনার ApiController এর connectGitHub মেথড)
+async function saveRepoUrl() {
+    const repoUrl = document.getElementById('repo-input').value.trim();
+    if (!repoUrl) return toast.error('Please enter a valid URL');
+
+    const btn = document.getElementById('repo-btn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connecting...';
+    btn.disabled = true;
+
+    try {
+        const response = await fetch('/api/github/connect', { // Ensure your route matches this
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('groupsync_auth_token')}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ repo_url: repoUrl })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            toast.success(data.message);
+            checkGithubStatus(); // UI রিলোড করার জন্য
+        } else {
+            toast.error(data.message);
+            btn.innerHTML = 'Connect Repository Sync';
+            btn.disabled = false;
+        }
+    } catch (error) {
+        toast.error('An error occurred.');
+        btn.innerHTML = 'Connect Repository Sync';
+        btn.disabled = false;
+    }
+}
+
+// GitHub Disconnect করার API কল
+async function disconnectGitHub() {
+    if(!confirm('Are you sure you want to disconnect?')) return;
+
+    try {
+        const response = await fetch('/api/github/disconnect', { // Ensure your route matches this
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('groupsync_auth_token')}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            toast.warning('GitHub Disconnected!');
+            checkGithubStatus();
+        }
+    } catch (error) {
+        toast.error('Failed to disconnect.');
+    }
+}
+
+// Force Sync API (আপনার ApiController এর syncGitHub মেথড)
+async function syncCommitsNow() {
+    toast.info('Syncing commits with GitHub...');
+    try {
+        const response = await fetch('/api/github/sync', { 
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('groupsync_auth_token')}`,
+                'Accept': 'application/json'
+            }
+        });
+        const data = await response.json();
+        if (data.success) {
+            toast.success(`Sync complete! Total commits: ${data.data.total_commits}`);
+        } else {
+            toast.error(data.message);
+        }
+    } catch(e) {
+        toast.error('Failed to sync.');
+    }
+}
 </script>
 </body>
 </html>
