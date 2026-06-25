@@ -454,106 +454,106 @@
         // COURSE DETAILS FUNCTION
         // ============================================
         function showCourseDetails(courseId) {
-            const course = DEMO_COURSES.find(c => c.id === courseId);
-            if (!course) {
-                window.toast.error('Course not found');
-                return;
-            }
+    const course = DEMO_COURSES.find(c => c.id === courseId);
+    if (!course) {
+        window.toast.error('Course not found');
+        return;
+    }
 
-            const enrolledStudents = DEMO_USERS.filter(u => u.role === 'student').slice(0, course.students || 0);
+    const enrolledStudents = DEMO_USERS.filter(u => u.role === 'student').slice(0, course.students || 0);
 
-            let studentsHtml = enrolledStudents.length > 0 
-                ? enrolledStudents.map(s => `
-                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
-                        <span class="text-sm text-gray-700 dark:text-gray-300">${s.name}</span>
-                        <span class="text-xs text-gray-500 dark:text-gray-400">${s.email}</span>
-                        <span class="px-2 py-0.5 rounded-full text-xs ${getStatusBadge(s.status)}">${s.status}</span>
-                    </div>
-                `).join('')
-                : '<p class="text-gray-500 dark:text-gray-400 text-sm">No students enrolled in this course yet.</p>';
+    let studentsHtml = enrolledStudents.length > 0 
+        ? enrolledStudents.map(s => `
+            <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                <span class="text-sm text-gray-700 dark:text-gray-300">${s.name}</span>
+                <span class="text-xs text-gray-500 dark:text-gray-400">${s.email}</span>
+                <span class="px-2 py-0.5 rounded-full text-xs ${getStatusBadge(s.status)}">${s.status}</span>
+            </div>
+        `).join('')
+        : '<p class="text-gray-500 dark:text-gray-400 text-sm">No students enrolled in this course yet.</p>';
 
-            const activityData = [
-                { week: 'Week 1', commits: Math.floor(Math.random() * 20) + 5 },
-                { week: 'Week 2', commits: Math.floor(Math.random() * 25) + 8 },
-                { week: 'Week 3', commits: Math.floor(Math.random() * 30) + 10 },
-                { week: 'Week 4', commits: Math.floor(Math.random() * 35) + 12 }
-            ];
+    const activityData = [
+        { week: 'Week 1', commits: Math.floor(Math.random() * 20) + 5 },
+        { week: 'Week 2', commits: Math.floor(Math.random() * 25) + 8 },
+        { week: 'Week 3', commits: Math.floor(Math.random() * 30) + 10 },
+        { week: 'Week 4', commits: Math.floor(Math.random() * 35) + 12 }
+    ];
 
-            let activityRows = activityData.map(w => `
-                <tr class="border-t border-gray-100 dark:border-gray-800">
-                    <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">${w.week}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">${w.commits}</td>
-                    <td class="px-4 py-2">
-                        <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
-                            <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${Math.min((w.commits / 40) * 100, 100)}%"></div>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-
-            const content = `
-                <div class="space-y-4">
-                    <div class="bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] -mx-6 -mt-6 px-6 py-4 rounded-t-2xl">
-                        <h3 class="text-2xl font-bold text-white">${course.code}</h3>
-                        <p class="text-white/80">${course.title}</p>
-                    </div>
-
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
-                        <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-[#3AAFA9]">${course.teacher}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Instructor</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-[#3AAFA9]">${course.students}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Students</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold text-[#3AAFA9]">${Math.ceil(course.students / 4)}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Groups</p>
-                        </div>
-                        <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
-                            <p class="text-2xl font-bold ${course.status === 'active' ? 'text-green-600' : 'text-red-600'}">${course.status}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Status</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <p class="text-gray-700 dark:text-gray-300">${course.description || 'This course covers advanced topics in ' + course.title + '. Students will gain practical knowledge through hands-on projects and assignments.'}</p>
-                    </div>
-
-                    <div>
-                        <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">📊 Weekly Commit Activity</h4>
-                        <div class="overflow-x-auto">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Week</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Progress</th>
-                                    </tr>
-                                </thead>
-                                <tbody>${activityRows}</tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">👥 Enrolled Students</h4>
-                        <div class="max-h-48 overflow-y-auto border border-gray-100 dark:border-gray-800 rounded-lg divide-y divide-gray-100 dark:divide-gray-800">
-                            ${studentsHtml}
-                        </div>
-                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Showing ${enrolledStudents.length} of ${course.students} students</p>
-                    </div>
-
-                    <div class="flex gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button onclick="closeModal(); editCourse(${course.id})" class="flex-1 btn-teal text-sm">✏️ Edit Course</button>
-                        <button onclick="closeModal(); window.toast.success('Report for ${course.code} generated!')" class="flex-1 btn-teal-outline text-sm">📄 Generate Report</button>
-                    </div>
+    let activityRows = activityData.map(w => `
+        <tr class="border-t border-gray-100 dark:border-gray-800">
+            <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">${w.week}</td>
+            <td class="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">${w.commits}</td>
+            <td class="px-4 py-2">
+                <div class="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
+                    <div class="bg-[#3AAFA9] h-2 rounded-full" style="width: ${Math.min((w.commits / 40) * 100, 100)}%"></div>
                 </div>
-            `;
+            </td>
+        </tr>
+    `).join('');
 
-            showModal('Course Details', content);
-        }
+    const content = `
+        <div class="space-y-4">
+            <div class="bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] -mx-6 -mt-6 px-6 py-4 rounded-t-2xl">
+                <h3 class="text-2xl font-bold text-white">${course.code}</h3>
+                <p class="text-white/80">${course.title}</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+                <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
+                    <p class="text-2xl font-bold text-[#3AAFA9]">${course.teacher}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Instructor</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
+                    <p class="text-2xl font-bold text-[#3AAFA9]">${course.students}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Students</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
+                    <p class="text-2xl font-bold text-[#3AAFA9]">${Math.ceil(course.students / 4)}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Groups</p>
+                </div>
+                <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-center">
+                    <p class="text-2xl font-bold ${course.status === 'active' ? 'text-green-600' : 'text-red-600'}">${course.status}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Status</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                <p class="text-gray-700 dark:text-gray-300">${course.description || 'This course covers advanced topics in ' + course.title + '. Students will gain practical knowledge through hands-on projects and assignments.'}</p>
+            </div>
+
+            <div>
+                <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">📊 Weekly Commit Activity</h4>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Week</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Commits</th>
+                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Progress</th>
+                            </tr>
+                        </thead>
+                        <tbody>${activityRows}</tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-semibold text-gray-800 dark:text-gray-100 mb-2">👥 Enrolled Students</h4>
+                <div class="max-h-48 overflow-y-auto border border-gray-100 dark:border-gray-800 rounded-lg divide-y divide-gray-100 dark:divide-gray-800">
+                    ${studentsHtml}
+                </div>
+                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Showing ${enrolledStudents.length} of ${course.students} students</p>
+            </div>
+
+            <div class="flex gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button onclick="closeModal(); editCourse(${course.id})" class="flex-1 btn-teal text-sm">✏️ Edit Course</button>
+                <button onclick="closeModal(); generateCourseReport(${course.id})" class="flex-1 btn-teal-outline text-sm">📄 Generate Report</button>
+            </div>
+        </div>
+    `;
+
+    showModal('Course Details', content);
+}
 
         // ============================================
         // PAGE: DASHBOARD
@@ -892,7 +892,8 @@
                             <div class="flex justify-between"><span class="text-sm text-gray-500 dark:text-gray-400">Status</span><span class="px-2 py-0.5 rounded-full text-xs ${c.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'}">${c.status}</span></div>
                         </div>
                         <button onclick="showCourseDetails(${c.id})" class="mt-4 w-full btn-teal text-sm">📋 View Details</button>
-                    </div>
+                    <button onclick="generateCourseReport(${c.id})" class="mt-2 w-full btn-teal-outline text-sm">📄 Generate Report</button>
+                        </div>
                 </div>
             `).join('');
 
@@ -951,6 +952,74 @@
                 renderCourses();
             });
         }
+        // ============================================
+// GENERATE COURSE REPORT FUNCTION
+// ============================================
+function generateCourseReport(courseId) {
+    const course = DEMO_COURSES.find(c => c.id === courseId);
+    if (!course) {
+        window.toast.error('Course not found');
+        return;
+    }
+
+    window.toast.info(`📄 Generating report for ${course.code}...`);
+
+    // Create report content
+    const reportContent = `
+================================================
+        GROUPSYNC - COURSE REPORT
+================================================
+
+Course Code: ${course.code}
+Course Title: ${course.title}
+Semester: ${course.semester}
+Teacher: ${course.teacher}
+Status: ${course.status}
+Total Students: ${course.students}
+
+------------------------------------------------
+        STUDENT LIST
+------------------------------------------------
+${DEMO_USERS.filter(u => u.role === 'student').map((s, i) => 
+    `  ${i+1}. ${s.name} (${s.email}) - ${s.status}`
+).join('\n') || '  No students enrolled'}
+
+------------------------------------------------
+        STATISTICS
+------------------------------------------------
+Total Students: ${course.students}
+Average Group Size: ${Math.ceil(course.students / 4)}
+Active Students: ${DEMO_USERS.filter(u => u.role === 'student' && u.status === 'active').length}
+Pending Students: ${DEMO_USERS.filter(u => u.role === 'student' && u.status === 'pending').length}
+Inactive Students: ${DEMO_USERS.filter(u => u.role === 'student' && u.status === 'inactive').length}
+
+------------------------------------------------
+        GENERATED
+------------------------------------------------
+Date: ${new Date().toLocaleDateString()}
+Time: ${new Date().toLocaleTimeString()}
+Generated by: GroupSync Admin Panel
+
+================================================
+    `;
+
+    // Create and download the report
+    try {
+        const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${course.code}_Report_${new Date().toISOString().slice(0,10)}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        
+        window.toast.success(`✅ Report for ${course.code} generated and downloaded successfully!`);
+    } catch (error) {
+        window.toast.error('❌ Error generating report. Please try again.');
+    }
+}
 
         // ============================================
         // PAGE: AUDIT LOGS
