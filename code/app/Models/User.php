@@ -26,20 +26,7 @@ class User extends Authenticatable
         'department',
         'profile_picture',
         'is_active',
-        'last_login_at',
-        'student_id',
-        // GitHub fields
-        'github_token',
-        'github_username',
-        'github_repo_owner',
-        'github_repo_name',
-        'github_repo_url',
-        'github_connected_at',
-        'total_commits',
-        'weekly_commit_data',
-        'last_github_sync',
-        'classification',
-        'overall_score',
+        'last_login_at'
     ];
 
     /**
@@ -50,7 +37,6 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
-        'github_token', // Hide GitHub token for security
     ];
 
     /**
@@ -64,10 +50,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
-            'github_connected_at' => 'datetime',
-            'last_github_sync' => 'datetime',
             'is_active' => 'boolean',
-            'weekly_commit_data' => 'array',
         ];
     }
 
@@ -137,25 +120,12 @@ class User extends Authenticatable
         return $this->hasMany(PeerReview::class, 'reviewee_id');
     }
 
-    public function peerReviewsReceived()
-    {
-        return $this->receivedPeerReviews();
-    }
-
     /**
      * Get the contribution scores for this student
      */
     public function contributionScores()
     {
         return $this->hasMany(ContributionScore::class, 'student_id');
-    }
-
-    /**
-     * Get the latest contribution score for this student
-     */
-    public function getLatestContributionScore()
-    {
-        return $this->contributionScores()->latest()->first();
     }
 
     /**
@@ -184,93 +154,7 @@ class User extends Authenticatable
 
     /**
      * ============================================
-     * GITHUB METHODS
-     * ============================================
-     */
-
-    /**
-     * Check if user has GitHub connected
-     */
-    public function hasGithubConnected(): bool
-    {
-        return !empty($this->github_repo_url) && !empty($this->github_token);
-    }
-
-    /**
-     * Get GitHub repository path (owner/repo)
-     */
-    public function getGithubRepoPathAttribute(): ?string
-    {
-        if (!$this->github_repo_url) {
-            return null;
-        }
-        
-        preg_match('/github\.com\/([^\/]+\/[^\/]+)/', $this->github_repo_url, $matches);
-        return $matches[1] ?? null;
-    }
-
-    /**
-     * Get the user's avatar URL
-     */
-    public function getAvatarUrlAttribute(): string
-    {
-        // If user has GitHub username, try to get GitHub avatar
-        if ($this->github_username) {
-            return "https://github.com/{$this->github_username}.png";
-        }
-        
-        // If profile picture exists in database
-        if ($this->profile_picture) {
-            return asset('storage/profile-pictures/' . $this->profile_picture);
-        }
-        
-        // Fallback to UI Avatars
-        $name = urlencode($this->getFullNameAttribute());
-        return "https://ui-avatars.com/api/?name={$name}&background=3AAFA9&color=fff&size=120&bold=true";
-    }
-
-    /**
-     * Get GitHub API token
-     */
-    public function getGithubToken(): ?string
-    {
-        return $this->github_token;
-    }
-
-    /**
-     * Check if GitHub token is valid (not expired)
-     */
-    public function hasValidGithubToken(): bool
-    {
-        // If connected_at is more than 30 days ago, token might be expired
-        if ($this->github_connected_at) {
-            return $this->github_connected_at->diffInDays(now()) < 30;
-        }
-        return false;
-    }
-
-    /**
-     * Disconnect GitHub
-     */
-    public function disconnectGithub(): void
-    {
-        $this->github_token = null;
-        $this->github_username = null;
-        $this->github_repo_owner = null;
-        $this->github_repo_name = null;
-        $this->github_repo_url = null;
-        $this->github_connected_at = null;
-        $this->total_commits = 0;
-        $this->weekly_commit_data = null;
-        $this->last_github_sync = null;
-        $this->classification = 'Moderate';
-        $this->overall_score = 0;
-        $this->save();
-    }
-
-    /**
-     * ============================================
-     * ROLE METHODS
+     * HELPER METHODS
      * ============================================
      */
 
@@ -307,12 +191,6 @@ class User extends Authenticatable
     }
 
     /**
-     * ============================================
-     * GROUP METHODS
-     * ============================================
-     */
-
-    /**
      * Get the user's current group for a specific course
      */
     public function getGroupForCourse($courseId)
@@ -334,45 +212,5 @@ class User extends Authenticatable
                 $query->where('course_id', $courseId);
             })
             ->exists();
-    }
-
-    /**
-     * ============================================
-     * SCOPES
-     * ============================================
-     */
-
-    /**
-     * Scope a query to only include users with GitHub connected.
-     */
-    public function scopeWithGithub($query)
-    {
-        return $query->whereNotNull('github_repo_url')
-                     ->whereNotNull('github_token');
-    }
-
-    /**
-     * Scope a query to only include users without GitHub connected.
-     */
-    public function scopeWithoutGithub($query)
-    {
-        return $query->whereNull('github_repo_url')
-                     ->orWhereNull('github_token');
-    }
-
-    /**
-     * Scope a query to only include active users.
-     */
-    public function scopeActive($query)
-    {
-        return $query->where('is_active', true);
-    }
-
-    /**
-     * Scope a query to only include users with a specific role.
-     */
-    public function scopeWithRole($query, string $role)
-    {
-        return $query->where('role', $role);
     }
 }

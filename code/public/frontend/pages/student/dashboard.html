@@ -1405,11 +1405,12 @@
         }
 
         // ============================================
-        // PEER REVIEW FUNCTIONS (FIXED)
+        // PEER REVIEW FUNCTIONS (COMPLETELY FIXED - GLOBALLY ACCESSIBLE)
         // ============================================
 
-        // Make functions globally accessible
-        window.submitPeerReview = function(reviewee, repoOwner, repoName) {
+        // Define functions first, then attach to window
+        function submitPeerReview(reviewee, repoOwner, repoName) {
+            console.log('submitPeerReview called with:', reviewee, repoOwner, repoName);
             const rating = document.querySelector('input[name="rating"]:checked');
             const comment = document.getElementById('peerReviewComment');
 
@@ -1436,9 +1437,10 @@
             closeModal();
             renderPage('peer-review');
             updatePeerReviewBadge();
-        };
+        }
 
-        window.showPeerReviewForm = function(reviewee, repoOwner, repoName) {
+        function showPeerReviewForm(reviewee, repoOwner, repoName) {
+            console.log('showPeerReviewForm called with:', reviewee, repoOwner, repoName);
             const userGithub = loadUserGitHub();
             if (!userGithub) {
                 showModal('⚠️ GitHub Profile Required', `
@@ -1496,9 +1498,9 @@
                     });
                 });
             }, 100);
-        };
+        }
 
-        window.updatePeerReviewBadge = function() {
+        function updatePeerReviewBadge() {
             const badge = document.getElementById('peerReviewBadge');
             const reviews = loadPeerReviews();
             const userGithub = loadUserGitHub();
@@ -1512,9 +1514,15 @@
                 badge.textContent = pending;
                 badge.style.display = 'inline';
             } else {
+                badge.textContent = '0';
                 badge.style.display = 'none';
             }
-        };
+        }
+
+        // Attach to window for global access
+        window.submitPeerReview = submitPeerReview;
+        window.showPeerReviewForm = showPeerReviewForm;
+        window.updatePeerReviewBadge = updatePeerReviewBadge;
 
         // ============================================
         // PAGE: DASHBOARD

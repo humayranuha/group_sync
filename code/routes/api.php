@@ -141,3 +141,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/admin/users/{id}', [ApiController::class, 'deleteUser'])->middleware('admin');
     Route::get('/admin/stats', [ApiController::class, 'getAdminStats'])->middleware('admin');
 });
+use App\Http\Controllers\NodeEmailController;
+
+Route::get('/node-status', [NodeEmailController::class, 'checkStatus']);
+Route::post('/node-send-email', [NodeEmailController::class, 'sendEmail']);
+Route::post('/node-send-feedback', [NodeEmailController::class, 'sendFeedback']);
+use App\Http\Controllers\DashboardController;
+
+// Dashboard APIs
+Route::get('/dashboard/stats', [DashboardController::class, 'getStats']);
+Route::get('/dashboard/students', [DashboardController::class, 'getStudents']);
+Route::get('/dashboard/courses', [DashboardController::class, 'getCourses']);
+Route::get('/dashboard/groups', [DashboardController::class, 'getGroups']);
+Route::get('/dashboard/projects', [DashboardController::class, 'getProjects']);
