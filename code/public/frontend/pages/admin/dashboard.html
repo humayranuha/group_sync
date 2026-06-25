@@ -1110,11 +1110,13 @@ function showAllUsers() {
                     navigate(page);
                 });
             });
+            <!-- Dashboard version 3 -->
 
             document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
 
             navigate('dashboard');
             <!-- Admin Dashboard Updated -->
+            
         }
 
         document.addEventListener('DOMContentLoaded', init);
