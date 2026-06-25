@@ -369,6 +369,88 @@
         }
 
         // ============================================
+        // EDIT COURSE FUNCTION
+        // ============================================
+        function editCourse(courseId) {
+            const course = DEMO_COURSES.find(c => c.id === courseId);
+            if (!course) {
+                window.toast.error('Course not found');
+                return;
+            }
+
+            const content = `
+                <form id="editCourseForm" class="space-y-4">
+                    <div class="bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] -mx-6 -mt-6 px-6 py-4 rounded-t-2xl">
+                        <h3 class="text-xl font-bold text-white">✏️ Edit Course</h3>
+                        <p class="text-white/80 text-sm">Update course information</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Code</label>
+                        <input type="text" id="editCourseCode" value="${course.code}" class="input-teal mt-1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Course Title</label>
+                        <input type="text" id="editCourseTitle" value="${course.title}" class="input-teal mt-1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Teacher</label>
+                        <input type="text" id="editCourseTeacher" value="${course.teacher}" class="input-teal mt-1" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Students Count</label>
+                        <input type="number" id="editCourseStudents" value="${course.students}" class="input-teal mt-1" min="0" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                        <textarea id="editCourseDescription" rows="3" class="input-teal mt-1">${course.description || ''}</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status</label>
+                        <select id="editCourseStatus" class="input-teal mt-1">
+                            <option value="active" ${course.status === 'active' ? 'selected' : ''}>Active</option>
+                            <option value="inactive" ${course.status === 'inactive' ? 'selected' : ''}>Inactive</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-3 pt-2">
+                        <button type="submit" class="flex-1 btn-teal">💾 Save Changes</button>
+                        <button type="button" onclick="closeModal()" class="flex-1 btn-teal-outline">Cancel</button>
+                    </div>
+                </form>
+            `;
+
+            showModal('Edit Course', content);
+
+            document.getElementById('editCourseForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const updatedCourse = {
+                    code: document.getElementById('editCourseCode').value.trim(),
+                    title: document.getElementById('editCourseTitle').value.trim(),
+                    teacher: document.getElementById('editCourseTeacher').value.trim(),
+                    students: parseInt(document.getElementById('editCourseStudents').value) || 0,
+                    description: document.getElementById('editCourseDescription').value.trim(),
+                    status: document.getElementById('editCourseStatus').value
+                };
+
+                if (!updatedCourse.code || !updatedCourse.title || !updatedCourse.teacher) {
+                    window.toast.error('Please fill all required fields');
+                    return;
+                }
+
+                const index = DEMO_COURSES.findIndex(c => c.id === courseId);
+                if (index !== -1) {
+                    DEMO_COURSES[index] = { ...DEMO_COURSES[index], ...updatedCourse };
+                }
+
+                closeModal();
+                window.toast.success(`✅ Course ${updatedCourse.code} updated successfully!`);
+                renderCourses();
+            });
+        }
+
+        // ============================================
         // COURSE DETAILS FUNCTION
         // ============================================
         function showCourseDetails(courseId) {
@@ -464,7 +546,7 @@
                     </div>
 
                     <div class="flex gap-3 mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <button onclick="closeModal(); window.toast.info('Editing ${course.code}')" class="flex-1 btn-teal text-sm">✏️ Edit Course</button>
+                        <button onclick="closeModal(); editCourse(${course.id})" class="flex-1 btn-teal text-sm">✏️ Edit Course</button>
                         <button onclick="closeModal(); window.toast.success('Report for ${course.code} generated!')" class="flex-1 btn-teal-outline text-sm">📄 Generate Report</button>
                     </div>
                 </div>
