@@ -369,7 +369,7 @@
         }
 
         // ============================================
-        // COURSE DETAILS FUNCTION (FIXED)
+        // COURSE DETAILS FUNCTION
         // ============================================
         function showCourseDetails(courseId) {
             const course = DEMO_COURSES.find(c => c.id === courseId);
@@ -476,165 +476,165 @@
         // ============================================
         // PAGE: DASHBOARD
         // ============================================
-       function renderDashboard() {
-    const container = document.getElementById('page-content');
-    const totalUsers = DEMO_USERS.length;
-    const activeUsers = DEMO_USERS.filter(u => u.status === 'active').length;
-    const pendingUsers = DEMO_USERS.filter(u => u.status === 'pending').length;
-    const inactiveUsers = DEMO_USERS.filter(u => u.status === 'inactive').length;
-    const totalCourses = DEMO_COURSES.length;
+        function renderDashboard() {
+            const container = document.getElementById('page-content');
+            const totalUsers = DEMO_USERS.length;
+            const activeUsers = DEMO_USERS.filter(u => u.status === 'active').length;
+            const pendingUsers = DEMO_USERS.filter(u => u.status === 'pending').length;
+            const inactiveUsers = DEMO_USERS.filter(u => u.status === 'inactive').length;
+            const totalCourses = DEMO_COURSES.length;
 
-    container.innerHTML = `
-        <div class="space-y-6">
-            <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
-                <h2 class="text-2xl font-bold">Admin Dashboard</h2>
-                <p class="text-white/80 mt-1 text-sm">System overview and management</p>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
-                <div class="stat-card" onclick="navigate('users')">
-                    <div class="flex items-center justify-between">
-                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Users</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalUsers}</p></div>
-                        <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="card-glass p-6 text-white bg-gradient-to-r from-[#2B7A78] to-[#3AAFA9] border-none shadow-xl">
+                        <h2 class="text-2xl font-bold">Admin Dashboard</h2>
+                        <p class="text-white/80 mt-1 text-sm">System overview and management</p>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Click to manage</p>
-                </div>
 
-                <div class="stat-card" onclick="navigateToUsersWithFilter('active')">
-                    <div class="flex items-center justify-between">
-                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Active</p><p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${activeUsers}</p></div>
-                        <div class="stat-icon teal-bg"><i class="fas fa-check-circle"></i></div>
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+                        <div class="stat-card" onclick="navigate('users')">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Users</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalUsers}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-users"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to manage</p>
+                        </div>
+
+                        <div class="stat-card" onclick="navigateToUsersWithFilter('active')">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Active</p><p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">${activeUsers}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-check-circle"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to view</p>
+                        </div>
+
+                        <div class="stat-card" onclick="navigateToUsersWithFilter('pending')">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Pending</p><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">${pendingUsers}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-clock"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to view</p>
+                        </div>
+
+                        <div class="stat-card" onclick="navigateToUsersWithFilter('inactive')">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Inactive</p><p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">${inactiveUsers}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-user-slash"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to view</p>
+                        </div>
+
+                        <div class="stat-card" onclick="navigate('courses')">
+                            <div class="flex items-center justify-between">
+                                <div><p class="text-sm text-gray-500 dark:text-gray-400">Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalCourses}</p></div>
+                                <div class="stat-icon teal-bg"><i class="fas fa-book"></i></div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">Click to manage</p>
+                        </div>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Click to view</p>
-                </div>
 
-                <div class="stat-card" onclick="navigateToUsersWithFilter('pending')">
-                    <div class="flex items-center justify-between">
-                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Pending</p><p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">${pendingUsers}</p></div>
-                        <div class="stat-icon teal-bg"><i class="fas fa-clock"></i></div>
+                    <div class="card-glass p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">User Statistics</h3>
+                        <canvas id="userChart" height="220"></canvas>
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">Click to view</p>
                 </div>
+            `;
 
-                <div class="stat-card" onclick="navigateToUsersWithFilter('inactive')">
-                    <div class="flex items-center justify-between">
-                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Inactive</p><p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">${inactiveUsers}</p></div>
-                        <div class="stat-icon teal-bg"><i class="fas fa-user-slash"></i></div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-1">Click to view</p>
-                </div>
-
-                <div class="stat-card" onclick="navigate('courses')">
-                    <div class="flex items-center justify-between">
-                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Courses</p><p class="text-2xl font-bold text-gray-800 dark:text-gray-100 mt-1">${totalCourses}</p></div>
-                        <div class="stat-icon teal-bg"><i class="fas fa-book"></i></div>
-                    </div>
-                    <p class="text-xs text-gray-400 mt-1">Click to manage</p>
-                </div>
-            </div>
-
-            <div class="card-glass p-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">User Statistics</h3>
-                <canvas id="userChart" height="220"></canvas>
-            </div>
-        </div>
-    `;
-
-    setTimeout(() => {
-        const ctx = document.getElementById('userChart')?.getContext('2d');
-        if (ctx) {
-            if (charts.user) charts.user.destroy();
-            charts.user = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Active', 'Pending', 'Inactive'],
-                    datasets: [{
-                        data: [activeUsers, pendingUsers, inactiveUsers],
-                        backgroundColor: ['#3AAFA9', '#f59e0b', '#ef4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'bottom' }
-                    }
+            setTimeout(() => {
+                const ctx = document.getElementById('userChart')?.getContext('2d');
+                if (ctx) {
+                    if (charts.user) charts.user.destroy();
+                    charts.user = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Active', 'Pending', 'Inactive'],
+                            datasets: [{
+                                data: [activeUsers, pendingUsers, inactiveUsers],
+                                backgroundColor: ['#3AAFA9', '#f59e0b', '#ef4444'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: { position: 'bottom' }
+                            }
+                        }
+                    });
                 }
-            });
+            }, 100);
         }
-    }, 100);
-}
-// ============================================
-// USER FILTER FUNCTIONS (for dashboard stats)
-// ============================================
-
-function navigateToUsersWithFilter(status) {
-    navigate('users');
-    setTimeout(() => {
-        filterUsersByStatus(status);
-    }, 100);
-}
-
-function filterUsersByStatus(status) {
-    const container = document.getElementById('page-content');
-    const filteredUsers = DEMO_USERS.filter(u => u.status === status);
-    
-    let rows = filteredUsers.map(u => `
-        <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-            <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${u.name}</td>
-            <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${u.email}</td>
-            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">${u.role}</span></td>
-            <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getStatusBadge(u.status)}">${u.status}</span></td>
-            <td class="px-4 py-2 flex gap-2">
-                <button onclick="editUser(${u.id})" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm" title="Edit"><i class="fas fa-edit"></i></button>
-                <button onclick="toggleUserStatus(${u.id})" class="text-yellow-600 hover:text-yellow-800 text-sm" title="Toggle Status"><i class="fas fa-sync"></i></button>
-                <button onclick="deleteUser(${u.id})" class="text-red-600 hover:text-red-800 text-sm" title="Delete"><i class="fas fa-trash"></i></button>
-            </td>
-        </tr>
-    `).join('');
-
-    const title = status.charAt(0).toUpperCase() + status.slice(1) + ' Users';
-    container.innerHTML = `
-        <div class="space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 ${title}</h2>
-                <div class="flex gap-2">
-                    <button onclick="showAllUsers()" class="btn-teal-outline text-sm">Show All</button>
-                    <button onclick="showAddUserModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> Add User</button>
-                </div>
-            </div>
-            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-center gap-2">
-                <i class="fas fa-filter text-[#3AAFA9]"></i>
-                <span class="text-sm text-gray-700 dark:text-gray-300">Showing <strong>${filteredUsers.length}</strong> ${status} user(s)</span>
-                <button onclick="showAllUsers()" class="ml-auto text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">Clear Filter</button>
-            </div>
-            <div class="card-glass p-0 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50 dark:bg-gray-800">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No users found.</td></tr>'}</tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    `;
-}
-
-function showAllUsers() {
-    navigate('users');
-}
 
         // ============================================
-        // PAGE: USERS (with Edit & Delete)
+        // USER FILTER FUNCTIONS
+        // ============================================
+        function navigateToUsersWithFilter(status) {
+            navigate('users');
+            setTimeout(() => {
+                filterUsersByStatus(status);
+            }, 100);
+        }
+
+        function filterUsersByStatus(status) {
+            const container = document.getElementById('page-content');
+            const filteredUsers = DEMO_USERS.filter(u => u.status === status);
+            
+            let rows = filteredUsers.map(u => `
+                <tr class="border-t border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <td class="px-4 py-2 font-medium text-gray-900 dark:text-gray-100">${u.name}</td>
+                    <td class="px-4 py-2 text-gray-600 dark:text-gray-400">${u.email}</td>
+                    <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">${u.role}</span></td>
+                    <td class="px-4 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${getStatusBadge(u.status)}">${u.status}</span></td>
+                    <td class="px-4 py-2 flex gap-2">
+                        <button onclick="editUser(${u.id})" class="text-[#3AAFA9] hover:text-[#2B7A78] text-sm" title="Edit"><i class="fas fa-edit"></i></button>
+                        <button onclick="toggleUserStatus(${u.id})" class="text-yellow-600 hover:text-yellow-800 text-sm" title="Toggle Status"><i class="fas fa-sync"></i></button>
+                        <button onclick="deleteUser(${u.id})" class="text-red-600 hover:text-red-800 text-sm" title="Delete"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            const title = status.charAt(0).toUpperCase() + status.slice(1) + ' Users';
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">👥 ${title}</h2>
+                        <div class="flex gap-2">
+                            <button onclick="showAllUsers()" class="btn-teal-outline text-sm">Show All</button>
+                            <button onclick="showAddUserModal()" class="btn-teal"><i class="fas fa-plus mr-2"></i> Add User</button>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg flex items-center gap-2">
+                        <i class="fas fa-filter text-[#3AAFA9]"></i>
+                        <span class="text-sm text-gray-700 dark:text-gray-300">Showing <strong>${filteredUsers.length}</strong> ${status} user(s)</span>
+                        <button onclick="showAllUsers()" class="ml-auto text-[#3AAFA9] hover:text-[#2B7A78] text-sm font-medium">Clear Filter</button>
+                    </div>
+                    <div class="card-glass p-0 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50 dark:bg-gray-800">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Name</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Email</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Role</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Status</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${rows || '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500 dark:text-gray-400">No users found.</td></tr>'}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showAllUsers() {
+            navigate('users');
+        }
+
+        // ============================================
+        // PAGE: USERS
         // ============================================
         function renderUsers() {
             const container = document.getElementById('page-content');
@@ -792,7 +792,7 @@ function showAllUsers() {
         }
 
         // ============================================
-        // PAGE: COURSES (with New Course & View Details)
+        // PAGE: COURSES
         // ============================================
         function renderCourses() {
             const container = document.getElementById('page-content');
@@ -871,7 +871,7 @@ function showAllUsers() {
         }
 
         // ============================================
-        // PAGE: AUDIT LOGS (with Export CSV)
+        // PAGE: AUDIT LOGS
         // ============================================
         function renderAudit() {
             const container = document.getElementById('page-content');
@@ -932,86 +932,86 @@ function showAllUsers() {
         // ============================================
         // PAGE: SETTINGS
         // ============================================
-     function renderSettings() {
-    const container = document.getElementById('page-content');
+        function renderSettings() {
+            const container = document.getElementById('page-content');
 
-    const savedSettings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
-    const siteName = savedSettings.siteName || 'GroupSync';
-    const emailVerification = savedSettings.emailVerification !== undefined ? savedSettings.emailVerification : true;
-    const sessionTimeout = savedSettings.sessionTimeout || 30;
-    const backupSchedule = savedSettings.backupSchedule || 'weekly';
+            const savedSettings = JSON.parse(localStorage.getItem('admin_settings') || '{}');
+            const siteName = savedSettings.siteName || 'GroupSync';
+            const emailVerification = savedSettings.emailVerification !== undefined ? savedSettings.emailVerification : true;
+            const sessionTimeout = savedSettings.sessionTimeout || 30;
+            const backupSchedule = savedSettings.backupSchedule || 'weekly';
 
-    container.innerHTML = `
-        <div class="space-y-6">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⚙️ Settings</h2>
+            container.innerHTML = `
+                <div class="space-y-6">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">⚙️ Settings</h2>
 
-            <div class="card-glass p-6">
-                <form id="settingsForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Site Name</label>
-                        <input type="text" id="siteName" value="${siteName}" class="input-teal mt-1">
+                    <div class="card-glass p-6">
+                        <form id="settingsForm" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Site Name</label>
+                                <input type="text" id="siteName" value="${siteName}" class="input-teal mt-1">
+                            </div>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="emailVerification" ${emailVerification ? 'checked' : ''} class="w-4 h-4 text-[#3AAFA9] rounded">
+                                <label for="emailVerification" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Require Email Verification</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Session Timeout (minutes)</label>
+                                <input type="number" id="sessionTimeout" value="${sessionTimeout}" class="input-teal mt-1 w-32">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Backup Schedule</label>
+                                <select id="backupSchedule" class="input-teal mt-1 w-48">
+                                    <option value="daily" ${backupSchedule === 'daily' ? 'selected' : ''}>Daily</option>
+                                    <option value="weekly" ${backupSchedule === 'weekly' ? 'selected' : ''}>Weekly</option>
+                                    <option value="monthly" ${backupSchedule === 'monthly' ? 'selected' : ''}>Monthly</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-teal">Save Settings</button>
+                        </form>
                     </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" id="emailVerification" ${emailVerification ? 'checked' : ''} class="w-4 h-4 text-[#3AAFA9] rounded">
-                        <label for="emailVerification" class="ml-2 text-sm text-gray-700 dark:text-gray-300">Require Email Verification</label>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Session Timeout (minutes)</label>
-                        <input type="number" id="sessionTimeout" value="${sessionTimeout}" class="input-teal mt-1 w-32">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Backup Schedule</label>
-                        <select id="backupSchedule" class="input-teal mt-1 w-48">
-                            <option value="daily" ${backupSchedule === 'daily' ? 'selected' : ''}>Daily</option>
-                            <option value="weekly" ${backupSchedule === 'weekly' ? 'selected' : ''}>Weekly</option>
-                            <option value="monthly" ${backupSchedule === 'monthly' ? 'selected' : ''}>Monthly</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-teal">Save Settings</button>
-                </form>
-            </div>
 
-            <div class="card-glass p-6">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">System Status</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Database</p>
-                        <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Connected</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">API Services</p>
-                        <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Operational</p>
-                    </div>
-                    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                        <p class="text-sm text-gray-500 dark:text-gray-400">Last Backup</p>
-                        <p class="text-gray-800 dark:text-gray-100 font-semibold">${savedSettings.lastBackup || '2 hours ago'}</p>
+                    <div class="card-glass p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">System Status</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Database</p>
+                                <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Connected</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">API Services</p>
+                                <p class="text-green-600 dark:text-green-400 font-semibold"><i class="fas fa-check-circle mr-1"></i> Operational</p>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Last Backup</p>
+                                <p class="text-gray-800 dark:text-gray-100 font-semibold">${savedSettings.lastBackup || '2 hours ago'}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    `;
+            `;
 
-    document.getElementById('settingsForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+            document.getElementById('settingsForm').addEventListener('submit', function(e) {
+                e.preventDefault();
 
-        const settings = {
-            siteName: document.getElementById('siteName').value,
-            emailVerification: document.getElementById('emailVerification').checked,
-            sessionTimeout: parseInt(document.getElementById('sessionTimeout').value) || 30,
-            backupSchedule: document.getElementById('backupSchedule').value,
-            lastBackup: new Date().toLocaleString()
-        };
+                const settings = {
+                    siteName: document.getElementById('siteName').value,
+                    emailVerification: document.getElementById('emailVerification').checked,
+                    sessionTimeout: parseInt(document.getElementById('sessionTimeout').value) || 30,
+                    backupSchedule: document.getElementById('backupSchedule').value,
+                    lastBackup: new Date().toLocaleString()
+                };
 
-        localStorage.setItem('admin_settings', JSON.stringify(settings));
+                localStorage.setItem('admin_settings', JSON.stringify(settings));
 
-        const backupElements = document.querySelectorAll('.bg-gray-50 .text-gray-800');
-        if (backupElements.length >= 3) {
-            backupElements[2].textContent = settings.lastBackup;
+                const backupElements = document.querySelectorAll('.bg-gray-50 .text-gray-800');
+                if (backupElements.length >= 3) {
+                    backupElements[2].textContent = settings.lastBackup;
+                }
+
+                window.toast.success('Settings saved successfully!');
+            });
         }
-
-        window.toast.success('Settings saved successfully!');
-    });
-}
 
         // ============================================
         // NAVIGATION
@@ -1106,19 +1106,16 @@ function showAllUsers() {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const page = link.dataset.page;
-                    if (window.innerWidth < 768) document.getElementById('sidebar').classList.add('-translate-x-full');
+                    if (window.innerWidth < 768) {
+                        document.getElementById('sidebar').classList.add('-translate-x-full');
+                    }
                     navigate(page);
                 });
             });
-            <!-- Dashboard version 3 -->
-            <!--Dashboard version 3-->
-       
 
             document.getElementById('logoutBtn')?.addEventListener('click', () => AuthService.logout());
 
             navigate('dashboard');
-            <!-- Admin Dashboard Updated -->
-            
         }
 
         document.addEventListener('DOMContentLoaded', init);
